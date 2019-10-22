@@ -48,6 +48,14 @@ var entity = (function module() {
         return client.MapAll(base + "associatedWith")
     }
 
+    /**
+     * Fetches a mapping from publication IRI to their citation
+     * @param {tpf.Client} client
+     */
+    function Citations(client) {
+        return client.Map(base + "citation")
+    }
+
     function Departments(client) {
         return new Promise(function (resolve) {
             client
@@ -698,6 +706,15 @@ var entity = (function module() {
     function publication(client, iri) {
         const self = this
 
+        this.Citation = function Citation(returnCitation) {
+            return new Promise(function() {
+                client
+                    .Entity(iri)
+                    .Link(base, "citation")
+                    .Single(decodeString(returnCitation))
+            })
+        }
+
         this.PubMedLink = function PubMedLink(returnPubMedLink) {
             const urlbase = "https://www.ncbi.nlm.nih.gov/pubmed/"
 
@@ -962,6 +979,7 @@ var entity = (function module() {
     return {
         Authorships: Authorships,
         AssociatedWiths: AssociatedWiths,
+        Citations: Citations,
         Departments: Departments,
         FundingOrganizations: FundingOrganizations,
         Institutes: Institutes,

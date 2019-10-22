@@ -281,7 +281,8 @@
             keepSorted("ul.organizations", getOrganizationTypeAndName)
             keepSorted("ul.projects")
             keepSorted("ul.studies")
-            keepSorted("ul.publications")
+            const pubs = document.querySelector("ul.publications")
+            const publicationsList = ui.SortedList(pubs, -1, getYear)
 
             const sections = [
                 "people", "projects", "studies", "publications", "datasets",
@@ -338,9 +339,18 @@
                 return name
             }
 
+
+            function getYear(/** @type {HTMLLIElement} */li) {
+                const year = li.querySelector(".year")
+                if (!year || !year.innerText) {
+                    return "0"
+                }
+                return year.innerText
+            }
+
             function keepSorted(selector, keyFunc) {
                 const node = root.querySelector(selector)
-                ui.SortedList(node, 1, keyFunc)
+                return ui.SortedList(node, 1, keyFunc)
             }
 
             /**
@@ -498,13 +508,36 @@
                 function renderPublication(publicationIRI) {
                     const pub = entity.Publication(client, publicationIRI)
                     const bindings = {
-                        title: pub.Title,
+                        title: getCitationOrTitle,
                         link: {
                             href: pub.PubMedLink
                         },
-                        year: pub.Year,
+                        year: fetchYear,
                     }
                     ui.Render(template, bindings)
+
+                    function getCitationOrTitle(callback) {
+                        return new Promise(function (resolve) {
+                            pub.Citation(resolve)
+                        })
+                            .then(function (citation) {
+                                if (citation) {
+                                    callback(citation)
+                                    return
+                                }
+                                pub.Title(callback)
+                            })
+                    }
+
+                    function fetchYear(callback) {
+                        return new Promise(function (resolve) {
+                            pub.Year(resolve)
+                        })
+                            .then(function (year) {
+                                callback(year)
+                                publicationsList.Update()
+                            })
+                    }
                 }
             }
 

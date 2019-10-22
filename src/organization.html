@@ -25,15 +25,6 @@
     <script crossorigin src="https://unpkg.com/@ungap/url-search-params@0.1.2/min.js"></script>
 
     <style>
-        .publications li a {
-            font-style: italic;
-        }
-
-        .name {
-            text-align: center;
-            text-shadow: 1px 1px 3px gray;
-        }
-
         .type {
             padding-bottom: 1em;
             text-align: center;
@@ -41,53 +32,6 @@
 
         .type a {
             font-size: larger;
-        }
-
-        section {
-            display: table;
-            width: 100%;
-            margin-bottom: 2em;
-        }
-
-        section h2 {
-            display: table-cell;
-            width: 45%;
-            text-align: right;
-        }
-
-        section ul {
-            padding-left: 1.5em;
-            display: table-cell;
-        }
-
-        section li {
-            line-height: 1.75em;
-        }
-
-        @media only screen and (max-width: 430px) {
-            section.people {
-                border-top: 0;
-                margin-top: 0;
-                padding-top: 0;
-            }
-
-            section {
-                display: block;
-                margin-bottom: 0;
-            }
-
-            section:last-child {
-                margin-bottom: 2em;
-            }
-
-            section h2 {
-                display: block;
-                text-align: left;
-            }
-
-            section ul {
-                display: block;
-            }
         }
     </style>
 
@@ -184,7 +128,7 @@
                     <ul class="studies"></ul>
                 </section>
 
-                 <section class="publications">
+                <section class="publications">
                     <h2 class="publications">
                         <a href="publications.html">Publications</a>
                         <span class="disclaimer">
@@ -193,7 +137,14 @@
                             <i class="fas fa-external-link-alt"></i>
                         </span>
                     </h2>
-                    <ul class="publications"></ul>
+                    <ul class="publications">
+                        <li class="template">
+                            <a href="#" class="title link"
+                               target="_blank" rel="noopener noreferrer"></a>
+                            <i class="fas fa-external-link-alt"></i>
+                            <span class="year"></span>
+                        </li>
+                    </ul>
                 </section>
 
             </div>
@@ -235,13 +186,14 @@
             organization.Children(listRenderer("ul.organizations", "organization"))
             organization.Projects(listRenderer("ul.projects", "project"))
             organization.Studies(listRenderer("ul.studies", "study"))
-            organization.Publications(listRenderer("ul.publications", "publication"))
+            organization.Publications(renderPublications)
 
             keepSorted("ul.people", getNameLastFirst)
             keepSorted("ul.organizations")
             keepSorted("ul.projects")
             keepSorted("ul.studies")
-            keepSorted("ul.publications")
+            const pubs = document.querySelector("ul.publications")
+            const publicationsList = ui.SortedList(pubs, -1, getYear)
 
             const sections = [
                 "people", "projects", "studies", "publications", "organizations"
@@ -271,6 +223,14 @@
                 const other = names.slice(0, -1)
                 const lastFirst = surname.concat(other).join(' ')
                 return lastFirst
+            }
+
+            function getYear(/** @type {HTMLLIElement} */li) {
+                const year = li.querySelector(".year")
+                if (!year || !year.innerText) {
+                    return "0"
+                }
+                return year.innerText
             }
 
             function keepSorted(selector, keyFunc) {
@@ -346,6 +306,53 @@
                 t.querySelector("i.fas").className += " fa-" + icons[type]
                 t.querySelector(".link").href = m3c.ListingLink("organizations")
                 t.querySelector(".typename").innerText = type
+            }
+
+            function renderPublications(publications) {
+                const ul = root.querySelector("ul.publications")
+                const template = ul.querySelector("li.template")
+
+                if (publications.length === 0) {
+                    ul.innerHTML = "<li><em>None</em></li>"
+                    return
+                }
+
+                publications.forEach(renderPublication)
+
+                function renderPublication(publicationIRI) {
+                    const pub = entity.Publication(client, publicationIRI)
+                    const bindings = {
+                        title: getCitationOrTitle,
+                        link: {
+                            href: pub.PubMedLink
+                        },
+                        year: fetchYear,
+                    }
+                    ui.Render(template, bindings)
+
+                    function getCitationOrTitle(callback) {
+                        return new Promise(function (resolve) {
+                            pub.Citation(resolve)
+                        })
+                            .then(function (citation) {
+                                if (citation) {
+                                    callback(citation)
+                                    return
+                                }
+                                pub.Title(callback)
+                            })
+                    }
+
+                    function fetchYear(callback) {
+                        return new Promise(function (resolve) {
+                            pub.Year(resolve)
+                        })
+                            .then(function (year) {
+                                callback(year)
+                                publicationsList.Update()
+                            })
+                    }
+                }
             }
 
             /**
