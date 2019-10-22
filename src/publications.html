@@ -52,9 +52,8 @@
             text-align: left;
         }
 
-        .citation .year,
-        .citation .authors {
-            display: none;
+        .citation {
+            font-size: smaller;
         }
     </style>
 </head>
@@ -164,6 +163,7 @@
                         <i class="fas fa-external-link-alt"></i>
                         <span class="year"></span>
                         <div class="authors"></div>
+                        <div class="citation"></span>
                     </li>
                 </ol>
             </div>
@@ -363,18 +363,13 @@
                     link: {
                         href: m3c.ProfileLink("publication", publicationIRI.slice(1, -1)),
                     },
-                    name: citation
-                        ? parseVIVOString(citation)
-                        : parseVIVOString(data.names[publicationIRI]),
+                    name: parseVIVOString(data.names[publicationIRI]),
                     year: published ? published : null,
-                    authors: authors ? authors.join(", ") : ""
+                    authors: authors ? authors.join(", ") : "",
+                    citation: citation ? parseVIVOString(citation) : ""
                 }
 
                 const li = ui.Render(template, bindings)
-
-                if (citation) {
-                    li.className += " citation"
-                }
 
                 for (var i = 0; i < authors.length; i++) {
                     facetsManager.Increment('author', authors[i], authors[i])
