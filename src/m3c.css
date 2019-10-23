@@ -94,6 +94,11 @@ a:visited {
 /* Orange #bc581a
 Blue #00529b */
 
+#nameFilter{
+    width: 50%;
+    font-size: 1em;
+}
+
 .listing .facet {
     background-color: white;
     box-shadow: 3px 4px 5px gray;
