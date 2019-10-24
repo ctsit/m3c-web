@@ -1,9 +1,9 @@
 ---
-name: Update Publications to my Profile
+name: Update Publications on my Profile
 about: Provide us a list of PubMed IDs for publications you've authored and ones you
   didn't.
-title: ''
-labels: ''
+title: 'Update Publications on my Profile'
+labels: 'publications'
 assignees: ''
 
 ---
