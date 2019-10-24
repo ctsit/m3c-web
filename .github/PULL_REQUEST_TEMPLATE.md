@@ -1,3 +1,8 @@
+---
+title: 'Short description of changes with minimal jargon'
+
+---
+
 **What does this change do?** _Please be clear and concise._
 
 Nothing.
@@ -38,7 +43,9 @@ None.
 
 All of these should have a check by them. Any exception requires an explanation.
 
-* [ ] My changes are free of cruft (old comments, print-debugging, unused variables).
-* [ ] I added and updated any relevant documentation such as the `README` or `CHANGELOG`?
-* [ ] My code includes JSDocs-based type hinting.
+* [ ] I matched the style of the existing code.
+* [ ] I used JSDocs JSDocs-based type hinting.
 * [ ] I have written the code myself or have given credit where credit is due.
+* [ ] I added and updated any relevant documentation such as the `README` or `CHANGELOG`?
+* [ ] I have made an effort to minimize code changes and have not included any cruft (old comments, print-debugging, unused variables).
+* [ ] I have made an effort maintain a clear commit history (haven't merged other branches or rebased improperly).
