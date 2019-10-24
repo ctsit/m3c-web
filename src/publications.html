@@ -55,6 +55,12 @@
         .citation {
             font-size: smaller;
         }
+
+        .publication .year,
+        .publication .authors {
+            display: inline-block;
+            padding-right: 0.5em;
+        }
     </style>
 </head>
 
@@ -158,12 +164,19 @@
                 <ol class="results">
                     <!-- Templates aren't visible, but their clones are filled out with real data. -->
                     <li class="publication template">
-                        <a href="#" class="name link"
-                            target="_blank" rel="noopener noreferrer"></a>
-                        <i class="fas fa-external-link-alt"></i>
-                        <span class="year"></span>
+                        <div>
+                            <a href="#" class="name link"
+                                target="_blank" rel="noopener noreferrer"></a>
+                            <i class="fas fa-external-link-alt"></i>
+                        </div>
+                        <div class="year"></div>
+                        <i class="fas fa-users" aria-label="Authors"></i>
                         <div class="authors"></div>
-                        <div class="citation"></span>
+                        <a href="#" class="cite">
+                            <i class="fas fa-quote-right" aria-hidden="true"></i>
+                            Cite
+                        </a>
+                        <div class="citation hidden"></div>
                     </li>
                 </ol>
             </div>
@@ -370,6 +383,18 @@
                 }
 
                 const li = ui.Render(template, bindings)
+
+                const cite = li.querySelector(".cite")
+                if (!citation) {
+                    cite.className += " hidden"
+                } else {
+                    cite.addEventListener("click", function (click) {
+                        click.preventDefault()
+                        cite.className += " hidden"
+                        const c = li.querySelector(".citation")
+                        c.className = c.className.replace("hidden", "")
+                    })
+                }
 
                 for (var i = 0; i < authors.length; i++) {
                     facetsManager.Increment('author', authors[i], authors[i])
