@@ -1,8 +1,3 @@
----
-title: 'Short description of changes with minimal jargon'
-
----
-
 **What does this change do?** _Please be clear and concise._
 
 Nothing.
