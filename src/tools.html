@@ -23,6 +23,28 @@
     <script crossorigin src="https://unpkg.com/whatwg-fetch@3.0.0/dist/fetch.umd.js"></script>
     <!-- URL polyfill to support Internet Explorer -->
     <script crossorigin src="https://unpkg.com/@ungap/url-search-params@0.1.2/min.js"></script>
+    <!-- Filters list using search bar -->
+    <script>
+        function FilterResult() {
+            var input, filter, ol, li, a, i, txtValue;
+            input = document.getElementById('nameFilter');
+            filter = input.value.toUpperCase();
+            ol = document.getElementsByClassName('results');
+            li = document.getElementsByClassName('tool');
+
+            // Loop throught list items and hide those that don't match
+            for (i = 0; i < li.length; i++) {
+                a = li[i].getElementsByTagName("a")[0];
+                txtValue = a.textContent || a.innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    li[i].style.display = "";
+                } else {
+                    li[i].style.display = "none";
+                }
+            }
+
+        }
+    </script>
 
     <style>
         .tags div {
@@ -81,6 +103,9 @@
             <div id="listing">
                 <div class="controls">
                     <div class="fa fa-spinner fa-spin hidden"></div>
+                    <br>
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="nameFilter" onkeyup="FilterResult()" placeholder="Search for tool">
                     <div class="count"></div>
                     <a href="#" class="reverse">Reverse</a>
                 </div>
@@ -151,6 +176,9 @@
             ctrlReverse.addEventListener("click", onCtrlReverseClick)
 
             ui.SortedList(facets.querySelector(".tag ul"), -1, sortByCount)
+
+            // Filter results
+            document.getElementById("nameFilter").addEventListener("keyup", filterResult)
 
             // Query the TPF server for all tools and some related data.
             const data = {
@@ -275,6 +303,32 @@
             function sortByName(li) {
                 const name = li.querySelector(".name").innerText.toUpperCase()
                 return name
+            }
+
+            /**
+            * Filter list according to search bar
+            */
+            function filterResult() {
+                var input, filter, ol, li, a, i, txtValue;
+                input = document.getElementById('nameFilter');
+                filter = input.value.toUpperCase();
+                ol = document.getElementsByClassName('results');
+                li = document.getElementsByClassName('tool');
+
+                // Loop throught list items and hide those that don't match
+                var count = 0;
+                for (i = 0; i < li.length; i++) {
+                    a = li[i].getElementsByTagName("a")[0];
+                    txtValue = a.textContent || a.innerText;
+                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                        li[i].style.display = "";
+                        count++;
+                    } else {
+                        li[i].style.display = "none";
+                    }
+                }
+                document.querySelector(".controls .count").innerText = String(count);
+
             }
         </script>
     </div>
