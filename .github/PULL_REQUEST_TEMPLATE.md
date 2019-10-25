@@ -39,7 +39,7 @@ None.
 All of these should have a check by them. Any exception requires an explanation.
 
 * [ ] I matched the style of the existing code.
-* [ ] I used JSDocs JSDocs-based type hinting.
+* [ ] I used JSDocs for documentation and JSDocs-based type hinting.
 * [ ] I have written the code myself or have given credit where credit is due.
 * [ ] I added and updated any relevant documentation such as the `README` or `CHANGELOG`?
 * [ ] I have made an effort to minimize code changes and have not included any cruft (old comments, print-debugging, unused variables).
