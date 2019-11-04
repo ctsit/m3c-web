@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Redirecting to Metabolomics Workbench</title>
+
+    <link rel="stylesheet" href="m3c.css" />
+
+    <!-- Promise polyfill to support Internet Explorer -->
+    <script crossorigin src="https://cdn.jsdelivr.net/npm/promise-polyfill@8/dist/polyfill.min.js"></script>
+    <!-- Fetch polyfill to support Internet Explorer -->
+    <script crossorigin src="https://unpkg.com/whatwg-fetch@3.0.0/dist/fetch.umd.js"></script>
+    <!-- URL polyfill to support Internet Explorer -->
+    <script crossorigin src="https://unpkg.com/@ungap/url-search-params@0.1.2/min.js"></script>
+
+</head>
+<body>
+    Redirecting to Metabolomics Workbench
+
+    <!-- The order is important. -->
+    <script src="tpf.js"></script>
+    <script src="str.js"></script>
+    <script src="m3c.js"></script>
+
+    <script>
+        const client = m3c.NewTPFClient()
+        const uri = m3c.Subject()
+
+        const base = "http://www.metabolomics.info/ontologies/2019/metabolomics-consortium#"
+
+        client
+          .Entity(uri)
+          .Link(base, "dataFor")
+          .Link(base, "studyId")
+          .Single(redirect)
+
+        function redirect(studyID) {
+            const sampleID = uri
+                .replace("https://vivo.metabolomics.info/individual/", "")
+
+            studyID = studyID.slice(1, -1)
+            const mwbLink = str.Format(
+                "https://www.metabolomicsworkbench.org/data/DRCCMetadata.php" +
+                "?Mode=Sample&MBSampleID={}&StudyID={}",
+                sampleID, studyID
+            )
+
+            window.location = mwbLink
+        }
+    </script>
+</body>
+</html>

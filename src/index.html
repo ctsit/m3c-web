@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,10 +9,13 @@
     <title>M3C People Portal</title>
 
     <!-- Font Awesome for neat icons. -->
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css"
+        integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+
+    <!-- Roboto font -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="m3c.css" />
-    <link rel="stylesheet" href="index.css" />
 
     <!-- Promise polyfill to support Internet Explorer -->
     <script crossorigin src="https://cdn.jsdelivr.net/npm/promise-polyfill@8/dist/polyfill.min.js"></script>
@@ -20,50 +24,599 @@
     <!-- URL polyfill to support Internet Explorer -->
     <script crossorigin src="https://unpkg.com/@ungap/url-search-params@0.1.2/min.js"></script>
 
-</head>
-<body class="profile">
-    
-    <h1>M3C People Portal</h1>
+    <!-- animate.css licensed under the MIT License -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.2/animate.min.css">
 
-    <nav>
-        <ul id="links">
-            <li class="People"></li>
-            <li class="Publications"></li>
-            <li class="Projects"></li>
-            <li class="Studies"></li>
-            <li class="Organizations"></li>
-            <li class="Datasets"></li>
-            <li class="Tools"></li>
-        </ul>
-    </nav>
-
-    <!-- The order is important. -->
-    <script src="tpf.js"></script>
-    <script src="str.js"></script>
-    <script src="m3c.js"></script>
-
-    <script>
-        const client = m3c.NewTPFClient()
-        const links = document.getElementById("links")
-        links.querySelectorAll("li").forEach(addLink)
-
-        function addLink(li) {
-            const concept = li.className
-            const lowered = concept.toLowerCase()
-            const type = m3c.IRIFor(concept)
-
-            client
-                .List(type)
-                .Results(function (instances) {
-                    li.innerHTML = str.Format(
-                        '<a href="{}">{} <span class="count">{}</span></a>',
-                        m3c.ListingLink(lowered),
-                        concept,
-                        instances.length
-                    )
-                })
+    <style>
+        #links {
+            display: table;
+            text-align: center;
+            width: 100%;
         }
-    </script>
+
+        #links li {
+            min-width: 9em;
+            display: inline-block;
+            padding: 2em 1em;
+            text-align: center;
+            background: white;
+            margin: 1em 0.3em;
+            border-radius: 50%;
+        }
+
+        #links li,
+        .visuals div {
+            box-shadow: 3px 4px 5px gray;
+        }
+
+        .count {
+            font-size: smaller;
+            display: block;
+        }
+
+        .hero {
+            width: 100%;
+            padding: 1em;
+            min-height: 2.5em;
+            text-align: center;
+            background: rgba(0, 169, 224, 0.4);
+        }
+
+        .hero-item:nth-child(n+2) {
+            display: none;
+        }
+
+        .hero-item,
+        .hero-item:visited {
+            box-shadow: 3px 4px 5px rgba(0, 169, 224, 0.9);
+            background: white;
+            padding: 2em;
+            margin: auto;
+        }
+
+        .hero-item {
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            display: grid;
+            grid-template-columns: 1fr 4fr 10fr 1fr;
+        }
+
+        .hero-item a.photo-frame {
+            padding-right: 1em;
+        }
+
+        .hero-item img.photo {
+            border-radius: 50%;
+            border: 5px solid white;
+            box-shadow: 0 0 3px gray;
+            max-width: 300px;
+            height: 200px;
+        }
+
+        .hero-item p {
+            align-self: center;
+            text-align: justify;
+        }
+
+        .hero-item .animated {
+            background-color: white;
+        }
+
+        .animated {
+            animation-duration: 500ms;
+        }
+
+        .visuals {
+            margin: auto;
+            margin-top: 1em;
+            display: -ms-grid;
+            display: grid;
+            -ms-grid-columns: 1fr 1fr 1fr;
+            grid-template-columns: repeat(auto-fit, 320px);
+            /* grid-template-columns: 1fr 1fr 1fr; */
+            grid-gap: 1em;
+            width: 95%;
+            justify-content: center;
+            justify-items: stretch;
+            padding-bottom: 1em;
+        }
+
+        .visuals div {
+            text-align: center;
+            background: white;
+            min-height: 200px;
+            padding: 1em;
+        }
+
+        .visuals .wordcloud { -ms-grid-column: 1 }
+        .visuals .graph     { -ms-grid-column: 2 }
+        .visuals .about     { -ms-grid-column: 3 }
+
+        .visuals div img {
+            width: 100%;
+            height: auto;
+        }
+
+        .wordcloud img {
+            padding-top: 1.5em;
+        }
+
+        .about p {
+            text-align: left;
+            padding: 0 1em;
+        }
+
+        h3 {
+            text-shadow: 1px 1px 3px gray;
+            font-weight: 300;
+            margin: 0.5em auto;
+        }
+
+        /* Slider */
+        .spotlight {
+            display: block;
+            font-size: larger;
+            text-shadow: 1px 1px 3px gray;
+            font-weight: 300;
+            margin-top: -1em;
+            margin-bottom: 1em;
+        }
+
+        .spotlight i.fas {
+            font-size: smaller;
+        }
+
+        a.prev-link,
+        a.next-link {
+            height: 100%;
+            width: 100%;
+            color:rgba(0, 169, 224, 0.4);
+        }
+
+        a.prev-link:hover,
+        a.next-link:hover {
+            color:rgba(0, 169, 224, 0.9);
+        }
+
+        div.prev,
+        div.next {
+            display: table;
+            height: 100%;
+            width: 100%;
+        }
+
+        div.prev i,
+        div.next i {
+            display: table-cell;
+            vertical-align: middle;
+            font-size: xx-large;
+        }
+
+        div.prev i { text-align: left; }
+        div.next i { text-align: right; }
+        /* End Slider */
+
+        @media only screen and (max-width: 800px) {
+            .hero {
+                padding: 1% 0;
+            }
+
+            .hero-item {
+                grid-template-columns: unset;
+                width: 98%;
+            }
+
+            a.next-link,
+            a.prev-link {
+                display: none;
+            }
+
+            .animated {
+                animation: unset;
+            }
+
+            .hero-item:nth-child(n+2) {
+                display: flex;
+                display: grid;
+            }
+
+            .hero-item a {
+                justify-self: center;
+                padding-right: 0;
+            }
+
+            .hero-item p {
+                text-align: left;
+                padding: 0;
+            }
+
+            .hero-item a.photo-frame {
+                padding-right: 0;
+            }
+
+            .spotlight {
+                text-align: center;
+                margin-top: 0;
+            }
+
+        }
+
+        @media only screen and (max-width: 690px) {
+           .wordcloud img {
+               padding-top: 0.5em;
+           }
+        }
+    </style>
+
+</head>
+
+<body class="dashboard">
+
+    <div class="container">
+
+        <header>
+            <a href="https://metabolomics.info/">
+                <img alt="Metabolomics Info logo"
+                    src="https://i2.wp.com/metabolomics.info/wp-content/uploads/2018/10/sepcc-logo-75.png?fit=60%2C60&ssl=1"
+                    width=60 height=60>
+                <div class="text">
+                    <h1>Metabolomics Info</h1>
+                    <p>Facilitating science through community</p>
+                </div>
+            </a>
+            <div class="spacer"></div>
+            <a id="menuToggle" aria-label="Toggle site navigation links">
+                <i class="fas fa-fw fa-bars" aria-hidden="true"></i>
+                <i class="fas fa-fw fa-times" aria-hidden="true"></i>
+            </a>
+            <nav>
+                <a href="#content" class="sr-only">Skip to Content</a>
+                <a href="index.html" class="dashboard-link current">
+                    <h2>People Portal</h2>
+                </a>
+                <a href="https://metabolomics.info/about/">
+                    <h2>About</h2>
+                </a>
+                <a href="https://metabolomics.info/events/">
+                    <h2>Events</h2>
+                </a>
+                <a href="https://metabolomics.info/contact/">
+                    <h2>Contact</h2>
+                </a>
+                <a href="https://metabolomics.info/consortium/">
+                    <h2>NIH Consortium</h2>
+                </a>
+            </nav>
+        </header>
+
+        <div class="page">
+            <nav>
+                <ul id="links">
+                    <li class="People">
+                        <a href="people.html">
+                            People
+                            <div class="fas fa-spinner fa-spin"></div>
+                            <span class="count"></span>
+                        </a>
+                    </li>
+                    <li class="Publications">
+                        <a href="people.html">
+                            Publications
+                            <span class="count"></span>
+                        </a>
+                    </li>
+                    <li class="Projects">
+                        <a href="people.html">
+                            Projects
+                            <span class="count"></span>
+                        </a>
+                    </li>
+                    <li class="Studies">
+                        <a href="people.html">
+                            Studies
+                            <span class="count"></span>
+                        </a>
+                    </li>
+                    <li class="Organizations">
+                        <a href="people.html">
+                            Organizations
+                            <span class="count"></span>
+                        </a>
+                    </li>
+                    <li class="Tools">
+                        <a href="people.html">
+                            Tools
+                            <span class="count"></span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <div id="content" class="hero">
+                <div class="hero-item person">
+                    <a class="prev-link">
+                        <div class="prev">
+                            <i class="fas fa-arrow-left"></i>
+                        </div>
+                    </a>
+
+                    <a class="photo-frame person" href="person.html?iri=https://vivo.metabolomics.info/individual/p197">
+                        <img class="photo" alt="Rick Yost" src="https://people.metabolomics.info/file/p197pic/photo.png" />
+                        <div class="name">Rick Yost</div>
+                    </a>
+
+                    <div class="about">
+                        <span class="spotlight"><i class="fas fa-user"></i> Person Spotlight</span>
+                        <p>
+                        <strong>Richard A Yost</strong> is an American scientist. He is a Professor and Head
+                        of Analytical Chemistry at the University of Florida. He received his BS degree in Chemistry in
+                        1974 from the University of Arizona, having performed undergraduate research in chromatography
+                        with Professor Mike Burke and his PhD degree in Analytical Chemistry in 1979 from Michigan
+                        State University, having performed graduate research with Professor Chris Enke. He then joined
+                        the faculty of the University of Florida.
+                        </p><p>
+                        He is the director of the Southeast Center for
+                        Integrated Metabolomics (SECIM) and of NIH&apos;s Metabolomics Consortium Coordinating Center
+                        (M3C). He is also a Professor of Pathology at both the University of Florida and the University
+                        of Utah/ARUP.
+                        </p>
+                    </div>
+
+                    <a class="next-link">
+                        <div class="next">
+                            <i class="fas fa-arrow-right"></i>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="hero-item study">
+                    <a class="prev-link">
+                        <div class="prev">
+                            <i class="fas fa-arrow-left"></i>
+                        </div>
+                    </a>
+
+                    <a class="photo-frame person" href="person.html?iri=https://vivo.metabolomics.info/individual/p434" >
+                        <img class="photo" alt="Megan Showalter" src="https://people.metabolomics.info/file/n434pic/photo.jpg" />
+                        <div class="name">Megan Showalter</div>
+                    </a>
+
+                    <div class="about">
+                        <span class="spotlight"><i class="fas fa-chart-line"></i> Study Spotlight</span>
+                        <p>
+                            <a href="study.html?iri=https://vivo.metabolomics.info/individual/ST001246" class="study">
+                                <strong>TFPa/HADHA is required for fatty acid beta-oxidation and cardiolipin re-modeling in human cardiomyocytes (part-I)</strong>
+                            </a>
+                        </p><p>
+                            Mitochondrial trifunctional protein deficiency, due to mutations in hydratase subunit A (HADHA), results in sudden infant death syndrome (SIDS) with no cure. To reveal the disease etiology, we generated stem cell-derived cardiomyocytes from HADHA-deficient hiPSCs and accelerated their maturation via a novel, engineered MicroRNA Maturation Cocktail (MiMaC) that upregulated the epigenetic regulator, HOPX.
+                        </p><p>
+                            This study reveals that TFPa/HADHA, a MLCL-AT-like enzyme, is required for FAO and cardiolipin remodeling, essential for functional mitochondria in human cardiomyocytes.
+                        </p>
+                    </div>
+
+                    <a class="next-link">
+                        <div class="next">
+                            <i class="fas fa-arrow-right"></i>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="hero-item project">
+                    <a class="prev-link">
+                        <div class="prev">
+                            <i class="fas fa-arrow-left"></i>
+                        </div>
+                    </a>
+
+                    <a class="photo-frame person" href="person.html?iri=https://vivo.metabolomics.info/individual/p342">
+                        <img class="photo" alt="Rachel Culp-Hill" src="https://vivo.metabolomics.info/file/p342pic/photo.jpg" />
+                        <div class="name">Rachel Culp-Hill</div>
+                    </a>
+
+                    <div class="about">
+                        <span class="spotlight"><i class="fas fa-project-diagram"></i> Project Spotlight</span>
+                        <p>
+                            <a href="project.html?iri=https://vivo.metabolomics.info/individual/PR000830" class="project">
+                                <strong>Trisomy 21 activates the kynurenine pathway via increased dosage of interferon receptors</strong>
+                            </a>
+                        </p><p>
+                            Trisomy 21 (T21) causes Down syndrome (DS), affecting immune and neurological function by unknown mechanisms. We report here a large metabolomics study of plasma and cerebrospinal fluid showing that people with DS produce elevated levels of kynurenine and quinolinic acid, two tryptophan catabolites with potent immunosuppressive and neurotoxic properties, respectively.
+                        </p>
+                    </div>
+
+                    <a class="next-link">
+                        <div class="next">
+                            <i class="fas fa-arrow-right"></i>
+                        </div>
+                    </a>
+                </div>
+
+            </div>
+
+            <div class="visuals">
+                <div class="wordcloud">
+                    <img src="wordcloud.gif" alt="Word Cloud showing common terms relating to Metabolomics" />
+                </div>
+                <div class="graph">
+                    <a href="projects_by_year.png">
+                        <img src="projects_by_year.png" alt="Graph showing the number of projects by year" />
+                    </a>
+                </div>
+                <div class="about">
+                    <h3>About</h3>
+                    <p>
+                        The Metabolomics Info People Portal is a service of the
+                        <a href="https://metabolomics.info">Metabolomics Consortium Coordinating Center</a>.
+                    </p>
+                    <p>
+                        Grant <a href="https://projectreporter.nih.gov/project_info_description.cfm?aid=9589555"
+                            target="_blank" rel="noopener noreferrer">1U2CDK119889-01</a>
+                        of the <a href="https://commonfund.nih.gov/metabolomics" target="_blank"
+                            rel="noopener noreferrer">NIH
+                            Common Fund Metabolomics Program</a>.
+                    </p>
+                </div>
+            </div>
+
+        </div> <!-- div.page -->
+
+        <footer>
+            <p>
+                Metabolomics Info is an outreach portal to support the
+                Metabolomics community.
+            </p>
+            <p>
+                © 2019 Metabolomics&nbsp;Consortium Coordinating&nbsp;Center
+            </p>
+        </footer>
+
+        <!-- The order is important. -->
+        <script src="tpf.js"></script>
+        <script src="str.js"></script>
+        <script src="m3c.js"></script>
+        <script src="entity.js"></script>
+
+        <script>
+            const client = m3c.NewTPFClient()
+            const links = document.getElementById("links")
+            const items = links.querySelectorAll("li")
+            for (var i = 0; i < items.length; i++) {
+                addLink(items[i])
+            }
+
+            const personLinks = document.querySelectorAll("a.person")
+            for (var i = 0; i < personLinks.length; i++) {
+                updateProfileLink("person", personLinks[i])
+            }
+
+            const studyLinks = document.querySelectorAll("a.study")
+            for (var i = 0; i < studyLinks.length; i++) {
+                updateProfileLink("study", studyLinks[i])
+            }
+
+            const projectLinks = document.querySelectorAll("a.project")
+            for (var i = 0; i < projectLinks.length; i++) {
+                updateProfileLink("project", projectLinks[i])
+            }
+
+            var lastSlide = new Date()
+            const sliderTimer = setInterval(slide, 1000) // Check every second
+
+            const nextLinks = document.querySelectorAll("a.next-link")
+            for (var i = 0; i < nextLinks.length; i++) {
+                addNextLinkClickHandler(nextLinks[i])
+            }
+
+            const prevLinks = document.querySelectorAll("a.prev-link")
+            for (var i = 0; i < prevLinks.length; i++) {
+                addPrevLinkClickHandler(prevLinks[i])
+            }
+
+            function addLink(li) {
+                const concept = li.className
+                const lowered = concept.toLowerCase()
+                const type = m3c.IRIFor(concept)
+
+                m3c.Count(client, type, renderCount)
+
+                function renderCount(count) {
+                    li.querySelector("a").href = m3c.ListingLink(lowered)
+                    li.querySelector(".count").innerText = count
+                }
+            }
+
+            function addNextLinkClickHandler(link) {
+                link.addEventListener("click", onNextClick)
+                link.slideNext = onNextClick
+
+                function onNextClick(clickEvent) {
+                    if (clickEvent) {
+                        clickEvent.preventDefault()
+                        // Clicking the navigation arrows effectively stops the
+                        clearInterval(sliderTimer)
+                    }
+
+                    const item = link.parentElement
+                    const slider = item.parentElement
+                    const next = item.nextElementSibling
+
+                    item.addEventListener("animationend", afterAnimation)
+                    item.className = item.className.replace(/(animated|slide(In|Out)(Left|Right))/g, "")
+                    item.className = (item.className + " animated slideOutLeft").trim()
+
+                    lastSlide = new Date()
+                    function afterAnimation() {
+                        item.removeEventListener("animationend", afterAnimation)
+                        next.className = next.className.replace(/(animated|slide(In|Out)(Left|Right))/g, "")
+                        next.className = (next.className + " animated slideInRight").trim()
+                        slider.appendChild(item)
+                        lastSlide = new Date()
+                    }
+                }
+            }
+
+            function addPrevLinkClickHandler(link) {
+                link.addEventListener("click", onPrevClick)
+
+                function onPrevClick(clickEvent) {
+                    if (clickEvent) {
+                        clickEvent.preventDefault()
+                        // Clicking the navigation arrows effectively stops the
+                        clearInterval(sliderTimer)
+                    }
+
+                    const item = link.parentElement
+                    const slider = item.parentElement
+                    const prev = slider.lastElementChild
+
+                    item.addEventListener("animationend", afterAnimation)
+                    item.className = item.className.replace(/(animated|slide(In|Out)(Left|Right))/g, "")
+                    item.className = (item.className + " animated slideOutRight").trim()
+
+                    lastSlide = new Date()
+                    function afterAnimation() {
+                        item.removeEventListener("animationend", afterAnimation)
+                        prev.className = prev.className.replace(/(animated|slide(In|Out)(Left|Right))/g, "")
+                        prev.className = (prev.className + " animated slideInLeft").trim()
+
+                        slider.insertBefore(prev, item)
+                        lastSlide = new Date()
+                    }
+                }
+            }
+
+            function slide() {
+                const maxDurationSecs = 10
+                // Check to see if it has been 10 seconds since the last slide.
+                // If it has, then slide again.
+                const cutoff = new Date()
+                cutoff.setSeconds(cutoff.getSeconds() - maxDurationSecs)
+
+                if (lastSlide < cutoff) {
+                    document.querySelector("a.next-link").slideNext()
+                }
+            }
+
+            function updateProfileLink(concept, link) {
+                const fragment = concept + ".html?iri="
+                const start = link.href.indexOf(fragment)
+                const iri = link.href.slice(start + fragment.length)
+
+                link.href = m3c.ProfileLink(concept, iri)
+                if (concept !== "person") {
+                    return
+                }
+
+                const person = entity.Person(client, iri)
+                person.Photo(function (url) {
+                    link.querySelector("img.photo").src =
+                        m3c.PhotoURL(client.Endpoint, url)
+                })
+            }
+        </script>
+
+    </div> <!-- div.container -->
 </body>
 
 </html>

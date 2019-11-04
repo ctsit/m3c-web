@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
-    <title>M3C People Listing</title>
+    <title>M3C Projects Listing</title>
 
     <!-- Font Awesome for neat icons. -->
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css"
@@ -23,16 +23,28 @@
     <script crossorigin src="https://unpkg.com/whatwg-fetch@3.0.0/dist/fetch.umd.js"></script>
     <!-- URL polyfill to support Internet Explorer -->
     <script crossorigin src="https://unpkg.com/@ungap/url-search-params@0.1.2/min.js"></script>
+    <!-- Filters list using search bar -->
+    <script>
+        function FilterResult() {
+            var input, filter, ol, li, a, i, txtValue;
+            input = document.getElementById('nameFilter');
+            filter = input.value.toUpperCase();
+            ol = document.getElementsByClassName('results');
+            li = document.getElementsByClassName('project');
 
-    <style>
-        .listing ol.results li div {
-            padding-left: 80px;
-        }
+            // Loop throught list items and hide those that don't match
+            for (i = 0; i < li.length; i++) {
+                a = li[i].getElementsByTagName("a")[0];
+                txtValue = a.textContent || a.innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    li[i].style.display = "";
+                } else {
+                    li[i].style.display = "none";
+                }
+            }
 
-        .listing ol.results li  {
-            min-height: 100px;
         }
-    </style>
+    </script>
 
 </head>
 
@@ -76,20 +88,20 @@
         </header>
 
         <div id="content" class="page">
-            <h1>People</h1>
+            <h1>Projects</h1>
             <div id="listing">
                 <div class="controls">
                     <div class="fa fa-spinner fa-spin hidden"></div>
                     <br>
                     <i class="fas fa-search"></i>
-                    <input type="text" id="nameFilter" placeholder="Search for name">
+                    <input type="text" id="nameFilter" onkeyup="FilterResult()" placeholder="Search for project">
                     <div class="count"></div>
                     <a href="#" class="reverse">Reverse</a>
                 </div>
 
                 <div class="facets">
                     <div class="facet organization">
-                        <p>Institute</p>
+                        <p>Organization</p>
                         <div class="facet-controls">
                             <a href="#" class="show">Show all</a>
                             <a href="#" class="limit">Show fewer</a>
@@ -109,16 +121,11 @@
 
                 <ol class="results">
                     <!-- Templates aren't visible, but their clones are filled out with real data. -->
-                    <li class="person template">
+                    <li class="project template">
                         <a href="#" class="link">
-                            <img class="photo" width="64" height="64"
-                                src="https://cdn.pixabay.com/photo/2016/08/08/09/17/avatar-1577909_960_720.png" />
                             <div class="name"></div>
                         </a>
-                        <div>
-                            <i class="fas fa-city"></i>
-                            <span class="organization"></span>
-                        </div>
+                        <div class="organization"></div>
                     </li>
                 </ol>
             </div>
@@ -149,57 +156,54 @@
             const results = root.querySelector(".results")
             const facets = root.querySelector(".facets")
             const ctrlReverse = root.querySelector(".reverse")
-            const personTemplate = root.querySelector("li.person.template")
+            const projectTemplate = root.querySelector("li.project.template")
 
             // Keep the results sorted.
-            const sorted = ui.SortedList(results, 1, sortLastFirst)
+            const sorted = ui.SortedList(results, 1, sortByName)
             ctrlReverse.addEventListener("click", onCtrlReverseClick)
 
             ui.SortedList(facets.querySelector(".organization ul"), -1, sortByCount)
 
             // Filter results
-            document.getElementById("nameFilter").addEventListener("keypress", filterResult)
+            document.getElementById("nameFilter").addEventListener("keyup", filterResult)
 
-            // Query the TPF server for all people and some related data.
+            // Query the TPF server for all projects and some related data.
             const data = {
-                person: [],
-                associatedWith: {},  // person IRI => org IRI
-                names: {},           // entity IRI => label string
-                institutes: []       // list of institute IRIs
+                projects: [],
+                names: {},    // entity IRI => label string
+                funding: {},  // project IRI => list of org IRIs
             }
 
             const promises = [
-                entity.Persons(client),
-                entity.AssociatedWiths(client),
+                entity.Projects(client),
                 entity.Names(client),
-                entity.Institutes(client),
+                entity.FundingOrganizations(client),
             ]
 
             Promise.all(promises)
                 .then(function setData(results) {
-                    data.person = results[0]
-                    data.associatedWith = results[1]
-                    data.names = results[2]
-                    data.institutes = results[3]
+                    data.projects = results[0]
+                    data.names = results[1]
+                    data.funding = results[2]
 
-                    data.person.forEach(renderPerson)
+                    data.projects.forEach(renderProject)
                 })
                 .then(function automaticallyUpdateCount() {
-                    if (data.person.length > 5 + 1) {
+                    if (data.projects.length > 5 + 1) {
                         const orgfacet = root.querySelector(".facet.organization")
                         orgfacet.className = (orgfacet.className + " limit").trim()
                     }
 
                     const checkboxes = document.querySelectorAll(".facet input")
                     for (var i = 0; i < checkboxes.length; i++) {
-                        checkboxes[i].addEventListener("click", updatePersonCount)
+                        checkboxes[i].addEventListener("click", updateCount)
                     }
 
-                    function updatePersonCount() {
+                    function updateCount() {
                         const visible = document.querySelectorAll(".results li:not(.hidden):not(.template)")
                         document.querySelector(".controls .count").innerText = visible.length
                     }
-                    updatePersonCount()
+                    updateCount()
                 })
 
             // Setup the filters used by each facets. Each item should be a
@@ -239,48 +243,24 @@
             }
 
             /**
-             * Render a person with the specified IRI.
-             * @param {string} personIRI
+             * Render a project with the specified IRI.
+             * @param {string} projectIRI
              */
-            function renderPerson(personIRI) {
-                const person = entity.Person(client, personIRI.slice(1, -1))
-                const associations = data.associatedWith[personIRI] || []
-                var orgIRI = null
-                for (var i = 0; i < associations.length; i++) {
-                    if (data.institutes.indexOf(associations[i]) !== -1 ) {
-                        orgIRI = associations[i]
-                        break
-                    }
-                }
-
+            function renderProject(projectIRI) {
+                // const project = entity.Project(client, projectIRI.slice(1, -1))
+                const orgIRI = data.funding[projectIRI]
                 const bindings = {
                     link: {
-                        href: m3c.ProfileLink("person", personIRI),
+                        href: m3c.ProfileLink("project", projectIRI),
                     },
-                    name: parseVIVOString(data.names[personIRI]),
-                    photo: {
-                        alt: data.names[personIRI],
-                        src: getPhoto,
-                    },
+                    name: parseVIVOString(data.names[projectIRI]),
                     organization: orgIRI ? data.names[orgIRI] : null,
                 }
 
-                const li = ui.Render(personTemplate, bindings)
+                const li = ui.Render(projectTemplate, bindings)
 
                 if (orgIRI) {
                     facetsManager.Increment('organization', bindings.organization, bindings.organization)
-                }
-
-                function getPhoto(callback) {
-                    person.PhotoThumbnail(renderPhoto)
-
-                    function renderPhoto(url) {
-                        if (!url) {
-                            return
-                        }
-                        url = m3c.PhotoURL(client.Endpoint, url)
-                        callback(url)
-                    }
                 }
             }
 
@@ -288,10 +268,9 @@
              * Extract the name of a list item; used for sorting.
              * @param {HTMLLIElement} li
              */
-            function sortLastFirst(li) {
-                const firstLast = li.querySelector(".name").innerText.toUpperCase()
-                const lastFirst = firstLast.split(' ').reverse().join(' ')
-                return lastFirst
+            function sortByName(li) {
+                const name = li.querySelector(".name").innerText.toUpperCase()
+                return name
             }
 
             /**
@@ -310,7 +289,7 @@
                 input = document.getElementById('nameFilter');
                 filter = input.value.toUpperCase();
                 ol = document.getElementsByClassName('results');
-                li = document.getElementsByClassName('person');
+                li = document.getElementsByClassName('project');
 
                 // Loop throught list items and hide those that don't match
                 var count = 0;

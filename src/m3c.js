@@ -15,6 +15,50 @@ var m3c = (function module() {
     const params = new URLSearchParams(loc.search)
     const defaultEndpoint = loc.protocol + "//" + loc.hostname + "/tpf/core"
 
+    /**
+     * Fetches the total number of individuals of a given type.
+     *
+     * @param {tpf.Client} client
+     * @param {string} type
+     * @param {(count: number) => void} callback
+     */
+    function Count(client, type, callback) {
+        const rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+        const totalItems = "<http://www.w3.org/ns/hydra/core#totalItems>"
+        const xsdInteger = "^^<http://www.w3.org/2001/XMLSchema#integer>"
+
+        tpf.Query(client.Endpoint, null, rdf + "type", type, 1)
+            .then(findTotalItems)
+            .then(callback)
+
+        function findTotalItems(triples) {
+            for (var i = 0; i < triples.length; i++) {
+                const triple = triples[i]
+
+                if (triple.Predicate !== totalItems) {
+                    continue
+                }
+
+                var cnt = triple.Object
+                cnt = cnt.replace(xsdInteger, "")
+                cnt = cnt.slice(1, -1)
+                cnt = parseInt(cnt)
+
+                return cnt
+            }
+            return -1
+        }
+    }
+
+    function DashboardLink() {
+        const endpoint = params.get("endpoint")
+        if (endpoint) {
+            return "index.html?endpoint=" + encodeURIComponent(endpoint)
+        }
+
+        return "index.html"
+    }
+
     function IRIFor(concept) {
         const
             base = "http://www.metabolomics.info/ontologies/2019/metabolomics-consortium#",
@@ -30,8 +74,8 @@ var m3c = (function module() {
             "People": foaf + "Person",
             "Project": base + "Project",
             "Projects": base + "Project",
-            "Publication": bibo + "Document",
-            "Publications": bibo + "Document",
+            "Publication": bibo + "Article",
+            "Publications": bibo + "Article",
             "Study": base + "Study",
             "Studies": base + "Study",
             "Tool": base + "Tool",
@@ -53,7 +97,7 @@ var m3c = (function module() {
      *        Entity type.
      */
     function ListingLink(type) {
-        let url = type + ".html"
+        var url = type + ".html"
 
         const endpoint = params.get("endpoint")
         if (endpoint) {
@@ -69,15 +113,64 @@ var m3c = (function module() {
      * By default, if no `endpoint` is passed in the query string, the endpoint
      * of the TPF server is assumed to be at `/tpf/core` on the current server.
      *
+     * @param {Node} [loading]
+     *
      * @returns {tpf.Client}
      */
-    function NewTPFClient() {
-        let endpoint = params.get("endpoint")
+    function NewTPFClient(loading) {
+        var endpoint = params.get("endpoint")
         if (!endpoint) {
             endpoint = defaultEndpoint
         }
 
-        return new tpf.Client(endpoint)
+        /* Replace dashboard links */
+        const links = document.getElementsByClassName("dashboard-link")
+        for (var i = 0; i < links.length; i++) {
+            links[i].href = m3c.DashboardLink()
+        }
+
+        /* Listen for nav menu toggle */
+        const menuToggle = document.getElementById("menuToggle")
+        if (menuToggle) {
+            menuToggle.addEventListener("click", toggleMenu)
+        }
+
+        const client = new tpf.Client(endpoint)
+        client.Endpoint = endpoint
+        patchFetch(client, loading)
+
+        return client
+    }
+
+    function toggleMenu() {
+        const menuToggle = document.getElementById("menuToggle")
+        const nav = document.querySelector("header nav")
+
+        if (!menuToggle || !nav) {
+            return
+        }
+
+        if (nav.className.indexOf("opened") === -1) {
+            menuToggle.className = (menuToggle.className + " opened").trim()
+            nav.className = (nav.className + " opened").trim()
+            return
+        }
+
+        menuToggle.className = menuToggle.className.replace("opened", "").trim()
+        nav.className = nav.className.replace("opened", "").trim()
+    }
+
+    /**
+     * Generates the full URL for a photo taking into account the endpoint.
+     *
+     * Example when used on the staging server *stage.x.org*
+     *
+     *    PhotoURL("http://stage.x.org/tpf/core", "/file/n007/photo.jpg")
+     *    => "http://stage.x.org/file/n007/photo.jpg"
+     */
+    function PhotoURL(endpoint, path) {
+        const basehref = endpoint.replace("/tpf/core", "")
+        return basehref + path
     }
 
     /**
@@ -93,7 +186,11 @@ var m3c = (function module() {
      * @param {string} iri  IRI of the entity.
      */
     function ProfileLink(type, iri) {
-        let url = type + ".html?iri=" + encodeURIComponent(iri)
+        if (iri[0] === '<') {
+            iri = iri.slice(1,-1)
+        }
+
+        var url = type + ".html?iri=" + encodeURIComponent(iri)
 
         const endpoint = params.get("endpoint")
         if (endpoint) {
@@ -111,11 +208,83 @@ var m3c = (function module() {
         return params.get("iri")
     }
 
+    /* Monkey patch fetch to easily track when data loading occurs */
+    function patchFetch(client, loadingIcon) {
+        if (typeof window === "undefined" || !window.fetch || window._fetch) {
+            return
+        }
+
+        var fetches = 0
+        const loading = []
+        const done = []
+
+        function decrement() {
+            fetches -= 1
+            if (fetches === 0) {
+                done.forEach(function (callback) {
+                    setTimeout(callback, 1)
+                })
+            }
+        }
+
+        function increment() {
+            fetches += 1
+            if (fetches === 1) {
+                loading.forEach(function (callback) {
+                    setTimeout(callback, 1)
+                })
+            }
+        }
+
+        const fetch = window.fetch
+        window.fetch = function m3cFetch() {
+            increment()
+            return fetch
+                .apply(null, arguments)
+                .then(function (response) {
+                    decrement()
+                    return response
+                })
+                .catch(function (err) {
+                    decrement()
+                    throw err
+                })
+        }
+
+        client.OnLoading = function OnLoading(callback) {
+            loading.push(callback)
+        }
+
+        client.OnDone = function onDone(callback) {
+            done.push(callback)
+        }
+
+        // Setup automatic behavior to toggle loading icon.
+        if (!loadingIcon) {
+            loadingIcon = window.document.querySelector(".fa-spinner.fa-spin")
+            if (!loadingIcon) {
+                return
+            }
+        }
+
+        client.OnLoading(function () {
+            loadingIcon.className =
+                loadingIcon.className.replace("hidden", "").trim()
+        })
+
+        client.OnDone(function () {
+            loadingIcon.className = loadingIcon.className + " hidden"
+        })
+    }
+
     // Module Exports
     return {
+        Count: Count,
+        DashboardLink: DashboardLink,
         IRIFor: IRIFor,
         ListingLink: ListingLink,
         NewTPFClient: NewTPFClient,
+        PhotoURL: PhotoURL,
         ProfileLink: ProfileLink,
         Subject: Subject,
     }

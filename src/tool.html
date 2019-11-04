@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <title>M3C Tool Profile</title>
+
+    <!-- Font Awesome for neat icons. -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css"
+        integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+
+    <!-- Roboto font -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="m3c.css" />
+
+    <!-- Promise polyfill to support Internet Explorer -->
+    <script crossorigin src="https://cdn.jsdelivr.net/npm/promise-polyfill@8/dist/polyfill.min.js"></script>
+    <!-- Fetch polyfill to support Internet Explorer -->
+    <script crossorigin src="https://unpkg.com/whatwg-fetch@3.0.0/dist/fetch.umd.js"></script>
+    <!-- URL polyfill to support Internet Explorer -->
+    <script crossorigin src="https://unpkg.com/@ungap/url-search-params@0.1.2/min.js"></script>
+
+    <style>
+        .info-frame > * {
+            display: block;
+            padding-top: 0.25em;
+            padding-bottom: 0.25em;
+        }
+
+        .listing-link {
+            font-size: larger;
+            padding-top: 0;
+            padding-bottom: 1em;
+        }
+
+        ul.tags { display: inline; }
+        ul.tags li {
+            display: inline;
+            padding-left: 0.25em;
+        }
+    </style>
+
+</head>
+
+<body class="profile">
+
+    <div class="container">
+
+        <header>
+            <a href="https://metabolomics.info/">
+                <img alt="Metabolomics Info logo"
+                    src="https://i2.wp.com/metabolomics.info/wp-content/uploads/2018/10/sepcc-logo-75.png?fit=60%2C60&ssl=1"
+                    width=60 height=60>
+                <div class="text">
+                    <h1>Metabolomics Info</h1>
+                    <p>Facilitating science through community</p>
+                </div>
+            </a>
+            <div class="spacer"></div>
+            <a id="menuToggle" aria-label="Toggle site navigation links">
+                <i class="fas fa-fw fa-bars" aria-hidden="true"></i>
+                <i class="fas fa-fw fa-times" aria-hidden="true"></i>
+            </a>
+            <nav>
+                <a href="#content" class="sr-only">Skip to Content</a>
+                <a href="index.html" class="dashboard-link current">
+                    <h2>People Portal</h2>
+                </a>
+                <a href="https://metabolomics.info/about/">
+                    <h2>About</h2>
+                </a>
+                <a href="https://metabolomics.info/events/">
+                    <h2>Events</h2>
+                </a>
+                <a href="https://metabolomics.info/contact/">
+                    <h2>Contact</h2>
+                </a>
+                <a href="https://metabolomics.info/consortium/">
+                    <h2>NIH Consortium</h2>
+                </a>
+            </nav>
+        </header>
+
+        <div id="content" class="page">
+            <div id="profile">
+                <h1 class="name"></h1>
+                <div>
+                    <i class="fas fa-tools" aria-hidden="true"></i>
+                    <a href="tools.html" class="listing-link">
+                        Tool
+                    </a>
+                </div>
+
+                <div class="info-frame">
+                    <div class="website">
+                        Website:
+                        <a href="#" class="link" target="_blank">
+                            <span class="text"></span>
+                        </a>
+                        <i class="fas fa-external-link-alt"></i>
+                    </div>
+
+                    <div class="license">
+                        License:
+                        <a href="#" class="license-url" target="_blank">
+                            <span class="license-name"></span>
+                            <i class="fas fa-external-link-alt"></i>
+                        </a>
+                    </div>
+
+                    <div class="tags">
+                        Tags:
+                        <ul class="tags"></ul>
+                    </div>
+                </div>
+
+                <div class="loading">
+                    <div class="fas fa-spinner fa-spin hidden"></div>
+                </div>
+
+                <section class="people">
+                    <h2 class="people">
+                        <a href="people.html">Contributors</a>
+                    </h2>
+                    <ul class="people"></ul>
+                </section>
+
+            </div>
+            <p class="disclaimer">
+                Data from the
+                <a href="https://www.metabolomicsworkbench.org">Metabolomics Workbench</a>
+                <i class="fas fa-external-link-alt"></i>.
+            </p>
+        </div>
+
+        <footer>
+            <p>
+                Metabolomics Info is an outreach portal to support the
+                Metabolomics community.
+            </p>
+            <p>
+                © 2019 Metabolomics&nbsp;Consortium Coordinating&nbsp;Center
+            </p>
+        </footer>
+
+        <!-- The order is important. -->
+        <script src="tpf.js"></script>
+        <script src="str.js"></script>
+        <script src="m3c.js"></script>
+        <script src="entity.js"></script>
+        <script src="ui.js"></script>
+
+        <script>
+            const client = m3c.NewTPFClient()
+            const uri = m3c.Subject()
+            const root = document.getElementById("profile")
+
+            const tool = entity.Tool(client, uri)
+            tool.Name(renderName)
+            tool.Website(renderWebsite)
+            tool.Tags(renderTags)
+            tool.License(renderLicense)
+            tool.People(listRenderer("ul.people", "person"))
+
+            keepSorted("ul.people", getNameLastFirst)
+
+            const sections = ["people"]
+            sections.forEach(fixLink)
+
+            const listingLink = root.querySelector(".listing-link")
+            listingLink.href = m3c.ListingLink("tools")
+
+            function fixLink(name) {
+                const selector = str.Format("section.{} h2 a", name)
+                const link = root.querySelector(selector)
+                link.href = m3c.ListingLink(name)
+            }
+
+            /**
+             * Extracts a person's name for use by a sorting function.
+             *
+             * @param {HTMLLIElement} li
+             */
+            function getNameLastFirst(li) {
+                const link = li.querySelector("a")
+                if (!link) {
+                    return ""
+                }
+                const displayName = link.innerText
+                const names = displayName.split(' ')
+                const surname = names.slice(-1)
+                const other = names.slice(0, -1)
+                const lastFirst = surname.concat(other).join(' ')
+                return lastFirst
+            }
+
+            function keepSorted(selector, keyFunc) {
+                const node = root.querySelector(selector)
+                ui.SortedList(node, 1, keyFunc)
+            }
+
+            /**
+             * Creates a function that accepts a list of items to render.
+             *
+             * This is used for most of the entity associations, like Publications,
+             * instead of having a separate function for each, all of which would do
+             * pretty much the same thing.
+             *
+             * @param {string} selector
+             * @param {string} type
+             */
+            function listRenderer(selector, type) {
+                return function renderList(items) {
+                    const ul = root.querySelector(selector)
+
+                    if (items.length === 0) {
+                        ul.innerHTML = "<li><em>None</em></li>"
+                        return
+                    }
+
+                    items.forEach(renderItem)
+                    function renderItem(iri) {
+                        entity.Name(client, iri, renderName)
+                        function renderName(name) {
+                            renderListItem(ul, type, iri, name)
+                        }
+                    }
+                }
+            }
+
+            function renderLicense(license) {
+                if (!license || !license.name) {
+                    const element = root.querySelector(".license")
+                    element.parentElement.removeChild(element)
+                    return
+                }
+
+                const name = root.querySelector(".license-name")
+                const url = root.querySelector(".license-url")
+
+                name.innerText = license.name
+                url.href = license.url
+            }
+
+            function renderListItem(ul, type, iri, name) {
+                const li = document.createElement("li")
+                li.innerHTML = str.Format(
+                    '<a href="{}">{}</a>',
+                    m3c.ProfileLink(type, iri.slice(1, -1)),
+                    name
+                )
+                ul.appendChild(li)
+            }
+
+            function renderName(name) {
+                if (!name) {
+                    root.innerText = "Unknown tool."
+                    return
+                }
+
+                name = name.trim()
+                root.querySelector(".name").innerHTML = name
+            }
+
+            function renderTags(tags) {
+                const list = root.querySelector("ul.tags")
+
+                tags.forEach(renderTag)
+
+                function renderTag(tag) {
+                    const item = document.createElement("li")
+                    item.innerText = tag
+                    list.appendChild(item)
+                }
+            }
+
+            function renderWebsite(url) {
+                const link = root.querySelector(".website .link")
+                const text = root.querySelector(".website .text")
+                link.href = url
+                text.innerText = url
+            }
+        </script>
+
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <title>M3C Organization Profile</title>
+
+    <!-- Font Awesome for neat icons. -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css"
+        integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+
+    <!-- Roboto font -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="m3c.css" />
+
+    <!-- Promise polyfill to support Internet Explorer -->
+    <script crossorigin src="https://cdn.jsdelivr.net/npm/promise-polyfill@8/dist/polyfill.min.js"></script>
+    <!-- Fetch polyfill to support Internet Explorer -->
+    <script crossorigin src="https://unpkg.com/whatwg-fetch@3.0.0/dist/fetch.umd.js"></script>
+    <!-- URL polyfill to support Internet Explorer -->
+    <script crossorigin src="https://unpkg.com/@ungap/url-search-params@0.1.2/min.js"></script>
+
+    <style>
+        .type {
+            padding-bottom: 1em;
+            text-align: center;
+        }
+
+        .type a {
+            font-size: larger;
+        }
+    </style>
+
+</head>
+
+<body class="profile">
+
+    <div class="container">
+
+        <header>
+            <a href="https://metabolomics.info/">
+                <img alt="Metabolomics Info logo"
+                    src="https://i2.wp.com/metabolomics.info/wp-content/uploads/2018/10/sepcc-logo-75.png?fit=60%2C60&ssl=1"
+                    width=60 height=60>
+                <div class="text">
+                    <h1>Metabolomics Info</h1>
+                    <p>Facilitating science through community</p>
+                </div>
+            </a>
+            <div class="spacer"></div>
+            <a id="menuToggle" aria-label="Toggle site navigation links">
+                <i class="fas fa-fw fa-bars" aria-hidden="true"></i>
+                <i class="fas fa-fw fa-times" aria-hidden="true"></i>
+            </a>
+            <nav>
+                <a href="#content" class="sr-only">Skip to Content</a>
+                <a href="index.html" class="dashboard-link current">
+                    <h2>People Portal</h2>
+                </a>
+                <a href="https://metabolomics.info/about/">
+                    <h2>About</h2>
+                </a>
+                <a href="https://metabolomics.info/events/">
+                    <h2>Events</h2>
+                </a>
+                <a href="https://metabolomics.info/contact/">
+                    <h2>Contact</h2>
+                </a>
+                <a href="https://metabolomics.info/consortium/">
+                    <h2>NIH Consortium</h2>
+                </a>
+            </nav>
+        </header>
+
+        <div id="content" class="page">
+            <div id="profile">
+                <h1 class="name"></h1>
+
+                <div class="type">
+                    <i class="fas"></i>
+                    <a href="organizations.html" class="link typename"></a>
+                </div>
+
+                <div class="info-frame">
+                    <div class="parent">
+                        <i class="fas fa-fw"></i>
+                        <a href="#" class="link typename"></a>
+                    </div>
+                     <div class="grandparent">
+                        <i class="fas fa-fw"></i>
+                        <a href="#" class="link typename"></a>
+                    </div>
+                </div>
+
+                <div class="loading">
+                    <div class="fas fa-spinner fa-spin hidden"></div>
+                </div>
+
+                <section class="people">
+                    <h2 class="people">
+                        <a href="people.html">People</a>
+                    </h2>
+                    <ul class="people"></ul>
+                </section>
+
+                <section class="organizations">
+                    <h2 class="organizations">
+                        <a href="organizations.html">Sub-organizations</a>
+                    </h2>
+                    <ul class="organizations"></ul>
+                </section>
+
+                <section class="projects">
+                    <h2 class="projects">
+                        <a href="projects.html">Projects</a>
+                    </h2>
+                    <ul class="projects"></ul>
+                </section>
+
+                <section class="studies">
+                    <h2 class="studies">
+                        <a href="studies.html">Studies</a>
+                    </h2>
+                    <ul class="studies"></ul>
+                </section>
+
+                <section class="publications">
+                    <h2 class="publications">
+                        <a href="publications.html">Publications</a>
+                        <span class="disclaimer">
+                            Data from
+                            <a href="https://www.ncbi.nlm.nih.gov/pubmed/">PubMed</a>
+                            <i class="fas fa-external-link-alt"></i>
+                        </span>
+                    </h2>
+                    <ul class="publications">
+                        <li class="template">
+                            <a href="#" class="title link"
+                               target="_blank" rel="noopener noreferrer"></a>
+                            <i class="fas fa-external-link-alt"></i>
+                            <span class="year"></span>
+                        </li>
+                    </ul>
+                </section>
+
+            </div>
+            <p class="disclaimer">
+                Data from the
+                <a href="https://www.metabolomicsworkbench.org">Metabolomics Workbench</a>
+                <i class="fas fa-external-link-alt"></i>.
+            </p>
+        </div>
+
+        <footer>
+            <p>
+                Metabolomics Info is an outreach portal to support the
+                Metabolomics community.
+            </p>
+            <p>
+                © 2019 Metabolomics Consortium Coordinating Center
+            </p>
+        </footer>
+
+        <!-- The order is important. -->
+        <script src="tpf.js"></script>
+        <script src="str.js"></script>
+        <script src="m3c.js"></script>
+        <script src="entity.js"></script>
+        <script src="ui.js"></script>
+
+        <script>
+            const client = m3c.NewTPFClient()
+            const uri = m3c.Subject()
+            const root = document.getElementById("profile")
+
+            const organization = entity.Organization(client, uri)
+            organization.Name(renderName)
+            organization.Type(renderType)
+            organization.Parent(renderParent)
+            organization.Grandparent(renderGrandparent)
+            organization.People(listRenderer("ul.people", "person"))
+            organization.Children(listRenderer("ul.organizations", "organization"))
+            organization.Projects(listRenderer("ul.projects", "project"))
+            organization.Studies(listRenderer("ul.studies", "study"))
+            organization.Publications(renderPublications)
+
+            keepSorted("ul.people", getNameLastFirst)
+            keepSorted("ul.organizations")
+            keepSorted("ul.projects")
+            keepSorted("ul.studies")
+            const pubs = document.querySelector("ul.publications")
+            const publicationsList = ui.SortedList(pubs, -1, getYear)
+
+            const sections = [
+                "people", "projects", "studies", "publications", "organizations"
+            ]
+
+            sections.forEach(fixLink)
+
+            function fixLink(name) {
+                const selector = str.Format("section.{} h2 a", name)
+                const link = root.querySelector(selector)
+                link.href = m3c.ListingLink(name)
+            }
+
+            /**
+             * Extracts a person's name for use by a sorting function.
+             *
+             * @param {HTMLLIElement} li
+             */
+            function getNameLastFirst(li) {
+                const link = li.querySelector("a")
+                if (!link) {
+                    return ""
+                }
+                const displayName = link.innerText
+                const names = displayName.split(' ')
+                const surname = names.slice(-1)
+                const other = names.slice(0, -1)
+                const lastFirst = surname.concat(other).join(' ')
+                return lastFirst
+            }
+
+            function getYear(/** @type {HTMLLIElement} */li) {
+                const year = li.querySelector(".year")
+                if (!year || !year.innerText) {
+                    return "0"
+                }
+                return year.innerText
+            }
+
+            function keepSorted(selector, keyFunc) {
+                const node = root.querySelector(selector)
+                ui.SortedList(node, 1, keyFunc)
+            }
+
+            function renderName(name) {
+                if (!name) {
+                    root.innerText = "Unknown organization."
+                    return
+                }
+
+                name = name.trim()
+                root.querySelector(".name").innerHTML = name
+            }
+
+            const icons = {
+                "Institute": "city",
+                "Department": "building",
+                "Laboratory": "flask",
+                "Organization": "building",
+            }
+
+            function renderGrandparent(grandparentIRI) {
+                const t = root.querySelector(".grandparent")
+                if (!grandparentIRI) {
+                    t.parentNode.removeChild(t)
+                    return
+                }
+
+                grandparentIRI = grandparentIRI.slice(1, -1)
+                const gp = entity.Organization(client, grandparentIRI)
+
+                gp.Name(renderName)
+                gp.Type(renderType)
+
+                function renderName(name) {
+                    t.querySelector(".typename").innerText = name
+                }
+
+                function renderType(type) {
+                    t.querySelector("i.fas").className += " fa-" + icons[type]
+                    t.querySelector(".link").href = m3c.ProfileLink("organization", grandparentIRI)
+                }
+            }
+
+            function renderParent(parentIRI) {
+                const t = root.querySelector(".parent")
+                if (!parentIRI) {
+                    t.parentNode.removeChild(t)
+                    return
+                }
+
+                parentIRI = parentIRI.slice(1, -1)
+                const p = entity.Organization(client, parentIRI)
+
+                p.Name(renderName)
+                p.Type(renderType)
+
+                function renderName(name) {
+                    t.querySelector(".typename").innerText = name
+                }
+
+                function renderType(type) {
+                    t.querySelector("i.fas").className += " fa-" + icons[type]
+                    t.querySelector(".link").href = m3c.ProfileLink("organization", parentIRI)
+                }
+            }
+
+            function renderType(type) {
+                const t = root.querySelector(".type")
+                t.querySelector("i.fas").className += " fa-" + icons[type]
+                t.querySelector(".link").href = m3c.ListingLink("organizations")
+                t.querySelector(".typename").innerText = type
+            }
+
+            function renderPublications(publications) {
+                const ul = root.querySelector("ul.publications")
+                const template = ul.querySelector("li.template")
+
+                if (publications.length === 0) {
+                    ul.innerHTML = "<li><em>None</em></li>"
+                    return
+                }
+
+                publications.forEach(renderPublication)
+
+                function renderPublication(publicationIRI) {
+                    const pub = entity.Publication(client, publicationIRI)
+                    const bindings = {
+                        title: getCitationOrTitle,
+                        link: {
+                            href: pub.PubMedLink
+                        },
+                        year: fetchYear,
+                    }
+                    ui.Render(template, bindings)
+
+                    function getCitationOrTitle(callback) {
+                        return new Promise(function (resolve) {
+                            pub.Citation(resolve)
+                        })
+                            .then(function (citation) {
+                                if (citation) {
+                                    callback(citation)
+                                    return
+                                }
+                                pub.Title(callback)
+                            })
+                    }
+
+                    function fetchYear(callback) {
+                        return new Promise(function (resolve) {
+                            pub.Year(resolve)
+                        })
+                            .then(function (year) {
+                                callback(year)
+                                publicationsList.Update()
+                            })
+                    }
+                }
+            }
+
+            /**
+             * Creates a function that accepts a list of items to render.
+             *
+             * This is used for most of the entity associations, like Publications,
+             * instead of having a separate function for each, all of which would do
+             * pretty much the same thing.
+             *
+             * @param {string} selector
+             * @param {string} type
+             */
+            function listRenderer(selector, type) {
+                return function renderList(items) {
+                    const ul = root.querySelector(selector)
+
+                    if (items.length === 0) {
+                        ul.innerHTML = "<li><em>None</em></li>"
+                        return
+                    }
+
+                    items.forEach(renderItem)
+                    function renderItem(iri) {
+                        entity.Name(client, iri, renderName)
+                        function renderName(name) {
+                            renderListItem(ul, type, iri, name)
+                        }
+                    }
+                }
+            }
+
+            function renderListItem(ul, type, iri, name) {
+                const li = document.createElement("li")
+                li.innerHTML = str.Format(
+                    '<a href="{}">{}</a>',
+                    m3c.ProfileLink(type, iri.slice(1, -1)),
+                    name
+                )
+                ul.appendChild(li)
+            }
+
+        </script>
+
+    </div>
+</body>
+
+</html>

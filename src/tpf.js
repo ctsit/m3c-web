@@ -48,14 +48,116 @@ var tpf = (function module() {
         }
 
         /**
+         * Maps subject-IRIs to object-IRIs with a given `predicate`.
+         *
+         * Unlike {@link Client#MapAll}, this expects a one-to-one mapping
+         * between subject and object.
+         *
+         * **Example**: get a map of person to their one and only VCard
+         *
+         *    new Client("https://vivo.metabolomics.info/tpf/core")
+         *       .Map("http://purl.obolibrary.org/obo/ARG_2000028",
+         *            function (map) { // Print James's one and only VCard
+         *                var vcard = map["https://vivo.metabolomics.info/individual/n007"]
+         *                console.log(vcard)
+         *            })
+         * @param {string} predicate
+         * @param {({[subjectIRI: string]: string})} [callback]
+         * @returns {Promise<{[subjectIRI: string]: string}>}
+         */
+
+        this.Map = function Map(predicate, callback) {
+            return this
+                .Query(null, predicate, null)
+                .then(function (triples) {
+                    const map = {}
+
+                    triples.forEach(function (triple) {
+                        map[triple.Subject] = triple.Object
+                    })
+
+                    if (callback) {
+                        callback(map)
+                    }
+
+                    return map
+                })
+        }
+
+        /**
+         * Maps subject-IRIs to a list of object-IRIs with a given `predicate`.
+         *
+         * Maps are represented as JavaScript objects. The subject-IRIs are the
+         * JavaScript object's properties and their values are a list of
+         * object-IRIs.
+         *
+         * **Example**: get a map of Person to their VCards
+         *
+         *    new Client("https://vivo.metabolomics.info/tpf/core")
+         *       .MapAll("http://purl.obolibrary.org/obo/ARG_2000028",
+         *            function (map) { // Print James's VCards
+         *                var person =
+         *                    "https://vivo.metabolomics.info/individual/n007"
+         *                console.log(map[person])
+         *            })
+         * @param {string} predicate
+         * @param {({[subjectIRI: string]: string[]})} [callback]
+         * @returns {Promise<{[subjectIRI: string]: string[]}>}
+         */
+        this.MapAll = function MapAll(predicate, callback) {
+            return this
+                .Query(null, predicate, null)
+                .then(function (triples) {
+                    const map = {}
+
+                    triples.forEach(function (triple) {
+                        if (!map[triple.Subject]) {
+                            map[triple.Subject] = []
+                        }
+                        map[triple.Subject].push(triple.Object)
+                    })
+
+                    if (callback) {
+                        callback(map)
+                    }
+
+                    return map
+                })
+        }
+
+        /**
          * Query the TPF server.
          *
          * @param {string} subject
          * @param {string} predicate
          * @param {string} object
+         * @param {number} page If unspecified or < 1, all pages are returned.
          */
-        this.Query = function query(subject, predicate, object) {
-            return Query(endpoint, subject, predicate, object)
+        this.Query = function query(subject, predicate, object, page) {
+            if (page) {
+                return Query(endpoint, subject, predicate, object, page)
+                    .then(function (triples) { return triples.filter(useful) })
+            }
+
+            return call([], 1)
+                .then(function (triples) { return triples.filter(useful) })
+
+            function call(allTriples, page) {
+                return Query(endpoint, subject, predicate, object, page)
+                    .then(function (triples) {
+                        // http://www.w3.org/ns/hydra/core#nextPage
+                        if (!triples.some(hasNextPage)) {
+                            return allTriples.concat(triples)
+                        }
+
+                        return call(allTriples.concat(triples), page + 1)
+
+                        function hasNextPage(triple) {
+                            const np = "<http://www.w3.org/ns/hydra/core#nextPage>"
+                            return triple.Predicate === np
+                        }
+                    })
+            }
         }
 
         /** Queries the TPF server for the entity with `iri`, if not cached. */
@@ -64,7 +166,7 @@ var tpf = (function module() {
                 return Promise.resolve(cache[iri].triples)
             }
 
-            return Query(endpoint, iri)
+            return self.Query(iri)
                 .then(function (triples) {
                     cache[iri] = {
                         triples: triples,
@@ -134,13 +236,15 @@ var tpf = (function module() {
      * @param {string} subject
      * @param {string} predicate
      * @param {string} object
+     * @param {number} page
      * @returns {Promise<{Subject: string, Object: string, Predicate: string}>}
      */
-    function Query(endpoint, subject, predicate, object) {
+    function Query(endpoint, subject, predicate, object, page) {
         const criteria = {
             subject: subject || "",
             predicate: predicate || "",
             object: object || "",
+            page: page || 1,
         }
 
         const headers = {
@@ -156,7 +260,6 @@ var tpf = (function module() {
         return fetch(url, options)
             .then(function (data) { return data.text() })
             .then(ParseTriples)
-            .then(function (triples) { return triples.filter(useful) })
     }
 
     /** Removes the surrounding double-quotation marks from a string. */
@@ -170,9 +273,11 @@ var tpf = (function module() {
             return str
         }
 
+        const suffix = "^^<http://www.w3.org/1999/02/22-rdf-syntax-ns#langString>"
+        str = str.replace(suffix, '')
+        // Chop of the language tag (example: "Hi"@en-US => Hi)
+        str = str.substring(0, str.lastIndexOf('"') + 1)
         return str
-            .replace('^^<http://www.w3.org/1999/02/22-rdf-syntax-ns#langString>', '')
-            .slice(1, -1)
     }
 
     /** Encodes the individual parts of a query string to make it URI safe. */
