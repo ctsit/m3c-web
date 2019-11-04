@@ -51,6 +51,16 @@
             padding: 0.1em 1em;
             text-align: left;
         }
+
+        .citation {
+            font-size: smaller;
+        }
+
+        .publication .year,
+        .publication .authors {
+            display: inline-block;
+            padding-right: 0.5em;
+        }
     </style>
 </head>
 
@@ -154,11 +164,19 @@
                 <ol class="results">
                     <!-- Templates aren't visible, but their clones are filled out with real data. -->
                     <li class="publication template">
-                        <a href="#" class="name link"
-                            target="_blank" rel="noopener noreferrer"></a>
-                        <i class="fas fa-external-link-alt"></i>
-                        <span class="year"></span>
+                        <div>
+                            <a href="#" class="name link"
+                                target="_blank" rel="noopener noreferrer"></a>
+                            <i class="fas fa-external-link-alt"></i>
+                        </div>
+                        <div class="year"></div>
+                        <i class="fas fa-users" aria-label="Authors"></i>
                         <div class="authors"></div>
+                        <a href="#" class="cite">
+                            <i class="fas fa-quote-right" aria-hidden="true"></i>
+                            Cite
+                        </a>
+                        <div class="citation hidden"></div>
                     </li>
                 </ol>
             </div>
@@ -192,7 +210,7 @@
             const template = root.querySelector("li.publication.template")
 
             // Keep the results sorted.
-            const sorted = ui.SortedList(results, 1, sortByName)
+            const sorted = ui.SortedList(results, -1, sortByYear)
             ctrlReverse.addEventListener("click", onCtrlReverseClick)
 
             ui.SortedList(facets.querySelector(".published ul"), -1, sortByName)
@@ -206,6 +224,9 @@
                 publications: [],
                 names: {},        // entity IRI => label string
                 authors: {},
+                years: {},
+                citations: {},
+
             }
 
             const promises = [
@@ -213,6 +234,7 @@
                 entity.Names(client),
                 entity.Authorships(client),
                 entity.PublicationYears(client),
+                entity.Citations(client),
             ]
 
             Promise.all(promises)
@@ -221,6 +243,7 @@
                     data.names = results[1]
                     data.authors = {}
                     data.years = results[3]
+                    data.citations = results[4]
 
                     // authorship IRI => list of author and pub
                     const authorships = results[2]
@@ -283,10 +306,10 @@
             const filters = {
                 published: function published(selected, li) {
                     const year = li.querySelector(".year")
-                    return selected.indexOf(year.innerText) !== -1
+                    return selected.indexOf(year.textContent) !== -1
                 },
                 author: function author(selected, li) {
-                    const authors = li.querySelector(".authors").innerText
+                    const authors = li.querySelector(".authors").textContent
                     for (var i = 0; i < selected.length; i++) {
                         if (authors.indexOf(selected[i]) !== -1) {
                             return true
@@ -347,6 +370,7 @@
                 })
 
                 const published = data.years[publicationIRI]
+                const citation = data.citations[publicationIRI]
 
                 const bindings = {
                     link: {
@@ -354,10 +378,23 @@
                     },
                     name: parseVIVOString(data.names[publicationIRI]),
                     year: published ? published : null,
-                    authors: authors ? authors.join(", ") : ""
+                    authors: authors ? authors.join(", ") : "",
+                    citation: citation ? parseVIVOString(citation) : ""
                 }
 
                 const li = ui.Render(template, bindings)
+
+                const cite = li.querySelector(".cite")
+                if (!citation) {
+                    cite.className += " hidden"
+                } else {
+                    cite.addEventListener("click", function (click) {
+                        click.preventDefault()
+                        cite.className += " hidden"
+                        const c = li.querySelector(".citation")
+                        c.className = c.className.replace("hidden", "")
+                    })
+                }
 
                 for (var i = 0; i < authors.length; i++) {
                     facetsManager.Increment('author', authors[i], authors[i])
@@ -385,6 +422,18 @@
             function sortByName(li) {
                 const name = li.querySelector(".name").innerText.toUpperCase()
                 return name
+            }
+
+            /**
+             * Extract the name of a list item; used for sorting.
+             * @param {HTMLLIElement} li
+             */
+            function sortByYear(li) {
+                const year = li.querySelector(".year")
+                if (!year || !year.innerText) {
+                    return "0"
+                }
+                return year.innerText
             }
 
             /**
