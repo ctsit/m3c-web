@@ -1,40 +1,24 @@
 Metabolomics Consortium Coordinating Center (M3C) Web Frontend
 ==============================================================
 
-Web frontend for the M3C People Portal.
+Web frontend for the M3C People Portal: https://people.metabolomics.info
+
 
 Quickstart
 ----------
 
-_Note: since there are no public releases yet, you must be on the University of
-Florida network to view anything._
+Open the `index.html` file. Set the `endpoint` URL parameter to your TPF
+endpoint:
 
-Open the `person.html` page in your browser and change the URL to:
-
-    person.html?iri=https://vivo.metabolomics.info/individual/n007&endpoint=http://stage.vivo.metabolomics.info/tpf/core
-
-
-Screenshots
------------
-
-*Screenshot of Dashboard*
-<img src="docs/01-dashboard.png" alt="Screenshot of Dashboard"></img>
-
-*Screenshot of People Lising*
-<img src="docs/02-people.png" alt="Screenshot of People Listing"></img>
-
-*Screenshot of Person Profile*
-<img src="docs/03-bond.png" alt="Screenshot of Person Profile"></img>
-
-*Screenshot of another Person Profile*
-<img src="docs/04-alec.png" alt="Screenshot of another Person Profile"></img>
+    https://people.metabolomics.info/index.html?endpoint=http://devbox:8888/tpf/core
 
 
 Contributing
 ------------
 
 _If you don't already have a code editor, we recommend [Visual Studio Code][].
-We use [JSDoc][] for documenting the code, which allows for nice features that aid in development such as autocompletion._
+We use [JSDoc][] for documenting the code, which allows for nice features that
+aid in development such as autocompletion._
 
 [JSDoc]: https://jsdoc.app/
 [Visual Studio Code]: https://code.visualstudio.com/
