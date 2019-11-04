@@ -186,6 +186,10 @@ var m3c = (function module() {
      * @param {string} iri  IRI of the entity.
      */
     function ProfileLink(type, iri) {
+        if (iri[0] === '<') {
+            iri = iri.slice(1,-1)
+        }
+
         var url = type + ".html?iri=" + encodeURIComponent(iri)
 
         const endpoint = params.get("endpoint")
