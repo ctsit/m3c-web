@@ -192,7 +192,7 @@ var entity = (function module() {
     function Publications(client) {
         return new Promise(function (resolve) {
             client
-                .List(bibo + "Document")
+                .List(bibo + "Article")
                 .Results(resolve)
         })
     }
