@@ -33,6 +33,10 @@
         .type a {
             font-size: larger;
         }
+
+        .hide {
+            display: none !important;
+        }
     </style>
 
 </head>
@@ -313,8 +317,10 @@
                 const template = ul.querySelector("li.template")
 
                 if (publications.length === 0) {
-                    ul.innerHTML = "<li><em>None</em></li>"
+                    ul.parentElement.classList.add("hide")
                     return
+                } else {
+                    ul.parentElement.classList.remove("hide")
                 }
 
                 publications.forEach(renderPublication)
@@ -370,8 +376,10 @@
                     const ul = root.querySelector(selector)
 
                     if (items.length === 0) {
-                        ul.innerHTML = "<li><em>None</em></li>"
+                        ul.parentElement.classList.add("hide")
                         return
+                    } else {
+                        ul.parentElement.classList.remove("hide")
                     }
 
                     items.forEach(renderItem)

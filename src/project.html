@@ -47,6 +47,10 @@
             margin-left: auto;
             margin-right: auto;
         }
+
+        .hide {
+            display: none !important;
+        }
     </style>
 
 </head>
@@ -271,8 +275,10 @@
                     const ul = root.querySelector(selector)
 
                     if (items.length === 0) {
-                        ul.innerHTML = "<li><em>None</em></li>"
+                        ul.parentElement.classList.add("hide")
                         return
+                    } else {
+                        ul.parentElement.classList.remove("hide")
                     }
 
                     items.forEach(renderItem)
@@ -289,8 +295,10 @@
                 const ul = root.querySelector("ul.datasets")
 
                 if (datasets.length === 0) {
-                    ul.innerHTML = "<li><em>None</em></li>"
+                    ul.parentElement.classList.add("hide")
                     return
+                } else {
+                    ul.parentElement.classList.remove("hide")
                 }
 
                 datasets.forEach(renderDataset)
@@ -391,8 +399,10 @@
                 const node = root.querySelector(".summary")
 
                 if (!summary) {
-                    node.innerHTML = "<em>None</em>"
+                    ul.parentElement.classList.add("hide")
                     return
+                } else {
+                    ul.parentElement.classList.remove("hide")
                 }
 
                 node.innerText = summary
