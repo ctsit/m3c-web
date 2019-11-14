@@ -399,10 +399,10 @@
                 const node = root.querySelector(".summary")
 
                 if (!summary) {
-                    ul.parentElement.classList.add("hide")
+                    node.parentElement.classList.add("hide")
                     return
                 } else {
-                    ul.parentElement.classList.remove("hide")
+                    node.parentElement.classList.remove("hide")
                 }
 
                 node.innerText = summary
