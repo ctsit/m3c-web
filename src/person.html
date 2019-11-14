@@ -102,6 +102,10 @@
         .hide {
             display: none !important;
         }
+
+        .hide-children > * {
+            display: none !important;
+        }
     </style>
 
 </head>
@@ -372,10 +376,14 @@
                     const ul = root.querySelector(selector)
 
                     if (items.length === 0) {
-                        ul.parentElement.classList.add("hide")
+                        if (ul.className.includes("people")) {
+                            ul.parentElement.classList.add("hide-children")
+                        } else {
+                            ul.parentElement.classList.add("hide")
+                        }
                         return
                     } else {
-                        ul.parentElement.classList.remove("hide")
+                        ul.parentElement.classList.remove(["hide", "hide-children"])
                     }
 
                     items.forEach(renderItem)

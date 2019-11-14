@@ -51,6 +51,12 @@
         .hide {
             display: none !important;
         }
+
+        .hide-vis {
+            visibility: hidden !important;
+            margin-bottom: 0 !important;
+            margin-top: 0 !important;
+        }
     </style>
 
 </head>
@@ -399,10 +405,10 @@
                 const node = root.querySelector(".summary")
 
                 if (!summary) {
-                    node.parentElement.classList.add("hide")
+                    node.parentElement.classList.add("hide-vis")
                     return
                 } else {
-                    node.parentElement.classList.remove("hide")
+                    node.parentElement.classList.remove("hide-vis")
                 }
 
                 node.innerText = summary

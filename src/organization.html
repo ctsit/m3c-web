@@ -37,6 +37,12 @@
         .hide {
             display: none !important;
         }
+
+        .hide-vis {
+            visibility: hidden !important;
+            margin-bottom: 0 !important;
+            margin-top: 0 !important;
+        }
     </style>
 
 </head>
@@ -376,10 +382,14 @@
                     const ul = root.querySelector(selector)
 
                     if (items.length === 0) {
-                        ul.parentElement.classList.add("hide")
+                        if (ul.className.includes("people")) {
+                            ul.parentElement.classList.add("hide-vis")
+                        } else {
+                            ul.parentElement.classList.add("hide")
+                        }
                         return
                     } else {
-                        ul.parentElement.classList.remove("hide")
+                        ul.parentElement.classList.remove(["hide", "hide-vis"])
                     }
 
                     items.forEach(renderItem)
