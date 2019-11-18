@@ -144,6 +144,27 @@ var ui = (function module() {
      * @param {Object.<string, any>} data
      */
     function Render(template, data) {
+        const elem = Build(template, data)
+        template.parentElement.appendChild(elem)
+        return elem
+    }
+
+    /**
+     * Clones template, fills it in with data, and returns it.
+     *
+     * Example:
+     *     <section>
+     *       <div class="template"><span class="name" /></div>
+     *     </section>
+     *
+     *   Build(document.querySelector(".template"), {name: "Hi"}) =>
+     *
+     *     <div><span class="name">Hi</span></div>
+     *
+     * @param {Node} template
+     * @param {Object.<string, any>} data
+     */
+    function Build(template, data) {
         const clone = template.cloneNode(true)
         clone.className = clone.className.replace("template", "")
 
@@ -196,7 +217,6 @@ var ui = (function module() {
             }
         }
 
-        template.parentElement.appendChild(clone)
         return clone
     }
 
@@ -333,6 +353,7 @@ var ui = (function module() {
         Facets: Facets,
         Render: Render,
         SortedList: SortedList,
+        Build: Build,
     }
 })()
 
