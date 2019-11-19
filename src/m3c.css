@@ -189,7 +189,7 @@ Blue #00529b */
 }
 
 header {
-    padding: 1em 2em 1em 2.3em;
+    padding: 1em 2em 0em 2.3em;
     background-color: white;
 
     display: flex;
@@ -277,6 +277,29 @@ header a:hover h2 {
 #menuToggle        i.fa-times { display: none; }
 #menuToggle.opened i.fa-times { display: unset; }
 #menuToggle.opened i.fa-bars { display: none; }
+
+@media only screen and (min-width: 890px) {
+    .sub-header, .sub-header-nav {
+        display: flex;
+        flex: 1;
+        padding: 0 2em 0 0;
+        margin: 0;
+        justify-content: flex-end;
+        /* background-color: orange; */
+    }
+    
+    .sub-header h2 {
+        padding: 0.8em;
+    }
+
+    div.sub-header {
+        background-color: #d2ebf3;
+        margin-left: -2.3em;
+        margin-right: -2em;
+        padding: 0;
+        width: auto;
+    }
+}
 
 .listing .page h1 {
     text-align: center;

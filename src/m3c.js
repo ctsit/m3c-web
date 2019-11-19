@@ -124,9 +124,15 @@ var m3c = (function module() {
         }
 
         /* Replace dashboard links */
-        const links = document.getElementsByClassName("dashboard-link")
-        for (var i = 0; i < links.length; i++) {
-            links[i].href = m3c.DashboardLink()
+        const dashboardLinks = document.getElementsByClassName("dashboard-link")
+        for (var i = 0; i < dashboardLinks.length; i++) {
+            dashboardLinks[i].href = m3c.DashboardLink()
+        }
+
+        /* Replace sub-header links */
+        const subHeaderLinks = document.getElementsByClassName("sub-header-link");
+        for (var i = 0; i < subHeaderLinks.length; i++) {
+            subHeaderLinks[i].href = m3c.ListingLink(subHeaderLinks[i].href.split(".")[0])
         }
 
         /* Listen for nav menu toggle */
@@ -144,20 +150,22 @@ var m3c = (function module() {
 
     function toggleMenu() {
         const menuToggle = document.getElementById("menuToggle")
-        const nav = document.querySelector("header nav")
+        const navs = document.querySelectorAll("header nav, header div")
 
-        if (!menuToggle || !nav) {
+        if (!menuToggle || !navs) {
             return
         }
 
-        if (nav.className.indexOf("opened") === -1) {
-            menuToggle.className = (menuToggle.className + " opened").trim()
-            nav.className = (nav.className + " opened").trim()
-            return
-        }
-
-        menuToggle.className = menuToggle.className.replace("opened", "").trim()
-        nav.className = nav.className.replace("opened", "").trim()
+        navs.forEach(function(nav) {
+            if (nav.className.indexOf("opened") === -1) {
+                menuToggle.className = (menuToggle.className + " opened").trim()
+                nav.className = (nav.className + " opened").trim()
+                return
+            }
+    
+            menuToggle.className = menuToggle.className.replace("opened", "").trim()
+            nav.className = nav.className.replace("opened", "").trim()
+        })
     }
 
     /**
