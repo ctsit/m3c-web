@@ -94,11 +94,6 @@ a:visited {
 /* Orange #bc581a
 Blue #00529b */
 
-#nameFilter{
-    width: 50%;
-    font-size: 1em;
-}
-
 .listing .facet {
     background-color: white;
     box-shadow: 3px 4px 5px gray;
@@ -462,6 +457,20 @@ footer p:last-of-type { text-align: right }
     }
 }
 
+#nameFilter {
+    width: 60%;
+    font-size: 1em;
+    border: none;
+    padding: 0 10px;
+    margin: 0;
+    height: 30px;
+    border-radius: 6px;
+}
+
+#nameFilter:focus {
+    outline: #00a9e0 auto 3px;
+}
+
 @media only screen and (max-width: 680px) {
 
     header h1 {
@@ -521,6 +530,11 @@ footer p:last-of-type { text-align: right }
         margin-bottom: 0.5em;
         padding-top: 0.25em;
         padding-bottom: 0.25em;
+    }
+
+    #nameFilter{
+        width: 90%;
+        font-size: 1em;
     }
 }
 
