@@ -107,7 +107,6 @@
                     <i class="fas fa-search"></i>
                     <input type="text" id="nameFilter" onkeyup="FilterResult()" placeholder="Search for tool">
                     <div class="count"></div>
-                    <a href="#" class="reverse">Reverse</a>
                 </div>
 
                 <div class="facets">
@@ -168,12 +167,10 @@
             const root = document.getElementById("listing")
             const results = root.querySelector(".results")
             const facets = root.querySelector(".facets")
-            const ctrlReverse = root.querySelector(".reverse")
             const template = root.querySelector("li.tool.template")
 
             // Keep the results sorted.
             const sorted = ui.SortedList(results, 1, sortByName)
-            ctrlReverse.addEventListener("click", onCtrlReverseClick)
 
             ui.SortedList(facets.querySelector(".tag ul"), -1, sortByCount)
 
@@ -239,15 +236,6 @@
 
             // Use facetsManager to dynamically increment the count of an option
             const facetsManager = ui.Facets(facets, results, filters)
-
-            /**
-             * Handle the onclick event of the Reverse link.
-             * @param {MouseEvent} clickEvent
-             */
-            function onCtrlReverseClick(clickEvent) {
-                clickEvent.preventDefault()
-                sorted.Reverse()
-            }
 
             /**
              * Extract the actual text from a VIVO string
