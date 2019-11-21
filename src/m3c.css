@@ -183,6 +183,11 @@ Blue #00529b */
     padding-right: 2%;
 }
 
+.prop-disclaimer {
+    display: block;
+    padding-right: unset;
+}
+
 .publications .disclaimer {
     display: block;
     padding-right: unset;
