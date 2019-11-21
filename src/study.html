@@ -40,6 +40,16 @@
         .mwb {
             font-size: smaller;
         }
+
+        .hide {
+            display: none !important;
+        }
+
+        .hide-vis {
+            visibility: hidden !important;
+            margin-bottom: 0 !important;
+            margin-top: 0 !important;
+        }
     </style>
 
 </head>
@@ -308,8 +318,10 @@
                     const ul = root.querySelector(selector)
 
                     if (items.length === 0) {
-                        ul.innerHTML = "<li><em>None</em></li>"
+                        ul.parentElement.classList.add("hide")
                         return
+                    } else {
+                        ul.parentElement.classList.remove("hide")
                     }
 
                     items.forEach(renderItem)
@@ -341,8 +353,10 @@
                 const ul = root.querySelector("ul.datasets")
 
                 if (datasets.length === 0) {
-                    ul.innerHTML = "<li><em>None</em></li>"
+                    ul.parentElement.classList.add("hide")
                     return
+                } else {
+                    ul.parentElement.classList.remove("hide")
                 }
 
                 datasets.forEach(renderDataset)
@@ -466,8 +480,10 @@
                 const node = root.querySelector("p.summary")
 
                 if (!summary) {
-                    node.innerHTML = "<em>None</em>"
+                    node.parentElement.classList.add("hide-vis")
                     return
+                } else {
+                    node.parentElement.classList.remove("hide-vis")
                 }
 
                 node.innerText = summary.replace(/\\"/g, '"')

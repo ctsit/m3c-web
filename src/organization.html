@@ -34,6 +34,16 @@
         .type a {
             font-size: larger;
         }
+
+        .hide {
+            display: none !important;
+        }
+
+        .hide-vis {
+            visibility: hidden !important;
+            margin-bottom: 0 !important;
+            margin-top: 0 !important;
+        }
     </style>
 
 </head>
@@ -334,8 +344,10 @@
                 const template = ul.querySelector("li.template")
 
                 if (publications.length === 0) {
-                    ul.innerHTML = "<li><em>None</em></li>"
+                    ul.parentElement.classList.add("hide")
                     return
+                } else {
+                    ul.parentElement.classList.remove("hide")
                 }
 
                 publications.forEach(renderPublication)
@@ -391,8 +403,14 @@
                     const ul = root.querySelector(selector)
 
                     if (items.length === 0) {
-                        ul.innerHTML = "<li><em>None</em></li>"
+                        if (ul.className.includes("people")) {
+                            ul.parentElement.classList.add("hide-vis")
+                        } else {
+                            ul.parentElement.classList.add("hide")
+                        }
                         return
+                    } else {
+                        ul.parentElement.classList.remove(["hide", "hide-vis"])
                     }
 
                     items.forEach(renderItem)

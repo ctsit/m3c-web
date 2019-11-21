@@ -42,6 +42,10 @@
             display: inline;
             padding-left: 0.25em;
         }
+
+        .hide {
+            display: none !important;
+        }
     </style>
 
 </head>
@@ -218,8 +222,10 @@
                     const ul = root.querySelector(selector)
 
                     if (items.length === 0) {
-                        ul.innerHTML = "<li><em>None</em></li>"
+                        ul.parentElement.classList.add("hide")
                         return
+                    } else {
+                        ul.parentElement.classList.remove("hide")
                     }
 
                     items.forEach(renderItem)

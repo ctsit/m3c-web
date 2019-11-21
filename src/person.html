@@ -98,6 +98,18 @@
                 padding-top: 0;
             }
         }
+
+        .hide {
+            display: none !important;
+        }
+
+        .hide-children {
+            margin-bottom: 0px !important;
+        }
+
+        .hide-children > * {
+            display: none !important;
+        }
     </style>
 
 </head>
@@ -393,8 +405,14 @@
                     const ul = root.querySelector(selector)
 
                     if (items.length === 0) {
-                        ul.innerHTML = "<li><em>None</em></li>"
+                        if (ul.className.includes("people")) {
+                            ul.parentElement.classList.add("hide-children")
+                        } else {
+                            ul.parentElement.classList.add("hide")
+                        }
                         return
+                    } else {
+                        ul.parentElement.classList.remove(["hide", "hide-children"])
                     }
 
                     items.forEach(renderItem)
@@ -411,8 +429,10 @@
                 const ul = root.querySelector("ul.datasets")
 
                 if (datasets.length === 0) {
-                    ul.innerHTML = "<li><em>None</em></li>"
+                    ul.parentElement.classList.add("hide")
                     return
+                } else {
+                    ul.parentElement.classList.remove("hide")
                 }
 
                 datasets.forEach(renderDataset)
@@ -524,8 +544,10 @@
                 const template = ul.querySelector("li.template")
 
                 if (publications.length === 0) {
-                    ul.innerHTML = "<li><em>None</em></li>"
+                    ul.parentElement.classList.add("hide")
                     return
+                } else {
+                    ul.parentElement.classList.remove("hide")
                 }
 
                 publications.forEach(renderPublication)
