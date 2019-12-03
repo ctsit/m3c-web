@@ -278,28 +278,29 @@ header a:hover h2 {
 #menuToggle.opened i.fa-times { display: unset; }
 #menuToggle.opened i.fa-bars { display: none; }
 
-@media only screen and (min-width: 890px) {
-    .sub-header, .sub-header-nav {
-        display: flex;
-        flex: 1;
-        padding: 0 2em 0 0;
-        margin: 0;
-        justify-content: flex-end;
-        /* background-color: orange; */
-    }
-    
+@media only screen and (min-width: 889px) {
     .sub-header h2 {
         padding: 0.8em;
     }
-
     div.sub-header {
-        background-color: #d2ebf3;
-        margin-left: -2.3em;
-        margin-right: -2em;
-        padding: 0;
-        width: auto;
+        margin-top: 1em;
+        flex-basis: 100%;
+        text-align: right;
+        padding: 0 0.5em;
     }
 }
+
+@media only screen and (min-width: 681px) {
+    .sub-header a.current h2 {
+        background-color: #eaeaea;
+        color: black;
+    }
+    div.sub-header {
+        background-color: #d2ebf3;
+    }
+}
+
+
 
 .listing .page h1 {
     text-align: center;
@@ -476,11 +477,14 @@ footer p:last-of-type { text-align: right }
 
     header nav.opened {
         display: block;
-        padding-top: 1em;
     }
 }
 
 @media only screen and (max-width: 680px) {
+
+    header nav.opened {
+        padding-top: 1em;
+    }
 
     header h1 {
         font-size: 1.9em;
