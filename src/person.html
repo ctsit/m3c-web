@@ -74,7 +74,15 @@
         }
 
         .info-frame ul {
-            padding-left: 10px;
+            padding-left: 1.3em;
+        }
+
+        li.institute {
+            padding-bottom: 0.8em;
+        }
+
+        ul.organizations {
+            margin-top: 0;
         }
 
         @media only screen and (max-width: 450px) {
@@ -465,7 +473,7 @@
 
                 // The null value holds the top level organizations.
                 lookup.set(null, {children: [], parent: {}})
-                
+
                 // https://stackoverflow.com/questions/444296/how-to-efficiently-build-a-tree-from-a-flat-structure
                 organizations.forEach(function (org) { lookup.set(org, {children: [], parent: {}, uri: org}) })
                 lookup.forEach(function (value, key, _map) {
@@ -498,7 +506,7 @@
 
                         function renderOrganization(orgObj, parentElement) {
                             let organizationIRI = orgObj.uri
-                            
+
                             organizationIRI = organizationIRI.slice(1, -1) // strip < >
                             entity.Organization(client, organizationIRI).Type(render)
 
