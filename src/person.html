@@ -73,6 +73,18 @@
             margin-bottom: 0.5em;
         }
 
+        .info-frame ul {
+            padding-left: 1.3em;
+        }
+
+        li.institute {
+            padding-bottom: 0.8em;
+        }
+
+        ul.organizations {
+            margin-top: 0;
+        }
+
         @media only screen and (max-width: 450px) {
             div.photo-frame,
             div.info-frame {
@@ -87,9 +99,15 @@
 
             .info-frame ul {
                 text-align: left;
+                padding-left: unset;
             }
+
             .info-frame li {
                 padding-bottom: 0.75em;
+            }
+
+            .info-frame li ul {
+                padding-top: 0.75em;
             }
 
             section.people {
@@ -517,35 +535,72 @@
             function renderOrganizations(organizations) {
                 const list = root.querySelector("ul.organizations")
                 const template = list.querySelector("li.template")
+                const lookup = new Map();
+                const promises = []
 
-                organizations.forEach(renderOrganization)
+                // The null value holds the top level organizations.
+                lookup.set(null, {children: [], parent: {}})
 
-                const icons = {
-                    "Institute": "city",
-                    "Department": "building",
-                    "Laboratory": "flask",
-                    "Organization": "building",
-                }
+                // https://stackoverflow.com/questions/444296/how-to-efficiently-build-a-tree-from-a-flat-structure
+                organizations.forEach(function (org) { lookup.set(org, {children: [], parent: {}, uri: org}) })
+                lookup.forEach(function (value, key, _map) {
+                    if (key) {
+                        let prom = entity.Organization(client, key.slice(1, -1)).Parent(function (parent) {
+                            if (lookup.has(parent)) {
+                                const parentOrg = lookup.get(parent)
+                                value.parent = parentOrg
+                                parentOrg.children.push(value)
+                            } else {
+                                const parentOrg = lookup.get(null)
+                                parentOrg.children.push(value)
+                            }
+                        })
+                        promises.push(prom)
+                    }
+                })
 
-                function renderOrganization(organizationIRI) {
-                    organizationIRI = organizationIRI.slice(1, -1) // strip < >
-                    entity.Organization(client, organizationIRI).Type(render)
+                Promise.all(promises)
+                    .then(function() {
+                        const rootElement = root.querySelector("ul.organizations")
+                        lookup.get(null).children.forEach((inst) => renderOrganization(inst, rootElement))
 
-                    function render(type) {
-                        const bindings = {
-                            name: entity.Name.bind(null, client, organizationIRI),
-                            link: {
-                                href: m3c.ProfileLink("organization", organizationIRI),
-                            },
-                            fas: {
-                                className: "fas fa-fw fa-" + icons[type]
-                            },
+                        const icons = {
+                            "Institute": "city",
+                            "Department": "building",
+                            "Laboratory": "flask",
+                            "Organization": "building",
                         }
 
-                        const li = ui.Render(template, bindings)
-                        li.className = (li.className + " " + type.toLowerCase()).trim()
-                    }
-                }
+                        function renderOrganization(orgObj, parentElement) {
+                            let organizationIRI = orgObj.uri
+
+                            organizationIRI = organizationIRI.slice(1, -1) // strip < >
+                            entity.Organization(client, organizationIRI).Type(render)
+
+                            function render(type) {
+                                const bindings = {
+                                    name: entity.Name.bind(null, client, organizationIRI),
+                                    link: {
+                                        href: m3c.ProfileLink("organization", organizationIRI),
+                                    },
+                                    fas: {
+                                        className: "fas fa-fw fa-" + icons[type]
+                                    },
+                                }
+
+                                const li = ui.Build(template, bindings)
+                                li.className = (li.className + " " + type.toLowerCase()).trim()
+                                parentElement.appendChild(li)
+
+                                // Recursively render the children of the current element
+                                if (lookup.has(orgObj.uri) && lookup.get(orgObj.uri).children.length > 0) {
+                                    const childUl = document.createElement('ul')
+                                    li.appendChild(childUl)
+                                    lookup.get(orgObj.uri).children.forEach((org) => renderOrganization(org, childUl))
+                                }
+                            }
+                        }
+                    })
             }
 
             function renderPhones(phones) {
