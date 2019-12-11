@@ -132,7 +132,9 @@ var m3c = (function module() {
         /* Replace sub-header links */
         const subHeaderLinks = document.getElementsByClassName("sub-header-link");
         for (var i = 0; i < subHeaderLinks.length; i++) {
-            subHeaderLinks[i].href = m3c.ListingLink(subHeaderLinks[i].href.split(".")[0])
+            const pathParts = subHeaderLinks[i].pathname.split("/")
+            const filename = pathParts[pathParts.length - 1]
+            subHeaderLinks[i].href = m3c.ListingLink(filename.replace(".html", ""))
         }
 
         /* Listen for nav menu toggle */
@@ -162,7 +164,7 @@ var m3c = (function module() {
                 nav.className = (nav.className + " opened").trim()
                 return
             }
-    
+
             menuToggle.className = menuToggle.className.replace("opened", "").trim()
             nav.className = nav.className.replace("opened", "").trim()
         })
