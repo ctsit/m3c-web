@@ -1,6 +1,29 @@
 Changelog
 =========
 
+# 0.2.0 - 2019-12-11
+
+Implemented requested style changes and bug fixes.
+
+ * Increase search bar size. (Hunter Jarrell)
+ * Make search bar style more consistent (Taeber Rapczak)
+ * Fix search bar count bug (Taeber Rapczak)
+ * Fix Tool showing as current for non-Tool pages (Taeber Rapczak)
+ * Add attribution under each section for display pages. (Hunter Jarrell)
+ * Move count on People Listing above spinner (Taeber Rapczak)
+ * Add sub-header linking to each listing page. (Hunter Jarrell)
+ * Tweak the sub-header menu (Taeber Rapczak)
+ * Change organizations on person page to nest organizations. (Hunter Jarrell)
+ * Add more padding for nested organizations (Taeber Rapczak)
+ * Fix spacing on person page when top line hidden (Hunter Jarrell)
+ * Fix hidden blank category spacing. (Hunter Jarrell)
+ * Fix typo in hiding blank categories for projects (Hunter Jarrell)
+ * Remove the reverse button from listing pages. (Hunter Jarrell)
+ * Move counts on listing pages to under title. (Hunter Jarrell)
+ * Hide all attributes that are None (Hunter Jarrell)
+ * Fix spacing under Organization name. (Hunter Jarrell)
+
+
 # 0.1.0 - 2019-11-04
 
 Initial release.
