@@ -1,6 +1,11 @@
 Changelog
 =========
 
+# 0.2.1 - 2019-12-11
+
+Fix sub-header menu link rewrite bug (Taeber Rapczak)
+
+
 # 0.2.0 - 2019-12-11
 
 Implemented requested style changes and bug fixes.
