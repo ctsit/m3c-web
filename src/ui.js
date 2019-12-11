@@ -18,11 +18,31 @@ var ui = (function module() {
      *        filters
      *        Filter functions that are called whenever there is a change to the
      *        selected facets. There should be one per facet.
+     * @param {HTMLInputElement} [search] Search/Filter bar
      */
-    function Facets(facets, results, filters) {
+    function Facets(facets, results, filters, search) {
         const facetElements = facets.querySelectorAll(".facet")
         for (var i = 0; i < facetElements.length; i++) {
             addFacetEventListeners(facetElements[i])
+        }
+
+        if (search) {
+            search.addEventListener("keyup", handleSearchKeyup)
+        }
+
+        /**
+         * Updates the results based on a change in the search bar.
+         *
+         * @param {KeyboardEvent} keyup
+         */
+        function handleSearchKeyup(keyup) {
+            if (keyup.isComposing || keyup.keyCode === 229) {
+                // Ignore IME composition
+                // @see https://developer.mozilla.org/en-US/docs/Web/API/Document/keyup_event
+                return
+            }
+
+            onFacetClick()
         }
 
         /**
@@ -100,10 +120,23 @@ var ui = (function module() {
                 const item = items[i]
 
                 if (remainingSets.every(isItemInSubset)) {
-                    // Item is in every set of remaining items.
-                    item.className = item.className.replace("hidden", "")
-                    item.className = item.className.trim()
-                    continue
+                    var filteredBySearch = false
+
+                    // Ensure that the search text is somewhere in the item.
+                    if (search && search.value && search.value.trim()) {
+                        const searchText = search.value.trim().toUpperCase()
+                        const itemText = item.textContent || item.innerText
+                        if (itemText.toUpperCase().indexOf(searchText) === -1) {
+                            filteredBySearch = true
+                        }
+                    }
+
+                    if (!filteredBySearch) {
+                        // Item is in every set of remaining items.
+                        item.className = item.className.replace("hidden", "")
+                        item.className = item.className.trim()
+                        continue
+                    }
                 }
 
                 // Item was filtered out of all facets, hide it if necessary.

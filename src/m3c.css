@@ -480,7 +480,7 @@ footer p:last-of-type { text-align: right }
     }
 }
 
-#nameFilter {
+#searchFilter {
     width: 60%;
     font-size: 1em;
     border: none;
@@ -490,7 +490,7 @@ footer p:last-of-type { text-align: right }
     border-radius: 6px;
 }
 
-#nameFilter:focus {
+#searchFilter:focus {
     outline: #00a9e0 auto 3px;
 }
 
@@ -559,7 +559,7 @@ footer p:last-of-type { text-align: right }
         padding-bottom: 0.25em;
     }
 
-    #nameFilter{
+    #searchFilter {
         width: 90%;
         font-size: 1em;
     }
