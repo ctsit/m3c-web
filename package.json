@@ -4,6 +4,6 @@
         "test": "npx mocha --recursive ./tests/*_test.js"
     },
     "devDependencies": {
-        "mocha": "^6.1.4"
+        "mocha": "^6.2.2"
     }
 }
