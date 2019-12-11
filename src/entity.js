@@ -495,11 +495,14 @@ var entity = (function module() {
         }
 
         this.Parent = function Parent(returnParent) {
-            return new Promise(function () {
+            return new Promise(function (resolve) {
                 client
                     .Entity(iri)
                     .Link(base, "hasParent")
-                    .Single(decodeString(returnParent))
+                    .Single(decodeString(function (data) {
+                        returnParent(data)
+                        resolve(data)
+                    }))
             })
         }
 

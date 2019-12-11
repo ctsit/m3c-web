@@ -23,28 +23,6 @@
     <script crossorigin src="https://unpkg.com/whatwg-fetch@3.0.0/dist/fetch.umd.js"></script>
     <!-- URL polyfill to support Internet Explorer -->
     <script crossorigin src="https://unpkg.com/@ungap/url-search-params@0.1.2/min.js"></script>
-    <!-- Filters list using search bar -->
-    <script>
-        function FilterResult() {
-            var input, filter, ol, li, a, i, txtValue;
-            input = document.getElementById('nameFilter');
-            filter = input.value.toUpperCase();
-            ol = document.getElementsByClassName('results');
-            li = document.getElementsByClassName('tool');
-
-            // Loop throught list items and hide those that don't match
-            for (i = 0; i < li.length; i++) {
-                a = li[i].getElementsByTagName("a")[0];
-                txtValue = a.textContent || a.innerText;
-                if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                    li[i].style.display = "";
-                } else {
-                    li[i].style.display = "none";
-                }
-            }
-
-        }
-    </script>
 
     <style>
         .tags div {
@@ -96,18 +74,40 @@
                     <h2>NIH Consortium</h2>
                 </a>
             </nav>
+            <div class="sub-header">
+                <nav class="sub-header">
+                    <a class="sub-header-link" href="people.html">
+                        <h2>People</h2>
+                    </a>
+                    <a class="sub-header-link" href="publications.html">
+                        <h2>Publications</h2>
+                    </a>
+                    <a class="sub-header-link" href="projects.html">
+                        <h2>Projects</h2>
+                    </a>
+                    <a class="sub-header-link" href="studies.html">
+                        <h2>Studies</h2>
+                    </a>
+                    <a class="sub-header-link" href="organizations.html">
+                        <h2>Organizations</h2>
+                    </a>
+                    <a class="sub-header-link current" href="tools.html">
+                        <h2>Tools</h2>
+                    </a>
+                </nav>
+            </div>
         </header>
 
         <div id="content" class="page">
             <h1>Tools</h1>
             <div id="listing">
                 <div class="controls">
-                    <div class="fa fa-spinner fa-spin hidden"></div>
-                    <br>
-                    <i class="fas fa-search"></i>
-                    <input type="text" id="nameFilter" onkeyup="FilterResult()" placeholder="Search for tool">
                     <div class="count"></div>
-                    <a href="#" class="reverse">Reverse</a>
+                    <div class="fa fa-spinner fa-spin hidden"></div>
+                    <div class="search">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchFilter" placeholder="Search">
+                    </div>
                 </div>
 
                 <div class="facets">
@@ -168,17 +168,13 @@
             const root = document.getElementById("listing")
             const results = root.querySelector(".results")
             const facets = root.querySelector(".facets")
-            const ctrlReverse = root.querySelector(".reverse")
+            const search = root.querySelector("#searchFilter")
             const template = root.querySelector("li.tool.template")
 
             // Keep the results sorted.
             const sorted = ui.SortedList(results, 1, sortByName)
-            ctrlReverse.addEventListener("click", onCtrlReverseClick)
 
             ui.SortedList(facets.querySelector(".tag ul"), -1, sortByCount)
-
-            // Filter results
-            document.getElementById("nameFilter").addEventListener("keyup", filterResult)
 
             // Query the TPF server for all tools and some related data.
             const data = {
@@ -209,14 +205,12 @@
 
                     const checkboxes = document.querySelectorAll(".facet input")
                     for (var i = 0; i < checkboxes.length; i++) {
-                        checkboxes[i].addEventListener("click", updateCount)
+                        checkboxes[i].addEventListener("click", updateResultCount)
                     }
 
-                    function updateCount() {
-                        const visible = document.querySelectorAll(".results li:not(.hidden):not(.template)")
-                        document.querySelector(".controls .count").innerText = visible.length
-                    }
-                    updateCount()
+                    search.addEventListener("keyup", updateResultCount)
+
+                    updateResultCount()
                 })
 
             // Setup the filters used by each facets. Each item should be a
@@ -238,16 +232,7 @@
             }
 
             // Use facetsManager to dynamically increment the count of an option
-            const facetsManager = ui.Facets(facets, results, filters)
-
-            /**
-             * Handle the onclick event of the Reverse link.
-             * @param {MouseEvent} clickEvent
-             */
-            function onCtrlReverseClick(clickEvent) {
-                clickEvent.preventDefault()
-                sorted.Reverse()
-            }
+            const facetsManager = ui.Facets(facets, results, filters, search)
 
             /**
              * Extract the actual text from a VIVO string
@@ -305,30 +290,9 @@
                 return name
             }
 
-            /**
-            * Filter list according to search bar
-            */
-            function filterResult() {
-                var input, filter, ol, li, a, i, txtValue;
-                input = document.getElementById('nameFilter');
-                filter = input.value.toUpperCase();
-                ol = document.getElementsByClassName('results');
-                li = document.getElementsByClassName('tool');
-
-                // Loop throught list items and hide those that don't match
-                var count = 0;
-                for (i = 0; i < li.length; i++) {
-                    a = li[i].getElementsByTagName("a")[0];
-                    txtValue = a.textContent || a.innerText;
-                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                        li[i].style.display = "";
-                        count++;
-                    } else {
-                        li[i].style.display = "none";
-                    }
-                }
-                document.querySelector(".controls .count").innerText = String(count);
-
+            function updateResultCount() {
+                const visible = document.querySelectorAll(".results li:not(.hidden):not(.template)")
+                document.querySelector(".controls .count").innerText = visible.length
             }
         </script>
     </div>

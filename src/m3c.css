@@ -94,11 +94,6 @@ a:visited {
 /* Orange #bc581a
 Blue #00529b */
 
-#nameFilter{
-    width: 50%;
-    font-size: 1em;
-}
-
 .listing .facet {
     background-color: white;
     box-shadow: 3px 4px 5px gray;
@@ -183,13 +178,18 @@ Blue #00529b */
     padding-right: 2%;
 }
 
+.prop-disclaimer {
+    display: block;
+    padding-right: unset;
+}
+
 .publications .disclaimer {
     display: block;
     padding-right: unset;
 }
 
 header {
-    padding: 1em 2em 1em 2.3em;
+    padding: 1em 2em 0em 2.3em;
     background-color: white;
 
     display: flex;
@@ -277,6 +277,30 @@ header a:hover h2 {
 #menuToggle        i.fa-times { display: none; }
 #menuToggle.opened i.fa-times { display: unset; }
 #menuToggle.opened i.fa-bars { display: none; }
+
+@media only screen and (min-width: 889px) {
+    .sub-header h2 {
+        padding: 0.8em;
+    }
+    div.sub-header {
+        margin-top: 1em;
+        flex-basis: 100%;
+        text-align: right;
+        padding: 0 0.5em;
+    }
+}
+
+@media only screen and (min-width: 681px) {
+    .sub-header a.current h2 {
+        background-color: #eaeaea;
+        color: black;
+    }
+    div.sub-header {
+        background-color: #d2ebf3;
+    }
+}
+
+
 
 .listing .page h1 {
     text-align: center;
@@ -453,11 +477,55 @@ footer p:last-of-type { text-align: right }
 
     header nav.opened {
         display: block;
-        padding-top: 1em;
     }
 }
 
+.search {
+    text-align: left;
+    background-color: white;
+    color: gray;
+    width: 75%;
+    margin: auto;
+    margin-top: 0.5em;
+    display: flex;
+}
+
+.search:hover {
+    color: black;
+    box-shadow: 3px 4px 5px gray;
+}
+
+.search:focus-within {
+    color: black;
+    box-shadow: 3px 4px 5px gray;
+    outline: auto;
+}
+
+.search i.fa-search {
+    padding-left: 1em;
+    align-self: center;
+}
+
+#searchFilter {
+    border: none;
+    padding: 1em 0.5em;
+    font-size: larger;
+    width: 100%;
+}
+
+#searchFilter:focus {
+    outline: none;
+}
+
 @media only screen and (max-width: 680px) {
+
+    header {
+        padding-bottom: 1em;
+    }
+
+    header nav.opened {
+        padding-top: 1em;
+    }
 
     header h1 {
         font-size: 1.9em;
@@ -516,6 +584,11 @@ footer p:last-of-type { text-align: right }
         margin-bottom: 0.5em;
         padding-top: 0.25em;
         padding-bottom: 0.25em;
+    }
+
+    .search {
+        width: 100%;
+        font-size: smaller;
     }
 }
 

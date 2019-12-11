@@ -40,6 +40,16 @@
         .mwb {
             font-size: smaller;
         }
+
+        .hide {
+            display: none !important;
+        }
+
+        .hide-vis {
+            visibility: hidden !important;
+            margin-bottom: 0 !important;
+            margin-top: 0 !important;
+        }
     </style>
 
 </head>
@@ -81,6 +91,28 @@
                     <h2>NIH Consortium</h2>
                 </a>
             </nav>
+            <div class="sub-header">
+                <nav class="sub-header">
+                    <a class="sub-header-link" href="people.html">
+                        <h2>People</h2>
+                    </a>
+                    <a class="sub-header-link" href="publications.html">
+                        <h2>Publications</h2>
+                    </a>
+                    <a class="sub-header-link" href="projects.html">
+                        <h2>Projects</h2>
+                    </a>
+                    <a class="sub-header-link current" href="studies.html">
+                        <h2>Studies</h2>
+                    </a>
+                    <a class="sub-header-link" href="organizations.html">
+                        <h2>Organizations</h2>
+                    </a>
+                    <a class="sub-header-link" href="tools.html">
+                        <h2>Tools</h2>
+                    </a>
+                </nav>
+            </div>
         </header>
 
         <div id="content" class="page">
@@ -108,13 +140,25 @@
                 </div>
 
                 <section class="summary">
-                    <h2>Summary</h2>
+                    <h2>
+                        Summary
+                        <span class="disclaimer prop-disclaimer">
+                            Data from the
+                            <a href="https://www.metabolomicsworkbench.org">Metabolomics Workbench</a>
+                            <i class="fas fa-external-link-alt"></i>
+                        </span>
+                    </h2>
                     <p class="summary"></p>
                 </section>
 
                 <section class="organizations">
                     <h2 class="organizations">
                         <a href="organizations.html">Organizations</a>
+                        <span class="disclaimer prop-disclaimer">
+                            Data from the
+                            <a href="https://www.metabolomicsworkbench.org">Metabolomics Workbench</a>
+                            <i class="fas fa-external-link-alt"></i>
+                        </span>
                     </h2>
                     <ul class="organizations">
                         <li>
@@ -135,6 +179,11 @@
                 <section class="projects">
                     <h2 class="projects">
                         <a href="project.html">Project</a>
+                        <span class="disclaimer prop-disclaimer">
+                            Data from the
+                            <a href="https://www.metabolomicsworkbench.org">Metabolomics Workbench</a>
+                            <i class="fas fa-external-link-alt"></i>
+                        </span>
                     </h2>
                     <ul class="projects">
                         <li><a class="project"></a></li>
@@ -144,6 +193,11 @@
                 <section class="people">
                     <h2 class="people">
                         <a href="people.html">People</a>
+                        <span class="disclaimer prop-disclaimer">
+                            Data from the
+                            <a href="https://www.metabolomicsworkbench.org">Metabolomics Workbench</a>
+                            <i class="fas fa-external-link-alt"></i>
+                        </span>
                     </h2>
                     <ul class="people"></ul>
                 </section>
@@ -151,6 +205,11 @@
                 <section class="studies">
                     <h2 class="studies">
                         <a href="studies.html">Related Studies</a>
+                        <span class="disclaimer prop-disclaimer">
+                            Data from the
+                            <a href="https://www.metabolomicsworkbench.org">Metabolomics Workbench</a>
+                            <i class="fas fa-external-link-alt"></i>
+                        </span>
                     </h2>
                     <ul class="studies"></ul>
                 </section>
@@ -163,6 +222,11 @@
                 <section class="datasets">
                     <h2 class="datasets">
                         <a href="datasets.html">Datasets</a>
+                        <span class="disclaimer prop-disclaimer">
+                            Data from the
+                            <a href="https://www.metabolomicsworkbench.org">Metabolomics Workbench</a>
+                            <i class="fas fa-external-link-alt"></i>
+                        </span>
                     </h2>
                     <ul class="datasets">
                         <li class="template">
@@ -181,7 +245,7 @@
             <p class="disclaimer">
                 Data from the
                 <a href="https://www.metabolomicsworkbench.org">Metabolomics Workbench</a>
-                <i class="fas fa-external-link-alt"></i>.
+                <i class="fas fa-external-link-alt"></i>
             </p>
         </div>
 
@@ -276,8 +340,10 @@
                     const ul = root.querySelector(selector)
 
                     if (items.length === 0) {
-                        ul.innerHTML = "<li><em>None</em></li>"
+                        ul.parentElement.classList.add("hide")
                         return
+                    } else {
+                        ul.parentElement.classList.remove("hide")
                     }
 
                     items.forEach(renderItem)
@@ -309,8 +375,10 @@
                 const ul = root.querySelector("ul.datasets")
 
                 if (datasets.length === 0) {
-                    ul.innerHTML = "<li><em>None</em></li>"
+                    ul.parentElement.classList.add("hide")
                     return
+                } else {
+                    ul.parentElement.classList.remove("hide")
                 }
 
                 datasets.forEach(renderDataset)
@@ -434,8 +502,10 @@
                 const node = root.querySelector("p.summary")
 
                 if (!summary) {
-                    node.innerHTML = "<em>None</em>"
+                    node.parentElement.classList.add("hide-vis")
                     return
+                } else {
+                    node.parentElement.classList.remove("hide-vis")
                 }
 
                 node.innerText = summary.replace(/\\"/g, '"')
