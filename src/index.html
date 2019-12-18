@@ -465,25 +465,16 @@
                         <a href="projects.html" class="widget-title">
                             <h3>Latest Projects</h3>
                         </a>
-                        <ol>
+                        <ol class="results">
                             <!-- Create an ordered list of the 10 most recent projects using the TPF list in projects.html (data.projects = results[0]) -->
-                            <li></li>
+                            <li class="project template">
+                                    <a href="#" class="link">
+                                        <div class="name"></div>
+                                    </a>
+                                    <div class="organization"></div>
+                                </li>
                         </ol>
                     </div>
-                <div class="about">
-                    <h3>About</h3>
-                    <p>
-                        The Metabolomics Info People Portal is a service of the
-                        <a href="https://metabolomics.info">Metabolomics Consortium Coordinating Center</a>.
-                    </p>
-                    <p>
-                        Grant <a href="https://projectreporter.nih.gov/project_info_description.cfm?aid=9589555"
-                            target="_blank" rel="noopener noreferrer">1U2CDK119889-01</a>
-                        of the <a href="https://commonfund.nih.gov/metabolomics" target="_blank"
-                            rel="noopener noreferrer">NIH
-                            Common Fund Metabolomics Program</a>.
-                    </p>
-                </div>
             </div>
 
         </div> <!-- div.page -->
@@ -650,6 +641,8 @@
             const results = root.querySelector(".results")
             const template = root.querySelector("li.publication.template")
 
+            const projectTemplate = root.querySelector("li.project.template")
+
             // Keep the results sorted.
             const sorted = ui.SortedList(results, -1, sortByYear)
 
@@ -660,8 +653,16 @@
                 authors: {},
                 years: {},
                 citations: {},
-
             }
+
+            // Query the TPF server for all projects and some related data.
+            const projectdata = {
+                projects: [],
+                names: {},    // entity IRI => label string
+                funding: {},  // project IRI => list of org IRIs
+            }
+            // TODO: "projectdata" won't work because tpf.js calls for "data" specifically
+
 
             const promises = [
                 entity.Publications(client),
@@ -669,6 +670,8 @@
                 entity.Authorships(client),
                 entity.PublicationYears(client),
                 entity.Citations(client),
+                entity.Projects(client),
+                entity.FundingOrganizations(client),
             ]
 
             Promise.all(promises)
@@ -712,7 +715,13 @@
                     }
 
                     data.publications.forEach(renderPublication)
-                })
+
+                    projectdata.projects = results[5]
+                    projectdata.names = results[1]
+                    projectdata.funding = results[6]
+    
+                    projectdata.projects.forEach(renderProject)
+                        })
 
             /**
              * Extract the actual text from a VIVO string
@@ -767,6 +776,24 @@
                 const li = ui.Render(template, bindings)
             }
 
+            /**
+             * Render a project with the specified IRI.
+             * @param {string} projectIRI
+             */
+            function renderProject(projectIRI) {
+                // const project = entity.Project(client, projectIRI.slice(1, -1))
+                const orgIRI = projectdata.funding[projectIRI]
+                const bindings = {
+                    link: {
+                        href: m3c.ProfileLink("project", projectIRI),
+                    },
+                    name: parseVIVOString(projectdata.names[projectIRI]),
+                    organization: orgIRI ? projectdata.names[orgIRI] : null,
+                }
+
+            const li = ui.Render(projectTemplate, bindings)
+
+        }
 
             /**
              * @param {string} name
@@ -781,15 +808,6 @@
              * Extract the name of a list item; used for sorting.
              * @param {HTMLLIElement} li
              */
-            function sortByName(li) {
-                const name = li.querySelector(".name").innerText.toUpperCase()
-                return name
-            }
-
-            /**
-             * Extract the name of a list item; used for sorting.
-             * @param {HTMLLIElement} li
-             */
             function sortByYear(li) {
                 const year = li.querySelector(".year")
                 if (!year || !year.innerText) {
@@ -798,8 +816,7 @@
                 return year.innerText
             }
 
-        </script>
-
+            </script>
     </div> <!-- div.container -->
 </body>
 

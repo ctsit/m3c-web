@@ -188,6 +188,11 @@ Blue #00529b */
     padding-right: unset;
 }
 
+.list-widget li:nth-of-type(n+11) {
+    display: none;
+}
+
+
 header {
     padding: 1em 2em 0em 2.3em;
     background-color: white;
