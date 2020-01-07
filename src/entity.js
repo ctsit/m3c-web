@@ -197,6 +197,34 @@ var entity = (function module() {
             })
     }
 
+    function PublicationDate(client) {
+        const dateTimeValues = client.Query(null, vivo + "dateTimeValue", null)
+        const dateTimes = client.Query(null, vivo + "dateTime", null)
+
+        return Promise.all([dateTimeValues, dateTimes])
+            .then(function (results) {
+                const dateTimesToPubs = mapTriples(results[0], true)
+                const dateTimesToValues = mapTriples(results[1])
+
+                const dates = {} // all instances of "time" were previously "year"
+                // how to return datetime without clipping the output down to just year? i need the publications on the index.html page to be organized by most recent, and the year isn't enough detail. how do we keep the month and day?
+                Object.keys(dateTimesToValues).forEach(function (dateTimeIRI) {
+                    const publicationIRI = dateTimesToPubs[dateTimeIRI]
+                    if (!publicationIRI) {
+                        return
+                    }
+                    const value = dateTimesToValues[dateTimeIRI]
+                    if (!value) {
+                        return
+                    }
+
+                    dates[publicationIRI] = value
+                })
+
+                return dates
+            })
+    }
+
     function Publications(client) {
         return new Promise(function (resolve) {
             client
@@ -997,6 +1025,7 @@ var entity = (function module() {
         Projects: Projects,
         Publication: Publication,
         PublicationYears: PublicationYears,
+        PublicationDate: PublicationDate,
         Publications: Publications,
         Studies: Studies,
         Study: Study,

@@ -444,11 +444,11 @@
                     </a>
                     <!-- Create an ordered list of the 10 most recent publications using the TPF list in publications.html (data.publications = results[0]) -->
                     <!-- TODO: Include the date AND year in the template, to ensure these are ordered by date and not just year. -->
-                    <div id="listing" style="font-size:0.9rem">
-                        <ol class="results">
+                    <div id="pub-listing" style="font-size:0.9rem">
+                        <ol class="pub-results">
                                 <!-- Templates aren't visible, but their clones are filled out with real data. -->
                                 <li class="publication template">
-                                    <div style="min-height:50px;">
+                                    <div style="min-height:50px;padding-bottom:2px;">
                                         <a href="#" class="name link"
                                             target="_blank" rel="noopener noreferrer" style="padding:0px 20px;"></a>
                                         <i class="fas fa-external-link-alt"></i>
@@ -462,19 +462,26 @@
                     </div>
                 </div>
                 <div class="list-widget" id="proj-widget">
+                    <div id="proj-listing">
                         <a href="projects.html" class="widget-title">
                             <h3>Latest Projects</h3>
                         </a>
-                        <ol class="results">
+                        <ol class="proj-results">
                             <!-- Create an ordered list of the 10 most recent projects using the TPF list in projects.html (data.projects = results[0]) -->
                             <li class="project template">
+                                <div style="min-height:50px;padding-bottom:2px;">
+                                        <a href="https://www.metabolomicsworkbench.org/data/DRCCMetadata.php?Mode=Project" class="name link mwb"
+                                            target="_blank" rel="noopener noreferrer" style="padding:0px 20px;"></a>
+                                        <i class="fas fa-external-link-alt"></i>
+                                    </div>
                                     <a href="#" class="link">
-                                        <div class="name"></div>
+                                        <div class="name" style="min-height:30px;margin-bottom:5px;padding:0px 20px;"></div>
                                     </a>
-                                    <div class="organization"></div>
+                                    <div class="organization" style="min-height:30px;margin-bottom:5px;padding:0.5em;"></div>
                                 </li>
                         </ol>
                     </div>
+                </div>
             </div>
 
         </div> <!-- div.page -->
@@ -637,49 +644,62 @@
             // script for the Publication and Projects list dashboard widgets
 
             // Aliases for certain HTML elements
-            const root = document.getElementById("listing")
-            const results = root.querySelector(".results")
-            const template = root.querySelector("li.publication.template")
+            const pub_root = document.getElementById("pub-listing")
+            const proj_root = document.getElementById("proj-listing")
+            const pub_results = pub_root.querySelector(".pub-results")
+            const proj_results = proj_root.querySelector(".proj-results")
+            const publicationTemplate = pub_root.querySelector("li.publication.template")
+            const projectTemplate = proj_root.querySelector("li.project.template")
 
-            const projectTemplate = root.querySelector("li.project.template")
 
             // Keep the results sorted.
-            const sorted = ui.SortedList(results, -1, sortByYear)
+            const pub_sorted = ui.SortedList(pub_results, -1, sortByYear)
+            const proj_sorted = ui.SortedList(proj_results, -1, sortByID)
+
+            // TODO: this "sorted" constant is messing up the order of projects (projects have no year). how else can i keep the publications in order? how can i separate the two lists?
 
             // Query the TPF server for all publications and some related data.
-            const data = {
+            const pub_data = {
                 publications: [],
                 names: {},        // entity IRI => label string
                 authors: {},
                 years: {},
                 citations: {},
-                projects: [],
-                funding: {},  // project IRI => list of org IRIs
             }
+
+            const proj_data = {
+                projects: [],
+                names: {},
+                funding: {},
+                ID: {},
+            }
+
+            // TODO: figure out how to bind project ID to the projects list using their IRIs so that i can print the publication list by ID number (just like the publications should be organized by date)
+            // right now, the project ID is a variable introduced under project.ID in the "project.html" file, while all of these other project properties are taken from "projects.html" because that's where all of the projects are displayed together in a list, allowing me to copy that html and javascript to create the list widget. however, the properties from "projects" are used like data.projects rather than project.(property), and they use a different root to acquire that information. renaming the root variable breaks it, so i think it's being used in another file, and i shouldn't change the stuff that's already here. maybe i can add a similar root function in that file, named projectRoot? how do i then merge the data and project arrays?
 
             const promises = [
                 entity.Publications(client),
                 entity.Names(client),
                 entity.Authorships(client),
-                entity.PublicationYears(client),
+                entity.PublicationDate(client),
                 entity.Citations(client),
                 entity.Projects(client),
                 entity.FundingOrganizations(client),
             ]
 
             Promise.all(promises)
-                .then(function setData(results) {
-                    data.publications = results[0]
-                    data.names = results[1]
-                    data.authors = {}
-                    data.years = results[3]
-                    data.citations = results[4]
+                .then(function setData(pub_results) {
+                    pub_data.publications = pub_results[0]
+                    pub_data.names = pub_results[1]
+                    pub_data.authors = {}
+                    pub_data.years = pub_results[3]
+                    pub_data.citations = pub_results[4]
 
                     // authorship IRI => list of author and pub
-                    const authorships = results[2]
+                    const authorships = pub_results[2]
 
-                    for (var i = 0; i < data.publications.length; i++) {
-                        const pub = data.publications[i]
+                    for (var i = 0; i < pub_data.publications.length; i++) {
+                        const pub = pub_data.publications[i]
                         const authors = []
 
                         Object.keys(authorships)
@@ -704,18 +724,33 @@
                                 }
                             })
 
-                        data.authors[pub] = authors
+                        pub_data.authors[pub] = authors
                     }
 
-                    data.publications.forEach(renderPublication)
+                    pub_data.publications.forEach(renderPublication)
                 })
-                .then(function setData(results) {
-                    data.projects = results[5]
-                    data.names = results[1]
-                    data.years = results[3]
-                    data.funding = results[6]
-    
-                    data.projects.forEach(renderProject)
+                
+            Promise.all(promises)
+                .then(function setData(proj_results) {
+
+                    proj_data.projects = proj_results[5]
+                    console.dir(proj_results)
+                    proj_data.names = proj_results[1]
+                    proj_data.funding = proj_results[6]
+
+                    for (var i = 0; i < proj_data.projects.length; i++) {
+                        const uri = proj_data.projects[i]
+                        const project = entity.Project(client, uri)
+                        const name = proj_data.names[uri]
+                        const funding_uri = proj_data.funding[uri]
+                        const funding_name = proj_data.names[funding_uri]
+
+                        project.ID(renderProject(uri, name, funding_uri, funding_name))
+                                
+
+
+                    }
+
                 })
 
             /**
@@ -737,9 +772,9 @@
              * @param {string} publicationIRI
              */
             function renderPublication(publicationIRI) {
-                const authors = data.authors[publicationIRI]
+                const authors = pub_data.authors[publicationIRI]
                     .map(function (authorIRI) {
-                        return data.names[authorIRI]
+                        return pub_data.names[authorIRI]
                     })
 
                 authors.sort(function (a, b) {
@@ -756,38 +791,44 @@
                     return 0
                 })
 
-                const published = data.years[publicationIRI]
-                const citation = data.citations[publicationIRI]
+                const published = pub_data.years[publicationIRI]
+                const citation = pub_data.citations[publicationIRI]
 
                 const bindings = {
                     link: {
                         href: m3c.ProfileLink("publication", publicationIRI.slice(1, -1)),
                     },
-                    name: parseVIVOString(data.names[publicationIRI]),
+                    name: parseVIVOString(pub_data.names[publicationIRI]),
                     year: published ? published : null,
                     authors: authors ? authors.join(", ") : "",
                     citation: citation ? parseVIVOString(citation) : ""
                 }
-                const li = ui.Render(template, bindings)
+                const li = ui.Render(publicationTemplate, bindings)
             }
 
             /**
              * Render a project with the specified IRI.
              * @param {string} projectIRI
              */
-            function renderProject(projectIRI) {
+            function renderProject(projectIRI, name, funding_uri, funding_name) {
                 // const project = entity.Project(client, projectIRI.slice(1, -1))
-                const orgIRI = data.funding[projectIRI]
-                const bindings = {
-                    link: {
-                        href: m3c.ProfileLink("project", projectIRI),
-                    },
-                    name: parseVIVOString(data.names[projectIRI]),
-                    organization: orgIRI ? data.names[orgIRI] : null,
-                }
+                return function(projectID){
+                    const orgIRI = funding_uri
+                    const bindings = {
+                        link: {
+                            href: m3c.ProfileLink("project", projectIRI),
+                        },
+                        name: parseVIVOString(name),
+                        organization: orgIRI ? funding_name : null,
+                        id: projectID
+                    }
 
-            const li = ui.Render(projectTemplate, bindings)
-        }
+                const li = ui.Render(projectTemplate, bindings)
+            }}
+
+
+            name = name.trim()
+            pub_root.querySelector(".name").innerHTML = name
 
             /**
              * @param {string} name
@@ -808,6 +849,14 @@
                     return "0"
                 }
                 return year.innerText
+            }
+
+            function sortByID(li) {
+                const id = li.querySelector(".cwb")
+                if (!id) {
+                    return "0"
+                }
+                return id
             }
 
             </script>
