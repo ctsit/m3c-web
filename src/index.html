@@ -443,10 +443,8 @@
                         <h3>Latest Publications</h3>
                     </a>
                     <!-- Create an ordered list of the 10 most recent publications using the TPF list in publications.html (data.publications = results[0]) -->
-                    <!-- TODO: Include the date AND year in the template, to ensure these are ordered by date and not just year. -->
                     <div id="pub-listing" style="font-size:0.9rem">
                         <ol class="pub-results">
-                                <!-- Templates aren't visible, but their clones are filled out with real data. -->
                                 <li class="publication template">
                                     <div style="min-height:50px;padding-bottom:2px;">
                                         <a href="#" class="name link"
@@ -656,7 +654,6 @@
             const pub_sorted = ui.SortedList(pub_results, -1, sortByYear)
             const proj_sorted = ui.SortedList(proj_results, -1, sortByID)
 
-            // TODO: this "sorted" constant is messing up the order of projects (projects have no year). how else can i keep the publications in order? how can i separate the two lists?
 
             // Query the TPF server for all publications and some related data.
             const pub_data = {
@@ -674,9 +671,6 @@
                 ID: {},
             }
 
-            // TODO: figure out how to bind project ID to the projects list using their IRIs so that i can print the publication list by ID number (just like the publications should be organized by date)
-            // right now, the project ID is a variable introduced under project.ID in the "project.html" file, while all of these other project properties are taken from "projects.html" because that's where all of the projects are displayed together in a list, allowing me to copy that html and javascript to create the list widget. however, the properties from "projects" are used like data.projects rather than project.(property), and they use a different root to acquire that information. renaming the root variable breaks it, so i think it's being used in another file, and i shouldn't change the stuff that's already here. maybe i can add a similar root function in that file, named projectRoot? how do i then merge the data and project arrays?
-
             const promises = [
                 entity.Publications(client),
                 entity.Names(client),
@@ -686,6 +680,7 @@
                 entity.Projects(client),
                 entity.FundingOrganizations(client),
             ]
+
 
             Promise.all(promises)
                 .then(function setData(pub_results) {
@@ -732,7 +727,6 @@
                 
             Promise.all(promises)
                 .then(function setData(proj_results) {
-
                     proj_data.projects = proj_results[5]
                     console.dir(proj_results)
                     proj_data.names = proj_results[1]
@@ -747,11 +741,10 @@
 
                         project.ID(renderProject(uri, name, funding_uri, funding_name))
                                 
-
-
                     }
 
                 })
+
 
             /**
              * Extract the actual text from a VIVO string
@@ -766,6 +759,7 @@
                 text = JSON.parse('"' + text + '"')
                 return text
             }
+
 
             /**
              * Render a publication with the specified IRI.
@@ -791,8 +785,14 @@
                     return 0
                 })
 
-                const published = pub_data.years[publicationIRI]
+                var published = pub_data.years[publicationIRI]
                 const citation = pub_data.citations[publicationIRI]
+
+                if (published) {
+                    published.toString()
+                    // assert(published.length == 23)
+                    published.slice(1, -12) 
+                }
 
                 const bindings = {
                     link: {
@@ -803,6 +803,7 @@
                     authors: authors ? authors.join(", ") : "",
                     citation: citation ? parseVIVOString(citation) : ""
                 }
+
                 const li = ui.Render(publicationTemplate, bindings)
             }
 
@@ -811,7 +812,6 @@
              * @param {string} projectIRI
              */
             function renderProject(projectIRI, name, funding_uri, funding_name) {
-                // const project = entity.Project(client, projectIRI.slice(1, -1))
                 return function(projectID){
                     const orgIRI = funding_uri
                     const bindings = {
@@ -827,9 +827,6 @@
             }}
 
 
-            name = name.trim()
-            pub_root.querySelector(".name").innerHTML = name
-
             /**
              * @param {string} name
              */
@@ -838,6 +835,7 @@
                 const lastFirst = firstLast.split(' ').reverse().join(' ')
                 return lastFirst
             }
+
 
             /**
              * Extract the name of a list item; used for sorting.
@@ -852,7 +850,7 @@
             }
 
             function sortByID(li) {
-                const id = li.querySelector(".cwb")
+                const id = li.querySelector(".mwb")
                 if (!id) {
                     return "0"
                 }
