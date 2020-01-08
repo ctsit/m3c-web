@@ -111,36 +111,6 @@
             animation-duration: 500ms;
         }
 
-        .visuals {
-            margin: auto;
-            margin-top: 1em;
-            display: -ms-grid;
-            display: grid;
-            -ms-grid-columns: 1fr 1fr 1fr;
-            grid-template-columns: repeat(auto-fit, 320px);
-            /* grid-template-columns: 1fr 1fr 1fr; */
-            grid-gap: 1em;
-            width: 95%;
-            justify-content: center;
-            justify-items: stretch;
-            padding-bottom: 1em;
-        }
-
-        .visuals div {
-            text-align: center;
-            background: white;
-            min-height: 200px;
-            padding: 1em;
-        }
-
-        .visuals #pub-widget  { -ms-grid-column: 1 }
-        .visuals #proj-widget { -ms-grid-column: 2 }
-
-        .visuals div img {
-            width: 100%;
-            height: auto;
-        }
-
         .wordcloud img {
             padding-top: 1.5em;
         }
@@ -250,6 +220,57 @@
                padding-top: 0.5em;
            }
         }
+
+        /* List Widgets */
+        .visuals {
+            margin: auto;
+            margin-top: 1em;
+            display: -ms-grid;
+            display: grid;
+            -ms-grid-columns: 1fr 1fr 1fr;
+            grid-template-columns: repeat(auto-fit, 320px);
+            /* grid-template-columns: 1fr 1fr 1fr; */
+            grid-gap: 1em;
+            width: 95%;
+            justify-content: center;
+            justify-items: stretch;
+            padding-bottom: 1em;
+        }
+
+        .visuals div {
+            text-align: center;
+            background: white;
+            min-height: 200px;
+            padding: 1em;
+        }
+
+        .visuals #pub-widget  { -ms-grid-column: 1 }
+        .visuals #proj-widget { -ms-grid-column: 2 }
+
+        .visuals div img {
+            width: 100%;
+            height: auto;
+        }
+
+        .list-widget {
+            font-size: 0.9rem;
+        }
+
+        .widget-list-titles {
+            min-height:50px !important;
+            padding-bottom:2px !important;
+        }
+
+        .widget-list-item {
+            padding:0px 20px !important;
+        }
+
+        .widget-info {
+            min-height:30px !important;
+            margin-bottom:5px !important;
+            padding:0.5em !important;
+        }
+
     </style>
 
 </head>
@@ -438,20 +459,19 @@
             </div>
 
             <div class="visuals">
-                <div class="list-widget" id="pub-widget">
+                <div id="pub-widget">
                     <a href="publications.html" class="widget-title">
                         <h3>Latest Publications</h3>
                     </a>
                     <!-- Create an ordered list of the 10 most recent publications using the TPF list in publications.html (data.publications = results[0]) -->
-                    <div id="pub-listing" style="font-size:0.9rem">
+                    <div class="list-widget" id="pub-listing">
                         <ol class="pub-results">
                                 <li class="publication template">
-                                    <div style="min-height:50px;padding-bottom:2px;">
-                                        <a href="#" class="name link"
-                                            target="_blank" rel="noopener noreferrer" style="padding:0px 20px;"></a>
-                                        <i class="fas fa-external-link-alt"></i>
+                                    <div class="widget-list-titles">
+                                        <a href="#" class="name link widget-list-item"
+                                            target="_blank" rel="noopener noreferrer"></a>
                                     </div>
-                                    <div style="min-height:30px;margin-bottom:5px;padding:0.5em;">
+                                    <div class="widget-info">
                                         <span class="year"></span>
                                         <span class="authors"></span>
                                     </div>
@@ -459,23 +479,19 @@
                         </ol>
                     </div>
                 </div>
-                <div class="list-widget" id="proj-widget">
-                    <div id="proj-listing">
-                        <a href="projects.html" class="widget-title">
+                <div id="proj-widget">
+                    <a href="projects.html" class="widget-title">
                             <h3>Latest Projects</h3>
-                        </a>
+                    </a>
+                    <div class="list-widget" id="proj-listing">
                         <ol class="proj-results">
                             <!-- Create an ordered list of the 10 most recent projects using the TPF list in projects.html (data.projects = results[0]) -->
                             <li class="project template">
-                                <div style="min-height:50px;padding-bottom:2px;">
-                                        <a href="https://www.metabolomicsworkbench.org/data/DRCCMetadata.php?Mode=Project" class="name link mwb"
-                                            target="_blank" rel="noopener noreferrer" style="padding:0px 20px;"></a>
-                                        <i class="fas fa-external-link-alt"></i>
+                                <div class="widget-list-titles">
+                                        <a href="https://www.metabolomicsworkbench.org/data/DRCCMetadata.php?Mode=Project" class="name link mwb widget-list-item"
+                                            target="_blank" rel="noopener noreferrer"></a>
                                     </div>
-                                    <a href="#" class="link">
-                                        <div class="name" style="min-height:30px;margin-bottom:5px;padding:0px 20px;"></div>
-                                    </a>
-                                    <div class="organization" style="min-height:30px;margin-bottom:5px;padding:0.5em;"></div>
+                                    <div class="organization widget-info"></div>
                                 </li>
                         </ol>
                     </div>
