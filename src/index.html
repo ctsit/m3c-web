@@ -788,18 +788,13 @@
                 var published = pub_data.years[publicationIRI]
                 const citation = pub_data.citations[publicationIRI]
 
-                if (published) {
-                    published.toString()
-                    // assert(published.length == 23)
-                    published.slice(1, -12) 
-                }
 
                 const bindings = {
                     link: {
                         href: m3c.ProfileLink("publication", publicationIRI.slice(1, -1)),
                     },
                     name: parseVIVOString(pub_data.names[publicationIRI]),
-                    year: published ? published : null,
+                    year: published ? published.slice(1, -55) : null,
                     authors: authors ? authors.join(", ") : "",
                     citation: citation ? parseVIVOString(citation) : ""
                 }
