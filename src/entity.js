@@ -206,8 +206,7 @@ var entity = (function module() {
                 const dateTimesToPubs = mapTriples(results[0], true)
                 const dateTimesToValues = mapTriples(results[1])
 
-                const dates = {} // all instances of "time" were previously "year"
-                // how to return datetime without clipping the output down to just year? i need the publications on the index.html page to be organized by most recent, and the year isn't enough detail. how do we keep the month and day?
+                const dates = {}
                 Object.keys(dateTimesToValues).forEach(function (dateTimeIRI) {
                     const publicationIRI = dateTimesToPubs[dateTimeIRI]
                     if (!publicationIRI) {

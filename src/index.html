@@ -256,6 +256,14 @@
             font-size: 0.9rem;
         }
 
+        .list-widget .pub-results li:nth-of-type(n+11) {
+        display: none;
+        }
+
+        .list-widget .proj-results li:nth-child(n+12) {
+        display: none !important;
+        }   /* n+11 only shows 9 results */
+
         .widget-list-titles {
             min-height:50px !important;
             padding-bottom:2px !important;
@@ -459,11 +467,11 @@
             </div>
 
             <div class="visuals">
+            <!-- Widgets for Latest Publications and Latest Projects -->
                 <div id="pub-widget">
                     <a href="publications.html" class="widget-title">
                         <h3>Latest Publications</h3>
                     </a>
-                    <!-- Create an ordered list of the 10 most recent publications using the TPF list in publications.html (data.publications = results[0]) -->
                     <div class="list-widget" id="pub-listing">
                         <ol class="pub-results">
                                 <li class="publication template">
@@ -485,7 +493,6 @@
                     </a>
                     <div class="list-widget" id="proj-listing">
                         <ol class="proj-results">
-                            <!-- Create an ordered list of the 10 most recent projects using the TPF list in projects.html (data.projects = results[0]) -->
                             <li class="project template">
                                 <div class="widget-list-titles">
                                         <a href="https://www.metabolomicsworkbench.org/data/DRCCMetadata.php?Mode=Project" class="name link mwb widget-list-item"
@@ -671,7 +678,7 @@
             const proj_sorted = ui.SortedList(proj_results, -1, sortByID)
 
 
-            // Query the TPF server for all publications and some related data.
+            // Query the TPF server for all publications/projects and some related data.
             const pub_data = {
                 publications: [],
                 names: {},        // entity IRI => label string
