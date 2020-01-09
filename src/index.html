@@ -684,7 +684,6 @@
                 names: {},        // entity IRI => label string
                 authors: {},
                 years: {},
-                citations: {},
             }
 
             const proj_data = {
@@ -699,7 +698,6 @@
                 entity.Names(client),
                 entity.Authorships(client),
                 entity.PublicationDate(client),
-                entity.Citations(client),
                 entity.Projects(client),
                 entity.FundingOrganizations(client),
             ]
@@ -711,7 +709,6 @@
                     pub_data.names = pub_results[1]
                     pub_data.authors = {}
                     pub_data.years = pub_results[3]
-                    pub_data.citations = pub_results[4]
 
                     // authorship IRI => list of author and pub
                     const authorships = pub_results[2]
@@ -750,10 +747,9 @@
                 
             Promise.all(promises)
                 .then(function setData(proj_results) {
-                    proj_data.projects = proj_results[5]
-                    console.dir(proj_results)
+                    proj_data.projects = proj_results[4]
                     proj_data.names = proj_results[1]
-                    proj_data.funding = proj_results[6]
+                    proj_data.funding = proj_results[5]
 
                     for (var i = 0; i < proj_data.projects.length; i++) {
                         const uri = proj_data.projects[i]
@@ -809,7 +805,6 @@
                 })
 
                 var published = pub_data.years[publicationIRI]
-                const citation = pub_data.citations[publicationIRI]
 
 
                 const bindings = {
@@ -819,7 +814,6 @@
                     name: parseVIVOString(pub_data.names[publicationIRI]),
                     year: published ? published.slice(1, -55) : null,
                     authors: authors ? authors.join(", ") : "",
-                    citation: citation ? parseVIVOString(citation) : ""
                 }
 
                 const li = ui.Render(publicationTemplate, bindings)
