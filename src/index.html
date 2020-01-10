@@ -256,11 +256,7 @@
             font-size: 0.9rem;
         }
 
-        .list-widget .pub-results li:nth-of-type(n+11) {
-        display: none;
-        }
-
-        .list-widget .proj-results li:nth-child(n+12) {
+        .list-widget li:nth-child(n+12) {
         display: none !important;
         }   /* n+11 only shows 9 results */
 
@@ -468,40 +464,36 @@
 
             <div class="visuals">
             <!-- Widgets for Latest Publications and Latest Projects -->
-                <div id="pub-widget">
-                    <a href="publications.html" class="widget-title">
+                <div id="pub-widget" class="Publications">
+                    <a href="publications.html">
                         <h3>Latest Publications</h3>
                     </a>
-                    <div class="list-widget" id="pub-listing">
-                        <ol class="pub-results">
-                                <li class="publication template">
-                                    <div class="widget-list-titles">
-                                        <a href="#" class="name link widget-list-item"
-                                            target="_blank" rel="noopener noreferrer"></a>
-                                    </div>
-                                    <div class="widget-info">
-                                        <span class="year"></span>
-                                        <span class="authors"></span>
-                                    </div>
-                                </li>
-                        </ol>
-                    </div>
+                    <ol class="list-widget" id="pub-listing">
+                            <li class="publication template pub-results">
+                                <div class="widget-list-titles">
+                                    <a href="#" class="name link widget-list-item"
+                                        target="_blank" rel="noopener noreferrer"></a>
+                                </div>
+                                <div class="widget-info">
+                                    <span class="year"></span>
+                                    <span class="authors"></span>
+                                </div>
+                            </li>
+                    </ol>
                 </div>
-                <div id="proj-widget">
-                    <a href="projects.html" class="widget-title">
+                <div id="proj-widget" class="Projects">
+                    <a href="projects.html">
                             <h3>Latest Projects</h3>
                     </a>
-                    <div class="list-widget" id="proj-listing">
-                        <ol class="proj-results">
-                            <li class="project template">
-                                <div class="widget-list-titles">
-                                        <a href="https://www.metabolomicsworkbench.org/data/DRCCMetadata.php?Mode=Project" class="name link mwb widget-list-item"
-                                            target="_blank" rel="noopener noreferrer"></a>
-                                    </div>
-                                    <div class="organization widget-info"></div>
-                                </li>
-                        </ol>
-                    </div>
+                    <ol class="list-widget" id="proj-listing">
+                        <li class="project template proj-results">
+                            <div class="widget-list-titles">
+                                    <a href="https://www.metabolomicsworkbench.org/data/DRCCMetadata.php?Mode=Project" class="name link mwb widget-list-item"
+                                        target="_blank" rel="noopener noreferrer"></a>
+                                </div>
+                                <div class="organization widget-info"></div>
+                            </li>
+                    </ol>
                 </div>
             </div>
 
@@ -559,6 +551,12 @@
             for (var i = 0; i < prevLinks.length; i++) {
                 addPrevLinkClickHandler(prevLinks[i])
             }
+
+            const widgetLinks = document.querySelector(".visuals")
+            const widgetPub = widgetLinks.querySelector("#pub-widget")
+            addWidgetLink(widgetPub)
+            const widgetProj = widgetLinks.querySelector("#proj-widget")
+            addWidgetLink(widgetProj)
 
             function addLink(li) {
                 const concept = li.className
@@ -660,6 +658,13 @@
                     link.querySelector("img.photo").src =
                         m3c.PhotoURL(client.Endpoint, url)
                 })
+            }
+
+            function addWidgetLink(id) {
+                const concept = id.className
+                const lowered = concept.toLowerCase()
+
+                id.querySelector("a").href = m3c.ListingLink(lowered)
             }
 
             // script for the Publication and Projects list dashboard widgets
