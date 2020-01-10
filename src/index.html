@@ -49,7 +49,8 @@
         }
 
         #links li,
-        .visuals div {
+        #pub-widget,
+        #proj-widget {
             box-shadow: 3px 4px 5px gray;
         }
 
@@ -109,10 +110,6 @@
 
         .animated {
             animation-duration: 500ms;
-        }
-
-        .wordcloud img {
-            padding-top: 1.5em;
         }
 
         .about p {
@@ -215,12 +212,6 @@
 
         }
 
-        @media only screen and (max-width: 690px) {
-           .wordcloud img {
-               padding-top: 0.5em;
-           }
-        }
-
         /* List Widgets */
         .visuals {
             margin: auto;
@@ -228,7 +219,7 @@
             display: -ms-grid;
             display: grid;
             -ms-grid-columns: 1fr 1fr 1fr;
-            grid-template-columns: repeat(auto-fit, 320px);
+            grid-template-columns: repeat(auto-fit, 480px);
             /* grid-template-columns: 1fr 1fr 1fr; */
             grid-gap: 1em;
             width: 95%;
@@ -247,21 +238,20 @@
         .visuals #pub-widget  { -ms-grid-column: 1 }
         .visuals #proj-widget { -ms-grid-column: 2 }
 
-        .visuals div img {
-            width: 100%;
-            height: auto;
-        }
-
         .list-widget {
             font-size: 0.9rem;
         }
 
-        .list-widget li:nth-child(n+12) {
-        display: none !important;
+        .pub-results li:nth-child(n+11) {
+            display: none !important;
+        }
+
+        .proj-results li:nth-child(n+12) {
+            display: none !important;
         }   /* n+11 only shows 9 results */
 
-        .widget-list-titles {
-            min-height:50px !important;
+        .widget-list-names {
+            min-height:35px !important;
             padding-bottom:2px !important;
         }
 
@@ -270,9 +260,15 @@
         }
 
         .widget-info {
-            min-height:30px !important;
-            margin-bottom:5px !important;
+            min-height:10px !important;
+            margin-bottom:10px !important;
             padding:0.5em !important;
+        }
+
+        @media only screen and (max-width: 480px) {
+            .visuals {
+                grid-template-columns: repeat(auto-fit, 320px);
+            }
         }
 
     </style>
@@ -468,9 +464,9 @@
                     <a href="publications.html">
                         <h3>Latest Publications</h3>
                     </a>
-                    <ol class="list-widget" id="pub-listing">
-                            <li class="publication template pub-results">
-                                <div class="widget-list-titles">
+                    <ol class="list-widget pub-results">
+                            <li class="publication template">
+                                <div class="widget-list-names">
                                     <a href="#" class="name link widget-list-item"
                                         target="_blank" rel="noopener noreferrer"></a>
                                 </div>
@@ -485,9 +481,9 @@
                     <a href="projects.html">
                             <h3>Latest Projects</h3>
                     </a>
-                    <ol class="list-widget" id="proj-listing">
-                        <li class="project template proj-results">
-                            <div class="widget-list-titles">
+                    <ol class="list-widget proj-results">
+                        <li class="project template">
+                            <div class="widget-list-names">
                                     <a href="https://www.metabolomicsworkbench.org/data/DRCCMetadata.php?Mode=Project" class="name link mwb widget-list-item"
                                         target="_blank" rel="noopener noreferrer"></a>
                                 </div>
@@ -670,8 +666,8 @@
             // script for the Publication and Projects list dashboard widgets
 
             // Aliases for certain HTML elements
-            const pub_root = document.getElementById("pub-listing")
-            const proj_root = document.getElementById("proj-listing")
+            const pub_root = document.getElementById("pub-widget")
+            const proj_root = document.getElementById("proj-widget")
             const pub_results = pub_root.querySelector(".pub-results")
             const proj_results = proj_root.querySelector(".proj-results")
             const publicationTemplate = pub_root.querySelector("li.publication.template")
