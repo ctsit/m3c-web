@@ -757,6 +757,7 @@
                     proj_data.projects = proj_results[4]
                     proj_data.names = proj_results[1]
                     proj_data.funding = proj_results[5]
+                    proj_data.id = {}
 
                     for (var i = 0; i < proj_data.projects.length; i++) {
                         const uri = proj_data.projects[i]
@@ -765,10 +766,12 @@
                         const funding_uri = proj_data.funding[uri]
                         const funding_name = proj_data.names[funding_uri]
 
-                        project.ID(renderProject(uri, name, funding_uri, funding_name))
+                        proj_data.id = project.ID(attachID(uri, name, funding_uri, funding_name))
+                        // project.ID(renderProject(uri, name, funding_uri, funding_name))
                                 
                     }
-
+                    
+                    proj_data.projects.forEach(renderProject)
                 })
 
 
@@ -830,7 +833,8 @@
              * Render a project with the specified IRI.
              * @param {string} projectIRI
              */
-            function renderProject(projectIRI, name, funding_uri, funding_name) {
+
+            function attachID(projectIRI, name, funding_uri, funding_name) {
                 return function(projectID){
                     const orgIRI = funding_uri
                     const bindings = {
@@ -841,9 +845,21 @@
                         organization: orgIRI ? funding_name : null,
                         id: projectID
                     }
+            }}
+
+            function renderProject(projectIRI) {
+                const orgIRI = proj_data.funding[projectIRI]
+                const bindings = {
+                    link: {
+                        href: m3c.ProfileLink("project", projectIRI.slice(1,-1)),
+                    },
+                    name: parseVIVOString(proj_data.names[projectIRI]),
+                    organization: orgIRI ? proj_data.names[orgIRI] : null,
+                    id: proj_data.id
+                }
 
                 const li = ui.Render(projectTemplate, bindings)
-            }}
+            }
 
 
             /**
