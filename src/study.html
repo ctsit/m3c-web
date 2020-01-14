@@ -366,28 +366,21 @@
                 if (datasets.length === 0) {
                     ul.parentElement.classList.add("hide")
                     return
-                } else {
-                    ul.parentElement.classList.remove("hide")
                 }
 
-                datasets.forEach(renderDataset)
+                ul.parentElement.classList.remove("hide")
 
-                function renderDataset(iri) {
-                    const template = ul.querySelector("li.template")
+                const studyID = uri
+                    .replace("https://vivo.metabolomics.info/individual/", "")
 
-                    const sampleID = iri
-                        .replace("https://vivo.metabolomics.info/individual/", "")
-                        .slice(1, -1)
-
-                    const bindings = {
-                        link: {
-                            href: m3c.ProfileLink("dataset", iri.slice(1, -1))
-                        },
-                        name: sampleID,
-                    }
-
-                    ui.Render(template, bindings)
-                }
+                ul.innerHTML = str.Format(
+                    '<li><a href="{}&StudyID={}#DataTabs">View analyses</a> ' +
+                    '<i class="fas fa-external-link-alt"></i> of {} {}.</li>',
+                    "https://www.metabolomicsworkbench.org/data/DRCCMetadata.php?Mode=Study&DataMode=AnalysisData",
+                    studyID,
+                    datasets.length,
+                    datasets.length === 1 ? "sample" : "samples"
+                )
             }
 
             function renderID(studyID) {
