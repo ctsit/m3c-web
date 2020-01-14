@@ -682,8 +682,6 @@
 
             // Keep the results sorted.
             const pub_sorted = ui.SortedList(pub_results, -1, sortByYear)
-            const proj_sorted = ui.SortedList(proj_results, -1, sortByID)
-
 
             // Query the TPF server for all publications/projects and some related data.
             const pub_data = {
@@ -757,7 +755,8 @@
                     proj_data.projects = proj_results[4]
                     proj_data.names = proj_results[1]
                     proj_data.funding = proj_results[5]
-                    proj_data.projects.forEach(renderProject)
+                    // Only render the latest 10 projects
+                    proj_data.projects.sort().reverse().slice(0, 10).forEach(renderProject)
                 })
 
 
@@ -855,15 +854,7 @@
                 return year.innerText
             }
 
-            function sortByID(li) {
-                const id = li.querySelector(".mwb")
-                if (!id) {
-                    return "0"
-                }
-                return id
-            }
-
-            </script>
+        </script>
     </div> <!-- div.container -->
 </body>
 
