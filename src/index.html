@@ -767,8 +767,6 @@
                         const funding_name = proj_data.names[funding_uri]
 
                         proj_data.id = project.ID(attachID(uri, name, funding_uri, funding_name))
-                        // project.ID(renderProject(uri, name, funding_uri, funding_name))
-                                
                     }
                     
                     proj_data.projects.forEach(renderProject)
@@ -829,24 +827,11 @@
                 const li = ui.Render(publicationTemplate, bindings)
             }
 
+
             /**
              * Render a project with the specified IRI.
              * @param {string} projectIRI
              */
-
-            function attachID(projectIRI, name, funding_uri, funding_name) {
-                return function(projectID){
-                    const orgIRI = funding_uri
-                    const bindings = {
-                        link: {
-                            href: m3c.ProfileLink("project", projectIRI),
-                        },
-                        name: parseVIVOString(name),
-                        organization: orgIRI ? funding_name : null,
-                        id: projectID
-                    }
-            }}
-
             function renderProject(projectIRI) {
                 const orgIRI = proj_data.funding[projectIRI]
                 const bindings = {
@@ -861,6 +846,15 @@
                 const li = ui.Render(projectTemplate, bindings)
             }
 
+            function attachID(projectIRI, name, funding_uri, funding_name) {
+                return function(projectID){
+                    const orgIRI = funding_uri
+                    const bindings = {
+                        name: parseVIVOString(name),
+                        organization: orgIRI ? funding_name : null,
+                        id: projectID
+                    }
+            }}
 
             /**
              * @param {string} name
