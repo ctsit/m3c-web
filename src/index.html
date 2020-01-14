@@ -751,24 +751,12 @@
 
                     pub_data.publications.forEach(renderPublication)
                 })
-                
+
             Promise.all(promises)
                 .then(function setData(proj_results) {
                     proj_data.projects = proj_results[4]
                     proj_data.names = proj_results[1]
                     proj_data.funding = proj_results[5]
-                    proj_data.id = {}
-
-                    for (var i = 0; i < proj_data.projects.length; i++) {
-                        const uri = proj_data.projects[i]
-                        const project = entity.Project(client, uri)
-                        const name = proj_data.names[uri]
-                        const funding_uri = proj_data.funding[uri]
-                        const funding_name = proj_data.names[funding_uri]
-
-                        proj_data.id = project.ID(attachID(uri, name, funding_uri, funding_name))
-                    }
-                    
                     proj_data.projects.forEach(renderProject)
                 })
 
@@ -840,21 +828,10 @@
                     },
                     name: parseVIVOString(proj_data.names[projectIRI]),
                     organization: orgIRI ? proj_data.names[orgIRI] : null,
-                    id: proj_data.id
                 }
 
                 const li = ui.Render(projectTemplate, bindings)
             }
-
-            function attachID(projectIRI, name, funding_uri, funding_name) {
-                return function(projectID){
-                    const orgIRI = funding_uri
-                    const bindings = {
-                        name: parseVIVOString(name),
-                        organization: orgIRI ? funding_name : null,
-                        id: projectID
-                    }
-            }}
 
             /**
              * @param {string} name
