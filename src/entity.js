@@ -197,33 +197,6 @@ var entity = (function module() {
             })
     }
 
-    function PublicationDate(client) {
-        const dateTimeValues = client.Query(null, vivo + "dateTimeValue", null)
-        const dateTimes = client.Query(null, vivo + "dateTime", null)
-
-        return Promise.all([dateTimeValues, dateTimes])
-            .then(function (results) {
-                const dateTimesToPubs = mapTriples(results[0], true)
-                const dateTimesToValues = mapTriples(results[1])
-
-                const dates = {}
-                Object.keys(dateTimesToValues).forEach(function (dateTimeIRI) {
-                    const publicationIRI = dateTimesToPubs[dateTimeIRI]
-                    if (!publicationIRI) {
-                        return
-                    }
-                    const value = dateTimesToValues[dateTimeIRI]
-                    if (!value) {
-                        return
-                    }
-
-                    dates[publicationIRI] = value
-                })
-
-                return dates
-            })
-    }
-
     function Publications(client) {
         return new Promise(function (resolve) {
             client
@@ -1024,7 +997,6 @@ var entity = (function module() {
         Projects: Projects,
         Publication: Publication,
         PublicationYears: PublicationYears,
-        PublicationDate: PublicationDate,
         Publications: Publications,
         Studies: Studies,
         Study: Study,
