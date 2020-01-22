@@ -213,15 +213,10 @@
                     </h2>
                     <ul class="studies"></ul>
                 </section>
-<!--
-                <section class="publications">
-                    <h2 class="publications">Publications</h2>
-                    <ul class="publications"></ul>
-                </section>
- -->
+
                 <section class="datasets">
                     <h2 class="datasets">
-                        <a href="datasets.html">Datasets</a>
+                        Samples
                         <span class="disclaimer prop-disclaimer">
                             Data from the
                             <a href="https://www.metabolomicsworkbench.org">Metabolomics Workbench</a>
@@ -235,12 +230,6 @@
                         </li>
                     </ul>
                 </section>
-<!--
-                <section class="tools">
-                    <h2 class="tools">Tools</h2>
-                    <ul class="tools"></ul>
-                </section>
- -->
             </div>
             <p class="disclaimer">
                 Data from the
@@ -377,28 +366,21 @@
                 if (datasets.length === 0) {
                     ul.parentElement.classList.add("hide")
                     return
-                } else {
-                    ul.parentElement.classList.remove("hide")
                 }
 
-                datasets.forEach(renderDataset)
+                ul.parentElement.classList.remove("hide")
 
-                function renderDataset(iri) {
-                    const template = ul.querySelector("li.template")
+                const studyID = uri
+                    .replace("https://vivo.metabolomics.info/individual/", "")
 
-                    const sampleID = iri
-                        .replace("https://vivo.metabolomics.info/individual/", "")
-                        .slice(1, -1)
-
-                    const bindings = {
-                        link: {
-                            href: m3c.ProfileLink("dataset", iri.slice(1, -1))
-                        },
-                        name: sampleID,
-                    }
-
-                    ui.Render(template, bindings)
-                }
+                ul.innerHTML = str.Format(
+                    '<li><a href="{}&StudyID={}#DataTabs">View analyses</a> ' +
+                    '<i class="fas fa-external-link-alt"></i> of {} {}.</li>',
+                    "https://www.metabolomicsworkbench.org/data/DRCCMetadata.php?Mode=Study&DataMode=AnalysisData",
+                    studyID,
+                    datasets.length,
+                    datasets.length === 1 ? "sample" : "samples"
+                )
             }
 
             function renderID(studyID) {

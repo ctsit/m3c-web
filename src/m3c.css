@@ -91,6 +91,12 @@ a:visited {
     text-decoration: none;
 }
 
+.hint {
+    font-size: smaller;
+    font-style: italic;
+    color: gray;
+}
+
 /* Orange #bc581a
 Blue #00529b */
 

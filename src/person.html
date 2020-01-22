@@ -296,19 +296,14 @@
 
                 <section class="datasets">
                     <h2 class="datasets">
-                        <a href="datasets.html">Datasets</a>
+                        Samples
                         <span class="disclaimer prop-disclaimer">
                             Data from the
                             <a href="https://www.metabolomicsworkbench.org">Metabolomics Workbench</a>
                             <i class="fas fa-external-link-alt"></i>
                         </span>
                     </h2>
-                    <ul class="datasets">
-                        <li class="template">
-                            <a href="#" class="link name" target="_blank"></a>
-                            <i class="fas fa-external-link-alt"></i>
-                        </li>
-                    </ul>
+                    <ul class="datasets"></ul>
                 </section>
 
             </div>
@@ -471,28 +466,17 @@
                 if (datasets.length === 0) {
                     ul.parentElement.classList.add("hide")
                     return
-                } else {
-                    ul.parentElement.classList.remove("hide")
                 }
 
-                datasets.forEach(renderDataset)
+                ul.parentElement.classList.remove("hide")
 
-                function renderDataset(iri) {
-                    const template = ul.querySelector("li.template")
-
-                    const sampleID = iri
-                        .replace("https://vivo.metabolomics.info/individual/", "")
-                        .slice(1, -1)
-
-                    const bindings = {
-                        link: {
-                            href: m3c.ProfileLink("dataset", iri.slice(1, -1))
-                        },
-                        name: sampleID,
-                    }
-
-                    ui.Render(template, bindings)
-                }
+                ul.innerHTML = str.Format(
+                    '<li>{} {} across all studies. <br /><span class="hint">' +
+                    "Use the individual Study links to view analyses.</span>" +
+                    "</li>",
+                    datasets.length,
+                    datasets.length === 1 ? "sample" : "samples"
+                )
             }
 
             function renderEmails(emails) {
