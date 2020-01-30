@@ -312,7 +312,12 @@ var ui = (function module() {
 
         /** Sorts an ordered list's items. */
         function sort() {
-            const lis = Array.prototype.slice.call(ol.querySelectorAll("li"))
+            // Get immediate <li> children.
+            const lis = []
+            for (var i = 0; i < ol.children.length; i++) {
+                lis.push(ol.children[i])
+            }
+
             lis.sort(function (a, b) {
                 const name1 = listItemKey(a)
                 const name2 = listItemKey(b)
