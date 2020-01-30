@@ -333,12 +333,23 @@ var ui = (function module() {
             })
         }
 
+        var dirty = 0
+
         function update() {
-            // Stop observing changes until after sorting is complete, otherwise
-            // each change during sorting will trigger onMutate forever.
-            observer.disconnect()
-            sort()
-            observe()
+            // Limit resorting to once in 100ms.
+            if (dirty) {
+                return
+            }
+
+            dirty = setTimeout(function () {
+                // Stop observing changes until after sorting is complete,
+                // otherwise each change during sorting will trigger onMutate
+                // causing a never-ending cycle.
+                observer.disconnect()
+                sort()
+                observe()
+                dirty = 0
+            }, 100)
         }
 
         return {
