@@ -194,7 +194,7 @@
             // Keep the results sorted.
             const sorted = ui.SortedList(results, 1, sortByName)
 
-            ui.SortedList(facets.querySelector(".type ul"), -1, sortByCount)
+            ui.SortedList(facets.querySelector(".type ul"), 1, sortByCount)
 
             // Query the TPF server for all organizations and some related data.
             const data = {
