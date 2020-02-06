@@ -541,8 +541,7 @@ var entity = (function module() {
             return new Promise(function () {
                 client
                     .Entity(iri)
-                    .Link(base, "manages")
-                    .Link(base, "collectionFor")
+                    .Link(base, "directs")
                     .Results(decodeStrings(returnStudies))
             })
         }
@@ -790,8 +789,7 @@ var entity = (function module() {
             return new Promise(function() {
                 client
                     .Entity(iri)
-                    .Link(base, "inCollection")
-                    .Link(base, "managedBy")
+                    .Link(base, "directedBy")
                     .Type(vivo, "Department")
                     .Single(returnDepartment)
             })
@@ -810,8 +808,7 @@ var entity = (function module() {
             return new Promise(function() {
                 client
                     .Entity(iri)
-                    .Link(base, "inCollection")
-                    .Link(base, "managedBy")
+                    .Link(base, "directedBy")
                     .Type(vivo, "Institute")
                     .Single(returnInstitute)
             })
@@ -821,8 +818,7 @@ var entity = (function module() {
             return new Promise(function() {
                 client
                     .Entity(iri)
-                    .Link(base, "inCollection")
-                    .Link(base, "managedBy")
+                    .Link(base, "directedBy")
                     .Type(vivo, "Laboratory")
                     .Single(returnLaboratory)
             })
