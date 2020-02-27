@@ -99,6 +99,9 @@
                     <a class="sub-header-link" href="tools.html">
                         <h2>Tools</h2>
                     </a>
+                    <a class="sub-header-link" href="help.html">
+                        <h2>Help</h2>
+                    </a>
                 </nav>
             </div>
         </header>
@@ -188,7 +191,7 @@
                 Metabolomics community.
             </p>
             <p>
-                © 2019 Metabolomics&nbsp;Consortium Coordinating&nbsp;Center
+                © 2020 Metabolomics&nbsp;Consortium Coordinating&nbsp;Center
             </p>
         </footer>
 
@@ -237,62 +240,61 @@
                 .then(function setData(results) {
                     data.publications = results[0]
                     data.names = results[1]
-                    data.authors = {}
+                    const authorships = results[2]
                     data.years = results[3]
                     data.citations = results[4]
 
-                    // authorship IRI => list of author and pub
-                    const authorships = results[2]
+                    // Build the authors mapping: author IRI => list of pubs.
+                    data.authors = {}
 
-                    for (var i = 0; i < data.publications.length; i++) {
-                        const pub = data.publications[i]
-                        const authors = []
+                    // authorships: IRI => list of unordered, pair (pub, person)
+                    const authorshipIRIs = Object.keys(authorships)
+                    for (var i = 0; i < authorshipIRIs.length; i++) {
+                        const authorshipIRI = authorshipIRIs[i]
+                        const relates = authorships[authorshipIRI]
 
-                        Object.keys(authorships)
-                            .forEach(function (iri) {
-                                const relates = authorships[iri]
-                                if (relates.length !== 2) {
-                                    console.warn(
-                                        "Unexpected number of authors and " +
-                                        "publications on authorship: " + iri
-                                    )
-                                    return
-                                }
-
-                                if (relates[0] === pub) {
-                                    authors.push(relates[1])
-                                    return
-                                }
-
-                                if (relates[1] === pub) {
-                                    authors.push(relates[0])
-                                    return
-                                }
-                            })
-
-                        data.authors[pub] = authors
-                    }
-
-                    data.publications.forEach(renderPublication)
-                })
-                .then(function automaticallyUpdateCount() {
-                    if (data.publications.length > 5 + 1) {
-                        const facets = document.querySelectorAll(".facet")
-                        for (var i = 0; i < facets.length; i++) {
-                            var f = facets[i]
-                            f.className = (f.className + " limit").trim()
+                        // Unfortunately, the pub-person pair could be in either
+                        // order. If the IRI contains "pmid", it's for the Pub.
+                        var pubIRI = relates[0]
+                        var personIRI = relates[1]
+                        if (relates[0].indexOf("pmid") === -1) {
+                            personIRI = relates[0]
+                            pubIRI = relates[1]
                         }
+
+                        if (!data.authors[pubIRI]) {
+                            data.authors[pubIRI] = []
+                        }
+
+                        data.authors[pubIRI].push(personIRI)
                     }
-
-                    const checkboxes = document.querySelectorAll(".facet input")
-                    for (var i = 0; i < checkboxes.length; i++) {
-                        checkboxes[i].addEventListener("click", updateResultCount)
-                    }
-
-                    search.addEventListener("keyup", updateResultCount)
-
-                    updateResultCount()
                 })
+                .then(function renderResultsItems() {
+                    const fragment = document.createDocumentFragment()
+                    const items = data.publications.map(renderPublication)
+                    items.forEach(function (li) { fragment.appendChild(li) })
+                    results.appendChild(fragment)
+                })
+                .then(automaticallyUpdateCount)
+
+            function automaticallyUpdateCount() {
+                if (data.publications.length > 5 + 1) {
+                    const facets = document.querySelectorAll(".facet")
+                    for (var i = 0; i < facets.length; i++) {
+                        var f = facets[i]
+                        f.className = (f.className + " limit").trim()
+                    }
+                }
+
+                const checkboxes = document.querySelectorAll(".facet input")
+                for (var i = 0; i < checkboxes.length; i++) {
+                    checkboxes[i].addEventListener("click", updateResultCount)
+                }
+
+                search.addEventListener("keyup", updateResultCount)
+
+                updateResultCount()
+            }
 
             // Setup the filters used by each facets. Each item should be a
             // function whose name matches the class name of the facet's HTML
@@ -367,7 +369,7 @@
                     citation: citation ? parseVIVOString(citation) : ""
                 }
 
-                const li = ui.Render(template, bindings)
+                const li = ui.Build(template, bindings)
 
                 const cite = li.querySelector(".cite")
                 if (!citation) {
@@ -388,6 +390,8 @@
                 if (published) {
                     facetsManager.Increment('published', bindings.year, bindings.year)
                 }
+
+                return li
             }
 
 
