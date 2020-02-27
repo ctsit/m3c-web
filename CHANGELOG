@@ -1,6 +1,19 @@
 Changelog
 =========
 
+## 0.4.0 - 2020-02-27
+
+ * Optimize page loading for Publications Listing (Taeber Rapczak)
+ * Fix broken organization nesting (Taeber Rapczak)
+ * Optimize page loading for Organization Listing (Taeber Rapczak)
+ * Update copyright year 2020 (Taeber Rapczak)
+ * Use new ontology properties: directs, directedBy (Taeber Rapczak)
+ * Replace email with GitHub issue reporting link (Taeber Rapczak)
+ * Use proper casing for Metabolomics Workbench (Taeber Rapczak)
+ * Add Help link to Profile pages and fix menu (Taeber Rapczak)
+ * Add Help page (Kevin Hanson)
+
+
 ## 0.3.0 - 2020-01-22
 
  * Reinterpret datasets to mean samples and analyses (Taeber Rapczak)
