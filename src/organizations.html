@@ -194,7 +194,7 @@
             // Keep the results sorted.
             const sorted = ui.SortedList(results, 1, sortByName)
 
-            ui.SortedList(facets.querySelector(".type ul"), -1, sortByCount)
+            ui.SortedList(facets.querySelector(".type ul"), 1, sortByCount)
 
             // Query the TPF server for all organizations and some related data.
             const data = {
@@ -220,21 +220,29 @@
                     data.laboratories = results[2]
                     data.names = results[3]
                     data.parents = results[4]
-
-                    data.institutes.forEach(function (i) { renderOrganization(i, "Institute") })
-                    data.departments.forEach(function (i) { renderOrganization(i, "Department") })
-                    data.laboratories.forEach(function (i) { renderOrganization(i, "Laboratory") })
                 })
-                .then(function automaticallyUpdateCount() {
-                    const checkboxes = document.querySelectorAll(".facet input")
-                    for (var i = 0; i < checkboxes.length; i++) {
-                        checkboxes[i].addEventListener("click", updateResultCount)
-                    }
-
-                    search.addEventListener("keyup", updateResultCount)
-
-                    updateResultCount()
+                .then(function () {
+                    const fragment = document.createDocumentFragment()
+                    const items = [].concat(
+                        data.institutes.map(function (i) { return renderOrganization(i, "Institute") }),
+                        data.departments.map(function (i) { return renderOrganization(i, "Department") }),
+                        data.laboratories.map(function (i) { return renderOrganization(i, "Laboratory") })
+                    )
+                    items.forEach(function (li) { fragment.appendChild(li) })
+                    results.appendChild(fragment)
                 })
+                .then(automaticallyUpdateCount)
+
+            function automaticallyUpdateCount() {
+                const checkboxes = document.querySelectorAll(".facet input")
+                for (var i = 0; i < checkboxes.length; i++) {
+                    checkboxes[i].addEventListener("click", updateResultCount)
+                }
+
+                search.addEventListener("keyup", updateResultCount)
+
+                updateResultCount()
+            }
 
             // Setup the filters used by each facets. Each item should be a
             // function whose name matches the class name of the facet's HTML
@@ -292,9 +300,11 @@
                     grandparent: grandparentIRI ? data.names[grandparentIRI] : "",
                 }
 
-                const li = ui.Render(organizationType, bindings)
+                const li = ui.Build(organizationType, bindings)
 
                 facetsManager.Increment('type', type, type)
+
+                return li
             }
 
             /**

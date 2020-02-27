@@ -312,7 +312,12 @@ var ui = (function module() {
 
         /** Sorts an ordered list's items. */
         function sort() {
-            const lis = Array.prototype.slice.call(ol.querySelectorAll("li"))
+            // Get immediate <li> children.
+            const lis = []
+            for (var i = 0; i < ol.children.length; i++) {
+                lis.push(ol.children[i])
+            }
+
             lis.sort(function (a, b) {
                 const name1 = listItemKey(a)
                 const name2 = listItemKey(b)
@@ -333,12 +338,23 @@ var ui = (function module() {
             })
         }
 
+        var dirty = 0
+
         function update() {
-            // Stop observing changes until after sorting is complete, otherwise
-            // each change during sorting will trigger onMutate forever.
-            observer.disconnect()
-            sort()
-            observe()
+            // Limit resorting to once in 100ms.
+            if (dirty) {
+                return
+            }
+
+            dirty = setTimeout(function () {
+                // Stop observing changes until after sorting is complete,
+                // otherwise each change during sorting will trigger onMutate
+                // causing a never-ending cycle.
+                observer.disconnect()
+                sort()
+                observe()
+                dirty = 0
+            }, 100)
         }
 
         return {
