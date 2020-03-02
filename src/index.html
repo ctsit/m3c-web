@@ -742,7 +742,7 @@
                     study_data.names = study_results[1]
                     study_data.submitted = study_results[5]
                     // Only render the latest 10 studies
-                    study_data.projects.sort().reverse().slice(0, 10).forEach(renderStudy)
+                    study_data.studies.forEach(renderStudy)
                 })
 
 
@@ -806,21 +806,17 @@
              * @param {string} studyIRI
              */
              function renderStudy(studyIRI) {
-                const submitted = data.submitted[studyIRI]
+                const submitted = study_data.submitted[studyIRI]
 
                 const bindings = {
                     link: {
                         href: m3c.ProfileLink("study", studyIRI.slice(1, -1)),
                     },
-                    name: parseVIVOString(data.names[studyIRI]),
+                    name: parseVIVOString(study_data.names[studyIRI]),
                     submitted: submitted ? submitted.getFullYear(): null,
                 }
 
-                const li = ui.Render(template, bindings)
-
-                if (submitted) {
-                    facetsManager.Increment('submitted', bindings.submitted, bindings.submitted)
-                }
+                const li = ui.Render(studyTemplate, bindings)
             }
 
             /**
