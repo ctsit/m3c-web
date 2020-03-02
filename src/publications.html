@@ -269,13 +269,29 @@
                         data.authors[pubIRI].push(personIRI)
                     }
                 })
-                .then(function renderResultsItems() {
-                    const fragment = document.createDocumentFragment()
-                    const items = data.publications.map(renderPublication)
-                    items.forEach(function (li) { fragment.appendChild(li) })
-                    results.appendChild(fragment)
+                .then(renderResultsItems)
+                .then(function () {
+                    console.log("Done!")
                 })
                 .then(automaticallyUpdateCount)
+
+            function renderResultsItems() {
+                data.publications = data.publications.sort(function (a, b) {
+                    return data.years[b] - data.years[a]
+                })
+                const fragment = document.createDocumentFragment()
+                const items = data.publications.slice(0, 30).map(renderPublication)
+                items.forEach(function (li) { fragment.appendChild(li) })
+                results.appendChild(fragment)
+
+                setTimeout(function() {
+                    const fragment2 = document.createDocumentFragment()
+                    const rest = data.publications.slice(30).map(renderPublication)
+                    rest.forEach(function (li) { fragment.appendChild(li) })
+                    results.appendChild(fragment)
+                    updateResultCount()
+                }, 1)
+            }
 
             function automaticallyUpdateCount() {
                 if (data.publications.length > 5 + 1) {

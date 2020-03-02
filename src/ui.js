@@ -26,6 +26,8 @@ var ui = (function module() {
             addFacetEventListeners(facetElements[i])
         }
 
+        var dirtyTimeoutID = 0
+
         if (search) {
             search.addEventListener("keyup", handleSearchKeyup)
         }
@@ -42,7 +44,12 @@ var ui = (function module() {
                 return
             }
 
-            onFacetClick()
+            // Delay results udpate by a half-second until user is done typing.
+            clearTimeout(dirtyTimeoutID)
+            dirtyTimeoutID = setTimeout(onFacetClick, 500)
+            search.removeEventListener("keyup", handleSearchKeyup)
+            search.dispatchEvent(new KeyboardEvent("keyup"))
+            search.addEventListener("keyup", handleSearchKeyup)
         }
 
         /**
