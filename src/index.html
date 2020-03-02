@@ -480,7 +480,9 @@
                                         <a href="https://www.metabolomicsworkbench.org/data/DRCCMetadata.php?Mode=Study" class="name link mwb widget-list-item"
                                             target="_blank" rel="noopener noreferrer"></a>
                                     </div>
-                                    <div class="organization widget-info"></div>
+                                    <div class="widget-info">
+                                        <span class="submitted"></span>
+                                    </div>
                                 </li>
                         </ol>
                     </div>
@@ -668,7 +670,7 @@
 
             // Keep the results sorted.
             const pub_sorted = ui.SortedList(pub_results, -1, sortByYear)
-            const study_sorted = ui.SortedList(study_results, -1, sortByYear)
+            const study_sorted = ui.SortedList(study_results, -1, sortStudyByYear)
 
             // Query the TPF server for all publications/projects and some related data.
             const pub_data = {
@@ -695,45 +697,43 @@
 
 
             Promise.all(promises)
-                .then(function setData(pub_results) {
+            .then(function setData(pub_results) {
                     pub_data.publications = pub_results[0]
                     pub_data.names = pub_results[1]
-                    pub_data.authors = {}
-                    pub_data.years = pub_results[3]
-
-                    // authorship IRI => list of author and pub
                     const authorships = pub_results[2]
+                    pub_data.years = pub_results[3]
+                    pub_data.citations = pub_results[4]
 
-                    for (var i = 0; i < pub_data.publications.length; i++) {
-                        const pub = pub_data.publications[i]
-                        const authors = []
+                    // Build the authors mapping: author IRI => list of pubs.
+                    pub_data.authors = {}
 
-                        Object.keys(authorships)
-                            .forEach(function (iri) {
-                                const relates = authorships[iri]
-                                if (relates.length !== 2) {
-                                    console.warn(
-                                        "Unexpected number of authors and " +
-                                        "publications on authorship: " + iri
-                                    )
-                                    return
-                                }
+                    // authorships: IRI => list of unordered, pair (pub, person)
+                    const authorshipIRIs = Object.keys(authorships)
+                    for (var i = 0; i < authorshipIRIs.length; i++) {
+                        const authorshipIRI = authorshipIRIs[i]
+                        const relates = authorships[authorshipIRI]
 
-                                if (relates[0] === pub) {
-                                    authors.push(relates[1])
-                                    return
-                                }
+                        // Unfortunately, the pub-person pair could be in either
+                        // order. If the IRI contains "pmid", it's for the Pub.
+                        var pubIRI = relates[0]
+                        var personIRI = relates[1]
+                        if (relates[0].indexOf("pmid") === -1) {
+                            personIRI = relates[0]
+                            pubIRI = relates[1]
+                        }
 
-                                if (relates[1] === pub) {
-                                    authors.push(relates[0])
-                                    return
-                                }
-                            })
+                        if (!pub_data.authors[pubIRI]) {
+                            pub_data.authors[pubIRI] = []
+                        }
 
-                        pub_data.authors[pub] = authors
+                        pub_data.authors[pubIRI].push(personIRI)
                     }
-
-                    pub_data.publications.forEach(renderPublication)
+                })
+                .then(function renderResultsItems() {
+                    const fragment = document.createDocumentFragment()
+                    const items = pub_data.publications.map(renderPublication)
+                    items.forEach(function (li) { fragment.appendChild(li) })
+                    pub_results.appendChild(fragment)
                 })
 
             Promise.all(promises)
@@ -741,7 +741,7 @@
                     study_data.studies = study_results[4]
                     study_data.names = study_results[1]
                     study_data.submitted = study_results[5]
-                    // Only render the latest 10 studies
+
                     study_data.studies.forEach(renderStudy)
                 })
 
@@ -790,10 +790,11 @@
 
                 const bindings = {
                     link: {
-                        href: m3c.ProfileLink("publication", publicationIRI.slice(1, -1)),
+                        href: m3c.ProfileLink("publication",
+                        publicationIRI.slice(1, -1)),
                     },
                     name: parseVIVOString(pub_data.names[publicationIRI]),
-                    year: published ? published.slice(1, -55) : null,
+                    year: published ? published : null,
                     authors: authors ? authors.join(", ") : "",
                 }
 
@@ -839,6 +840,14 @@
                     return "0"
                 }
                 return year.innerText
+            }
+
+            function sortStudyByYear(li) {
+                const submitted = li.querySelector(".submitted")
+                if (!submitted || !submitted.innerText) {
+                    return "0"
+                }
+                return submitted.innerText
             }
         </script>
 
