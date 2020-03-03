@@ -258,20 +258,6 @@
             const facetsManager = ui.Facets(facets, results, filters, search)
 
             /**
-             * Extract the actual text from a VIVO string
-             * @param {string} [text]
-             */
-            function parseVIVOString(text) {
-                if (!text || text[0] != '"') {
-                    return text
-                }
-
-                text = text.slice(1, text.lastIndexOf('"'))
-                text = JSON.parse('"' + text + '"')
-                return text
-            }
-
-            /**
              * Render an organization of type with the specified IRI.
              * @param {string} organizationIRI
              * @param {"Institute"|"Department"|"Laboratory"} type
@@ -291,7 +277,7 @@
                     link: {
                         href: m3c.ProfileLink("organization", organizationIRI.slice(1,-1)),
                     },
-                    name: parseVIVOString(data.names[organizationIRI]),
+                    name: entity.ParseVIVOString(data.names[organizationIRI]),
                     typename: type,
                     fas: {
                         className: "fas fa-"+ icons[type],

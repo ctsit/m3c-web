@@ -109,7 +109,7 @@ var entity = (function module() {
         return client.Query(null, rdfs + "label", null).then(function(triples) {
             const names = {}
             triples.forEach(function(triple) {
-                names[triple.Subject] = parseVIVOString(triple.Object)
+                names[triple.Subject] = ParseVIVOString(triple.Object)
             })
             return names
         })
@@ -130,6 +130,21 @@ var entity = (function module() {
      */
     function Parents(client) {
         return client.Map(base + "hasParent")
+    }
+
+    /**
+     * Extract the actual text from a VIVO string
+     * @param {string} [text]
+     * @returns string
+     */
+    function ParseVIVOString(text) {
+        if (!text || text[0] != '"') {
+            return text
+        }
+
+        text = text.slice(1, text.lastIndexOf('"'))
+        text = JSON.parse('"' + text + '"')
+        return text
     }
 
     /**
@@ -976,8 +991,8 @@ var entity = (function module() {
 
     // Module Exports
     return {
-        Authorships: Authorships,
         AssociatedWiths: AssociatedWiths,
+        Authorships: Authorships,
         Citations: Citations,
         Departments: Departments,
         FundingOrganizations: FundingOrganizations,
@@ -985,10 +1000,11 @@ var entity = (function module() {
         Laboratories: Laboratories,
         Name: Name,
         Names: Names,
+        Organization: Organization,
         Parents: Parents,
+        ParseVIVOString, ParseVIVOString,
         Person: Person,
         Persons: Persons,
-        Organization: Organization,
         Project: Project,
         Projects: Projects,
         Publication: Publication,

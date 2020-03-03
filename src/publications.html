@@ -319,20 +319,6 @@
             const facetsManager = ui.Facets(facets, results, filters, search)
 
             /**
-             * Extract the actual text from a VIVO string
-             * @param {string} [text]
-             */
-            function parseVIVOString(text) {
-                if (!text || text[0] != '"') {
-                    return text
-                }
-
-                text = text.slice(1, text.lastIndexOf('"'))
-                text = JSON.parse('"' + text + '"')
-                return text
-            }
-
-            /**
              * Render a publication with the specified IRI.
              * @param {string} publicationIRI
              */
@@ -363,10 +349,10 @@
                     link: {
                         href: m3c.ProfileLink("publication", publicationIRI.slice(1, -1)),
                     },
-                    name: parseVIVOString(data.names[publicationIRI]),
+                    name: entity.ParseVIVOString(data.names[publicationIRI]),
                     year: published ? published : null,
                     authors: authors ? authors.join(", ") : "",
-                    citation: citation ? parseVIVOString(citation) : ""
+                    citation: citation ? entity.ParseVIVOString(citation) : ""
                 }
 
                 const li = ui.Build(template, bindings)

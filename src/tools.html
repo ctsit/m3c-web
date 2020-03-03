@@ -238,20 +238,6 @@
             const facetsManager = ui.Facets(facets, results, filters, search)
 
             /**
-             * Extract the actual text from a VIVO string
-             * @param {string} [text]
-             */
-            function parseVIVOString(text) {
-                if (!text || text[0] != '"') {
-                    return text
-                }
-
-                text = text.slice(1, text.lastIndexOf('"'))
-                text = JSON.parse('"' + text + '"')
-                return text
-            }
-
-            /**
              * Render a tool with the specified IRI.
              * @param {string} toolIRI
              */
@@ -262,7 +248,7 @@
                     link: {
                         href: m3c.ProfileLink("tool", toolIRI.slice(1, -1)),
                     },
-                    name: parseVIVOString(data.names[toolIRI]),
+                    name: entity.ParseVIVOString(data.names[toolIRI]),
                 }
 
                 const li = ui.Render(template, bindings)
