@@ -1,0 +1,12 @@
+[
+    {
+        "pmid": "THIS IS A NUMBER",
+        "title": "...",
+        "authors": [
+            "",
+            ...
+        ],
+        "published": "THIS IS A DATE STRING"
+    },
+    { repeat }
+]
