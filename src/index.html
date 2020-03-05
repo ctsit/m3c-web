@@ -668,18 +668,10 @@
             const studyTemplate = study_root.querySelector("li.study.template")
 
 
-            // Keep the results sorted.
-            const pub_sorted = ui.SortedList(pub_results, -1, sortByYear)
+            // Keep the Study results sorted.
             const study_sorted = ui.SortedList(study_results, -1, sortStudyByYear)
 
-            // Query the TPF server for all publications/projects and some related data.
-            const pub_data = {
-                publications: [],
-                names: {},        // entity IRI => label string
-                authors: {},
-                years: {},
-            }
-
+            // Query the TPF server for all studies and some related data.
             const study_data = {
                 studies: [],
                 names: {},
@@ -687,60 +679,22 @@
             }
 
             const promises = [
-                entity.Publications(client),
                 entity.Names(client),
-                entity.Authorships(client),
-                entity.PublicationYears(client),
                 entity.Studies(client),
                 entity.SubmissionDates(client),
             ]
 
-
-            Promise.all(promises)
-            .then(function setData(pub_results) {
-                    pub_data.publications = pub_results[0]
-                    pub_data.names = pub_results[1]
-                    const authorships = pub_results[2]
-                    pub_data.years = pub_results[3]
-                    pub_data.citations = pub_results[4]
-
-                    // Build the authors mapping: author IRI => list of pubs.
-                    pub_data.authors = {}
-
-                    // authorships: IRI => list of unordered, pair (pub, person)
-                    const authorshipIRIs = Object.keys(authorships)
-                    for (var i = 0; i < authorshipIRIs.length; i++) {
-                        const authorshipIRI = authorshipIRIs[i]
-                        const relates = authorships[authorshipIRI]
-
-                        // Unfortunately, the pub-person pair could be in either
-                        // order. If the IRI contains "pmid", it's for the Pub.
-                        var pubIRI = relates[0]
-                        var personIRI = relates[1]
-                        if (relates[0].indexOf("pmid") === -1) {
-                            personIRI = relates[0]
-                            pubIRI = relates[1]
-                        }
-
-                        if (!pub_data.authors[pubIRI]) {
-                            pub_data.authors[pubIRI] = []
-                        }
-
-                        pub_data.authors[pubIRI].push(personIRI)
-                    }
-                })
-                .then(function renderResultsItems() {
-                    const fragment = document.createDocumentFragment()
-                    const items = pub_data.publications.map(renderPublication)
-                    items.forEach(function (li) { fragment.appendChild(li) })
-                    pub_results.appendChild(fragment)
+            // Read the Publications from a local .json file
+            fetch("publicationlist.json")
+                .then(function (res) { return res.json() }).then(function (pubs) { 
+                    pubs.forEach(renderPublication)
                 })
 
             Promise.all(promises)
                 .then(function setData(study_results) {
-                    study_data.studies = study_results[4]
-                    study_data.names = study_results[1]
-                    study_data.submitted = study_results[5]
+                    study_data.names = study_results[0]
+                    study_data.studies = study_results[1]
+                    study_data.submitted = study_results[2]
 
                     study_data.studies.forEach(renderStudy)
                 })
@@ -766,10 +720,7 @@
              * @param {string} publicationIRI
              */
             function renderPublication(publicationIRI) {
-                const authors = pub_data.authors[publicationIRI]
-                    .map(function (authorIRI) {
-                        return pub_data.names[authorIRI]
-                    })
+                const authors = publicationIRI.authors
 
                 authors.sort(function (a, b) {
                     const aname = sortLastFirst(a)
@@ -785,15 +736,15 @@
                     return 0
                 })
 
-                var published = pub_data.years[publicationIRI]
+                var published = publicationIRI.published
 
 
                 const bindings = {
                     link: {
                         href: m3c.ProfileLink("publication",
-                        publicationIRI.slice(1, -1)),
+                        publicationIRI.iri.slice(1, -1)),
                     },
-                    name: parseVIVOString(pub_data.names[publicationIRI]),
+                    name: publicationIRI.title,
                     year: published ? published : null,
                     authors: authors ? authors.join(", ") : "",
                 }
