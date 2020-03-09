@@ -1002,7 +1002,7 @@ var entity = (function module() {
         Names: Names,
         Organization: Organization,
         Parents: Parents,
-        ParseVIVOString, ParseVIVOString,
+        ParseVIVOString: ParseVIVOString,
         Person: Person,
         Persons: Persons,
         Project: Project,
