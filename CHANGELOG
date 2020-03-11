@@ -1,6 +1,17 @@
 Changelog
 =========
 
+## 0.5.0 - 2020-03-11
+
+
+ * Rewrite Publications Listing script to improve UX (Taeber Rapczak)
+ * Rework Person Listing to reduce network calls (Hunter Jarrell)
+ * Update README with new Quickstart instructions (Taeber Rapczak)
+ * Replace dashboard page widgets (Samantha Emerson)
+ * Move parseVIVOString to entity module (Taeber Rapczak)
+ * Update TPF client and other dependencies from upstream (Taeber Rapczak)
+
+
 ## 0.4.0 - 2020-02-27
 
  * Optimize page loading for Publications Listing (Taeber Rapczak)
