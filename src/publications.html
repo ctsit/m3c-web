@@ -354,6 +354,13 @@
                         const title = state.names[uri].toUpperCase()
                         if (title.indexOf(q) !== -1) {
                             filtered.push(uri)
+                            continue
+                        }
+
+                        const authors = state.authors[uri].join(", ").toUpperCase()
+                        if (authors.indexOf(q) !== -1) {
+                            filtered.push(uri)
+                            continue
                         }
                     }
                 }
