@@ -7,10 +7,20 @@ Web frontend for the M3C People Portal: https://people.metabolomics.info
 Quickstart
 ----------
 
-Open the `index.html` file. Set the `endpoint` URL parameter to your TPF
-endpoint:
+First, generate the `recentpubs.json` file.
 
-    https://people.metabolomics.info/index.html?endpoint=http://devbox:8888/tpf/core
+    $ npm install
+    $ TPF_ENDPOINT=http://stage.vivo.metabolomics.info/tpf/core \
+    > node src/recentpubs.js >src/recentpubs.json
+
+Next, run a local HTTP server. Then, open a browser with the `endpoint`
+parameter set to your TPF endpoint.
+
+For example, on macOS, you could run the following Terminal commands:
+
+    $ cd src/
+    $ python3 -m http.server 8080
+    $ open 'http://localhost:8080/?endpoint=http://stage.vivo.metabolomics.info/tpf/core'
 
 
 Contributing
