@@ -84,6 +84,18 @@ var entity = (function module() {
         })
     }
 
+    function MainImages(client) {
+        return client.MapAll(vitro + "mainImage")
+    }
+
+    function DownloadLocations(client) {
+        return client.MapAll(vitro + "downloadLocation")
+    }
+
+    function DirectDownloadUrls(client) {
+        return client.MapAll(vitro + "directDownloadUrl")
+    }
+
     /**
      * Fetches the name (label) of an Entity.
      *
@@ -433,7 +445,6 @@ var entity = (function module() {
                 client
                     .Entity(iri)
                     .Link(vitro, "mainImage")
-                    .Link(vitro, "thumbnailImage")
                     .Link(vitro, "downloadLocation")
                     .Link(vitro, "directDownloadUrl")
                     .Single(decodeString(returnPhoto))
@@ -995,9 +1006,12 @@ var entity = (function module() {
         Authorships: Authorships,
         Citations: Citations,
         Departments: Departments,
+        DirectDownloadUrls: DirectDownloadUrls,
+        DownloadLocations: DownloadLocations,
         FundingOrganizations: FundingOrganizations,
         Institutes: Institutes,
         Laboratories: Laboratories,
+        MainImages: MainImages,
         Name: Name,
         Names: Names,
         Organization: Organization,
