@@ -226,7 +226,7 @@
                 return Promise.all([
                     entity.Publications(client),
                     entity.Names(client),
-                    entity.PublicationYears(client),
+                    entity.PublicationDates(client),
                 ])
                 .then(function (data) {
                     const pubs = data[0]
@@ -239,7 +239,7 @@
                     })
 
                     pubs.sort(function (a, b) {
-                        return dates[b] - dates[a]
+                        return dates[b] > dates[a]
                     })
 
                     for (const uri in names) {
@@ -256,8 +256,10 @@
                     const years = {}
                     const older = "1999 and earlier"
                     for (const uri in dates) {
-                        const yr = dates[uri]
-                        const year = yr < 2000 ? older : new String(yr)
+                        var year = dates[uri].slice(0, "2012".length)
+                        if (year < "2000") {
+                            year = older
+                        }
                         if (!years[year]) {
                             years[year] = []
                         }
