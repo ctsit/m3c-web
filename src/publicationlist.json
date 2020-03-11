@@ -1,0 +1,93 @@
+[
+   {
+      "iri" : "<https://vivo.metabolomics.info/individual/pmid32042018>",
+      "pmid" : "32042018",
+      "published" : "2020",
+      "title" : "Sting nematodes modify metabolomic profiles of host plants.",
+      "authors" : [
+         "Nicole Benda",
+         "Kevin Kenworthy"
+      ]
+   },
+   {
+      "authors" : [
+         "Mohan Raizada"
+      ],
+      "title" : "Depression phenotype identified by using single nucleotide exact amplicon sequence variants of the human gut microbiome.",
+      "iri" : "<https://vivo.metabolomics.info/individual/pmid31988436>",
+      "published" : "2020",
+      "pmid" : "31988436"
+   },
+   {
+      "title" : "Light chain only variant of proliferative glomerulonephritis with monoclonal immunoglobulin deposits is associated with a high detection rate of the pathogenic plasma cell clone.",
+      "authors" : [
+         "Surendra Dasari"
+      ],
+      "iri" : "<https://vivo.metabolomics.info/individual/pmid32001067>",
+      "pmid" : "32001067",
+      "published" : "2020"
+   },
+   {
+      "title" : "Living cell-based regenerative medicine technologies for periodontal soft tissue augmentation.",
+      "authors" : [
+         "Stephen Feinberg"
+      ],
+      "iri" : "<https://vivo.metabolomics.info/individual/pmid31465117>",
+      "pmid" : "31465117",
+      "published" : "2020"
+   },
+   {
+      "iri" : "<https://vivo.metabolomics.info/individual/pmid31541782>",
+      "published" : "2020",
+      "pmid" : "31541782",
+      "authors" : [
+         "Christina Ferreira"
+      ],
+      "title" : "Influence of cAMP modulator supplementation of in vitro culture medium on Bos taurus indicus embryos."
+   },
+   {
+      "iri" : "<https://vivo.metabolomics.info/individual/pmid31739364>",
+      "published" : "2020",
+      "pmid" : "31739364",
+      "authors" : [
+         "David Askenazi"
+      ],
+      "title" : "Acute Kidney Injury is Associated with Poor Lung Outcomes in Infants Born ≥32 Weeks of Gestational Age."
+   },
+   {
+      "pmid" : "31846763",
+      "published" : "2020",
+      "iri" : "<https://vivo.metabolomics.info/individual/pmid31846763>",
+      "title" : "LC-MS/MS based comparative proteomics of floral nectars reveal different mechanisms involved in floral defense of Nicotiana spp., Petunia hybrida and Datura stramonium.",
+      "authors" : [
+         "Christoph Borchers"
+      ]
+   },
+   {
+      "authors" : [
+         "Brett Finlay"
+      ],
+      "title" : "Establishing or Exaggerating Causality for the Gut Microbiome: Lessons from Human Microbiota-Associated Rodents.",
+      "iri" : "<https://vivo.metabolomics.info/individual/pmid31978342>",
+      "published" : "2020",
+      "pmid" : "31978342"
+   },
+   {
+      "pmid" : "32051186",
+      "published" : "2020",
+      "iri" : "<https://vivo.metabolomics.info/individual/pmid32051186>",
+      "title" : "Floating the invisible swan: noninvasive prediction of haemodynamics.",
+      "authors" : [
+         "Evan Brittain"
+      ]
+   },
+   {
+      "authors" : [
+         "Geraint Rogers"
+      ],
+      "title" : "Improving Risk-Benefit in Faecal Transplantation through Microbiome Screening.",
+      "iri" : "<https://vivo.metabolomics.info/individual/pmid31952909>",
+      "published" : "2020",
+      "pmid" : "31952909"
+   }
+]

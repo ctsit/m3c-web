@@ -49,7 +49,8 @@
         }
 
         #links li,
-        .visuals div {
+        #pub-widget,
+        #study-widget {
             box-shadow: 3px 4px 5px gray;
         }
 
@@ -116,7 +117,7 @@
             margin-top: 1em;
             display: -ms-grid;
             display: grid;
-            -ms-grid-columns: 1fr 1fr 1fr;
+            -ms-grid-columns: 1fr 0.1fr 1fr;
             grid-template-columns: repeat(auto-fit, 320px);
             /* grid-template-columns: 1fr 1fr 1fr; */
             grid-gap: 1em;
@@ -133,22 +134,34 @@
             padding: 1em;
         }
 
-        .visuals .wordcloud { -ms-grid-column: 1 }
-        .visuals .graph     { -ms-grid-column: 2 }
-        .visuals .about     { -ms-grid-column: 3 }
+        .visuals #pub-widget  { -ms-grid-column: 1 }
+        .visuals #study-widget { -ms-grid-column: 3 }
 
-        .visuals div img {
-            width: 100%;
-            height: auto;
+        .list-widget {
+            font-size: 0.9rem;
         }
 
-        .wordcloud img {
-            padding-top: 1.5em;
+        .pub-results li:nth-child(n+11) {
+            display: none !important;
         }
 
-        .about p {
-            text-align: left;
-            padding: 0 1em;
+        .study-results li:nth-child(n+12) {
+            display: none !important;
+        }   /* n+11 only shows 9 results */
+
+        .widget-list-names {
+            min-height:35px !important;
+            padding-bottom:2px !important;
+        }
+
+        .widget-list-item {
+            padding:0px 20px !important;
+        }
+
+        .widget-info {
+            min-height:10px !important;
+            margin-bottom:10px !important;
+            padding:0.5em !important;
         }
 
         h3 {
@@ -439,29 +452,41 @@
             </div>
 
             <div class="visuals">
-                <div class="wordcloud">
-                    <img src="wordcloud.gif" alt="Word Cloud showing common terms relating to Metabolomics" />
+                <!-- Widgets for Latest Publications and Latest Studies -->
+                    <div id="pub-widget" class="Publications">
+                        <a href="publications.html">
+                            <h3>Latest Publications</h3>
+                        </a>
+                        <ol class="list-widget pub-results">
+                                <li class="publication template">
+                                    <div class="widget-list-names">
+                                        <a href="#" class="name link widget-list-item"
+                                            target="_blank" rel="noopener noreferrer"></a>
+                                    </div>
+                                    <div class="widget-info">
+                                        <span class="year"></span>
+                                        <span class="authors"></span>
+                                    </div>
+                                </li>
+                        </ol>
+                    </div>
+                    <div id="study-widget" class="Studies">
+                        <a href="studies.html">
+                                <h3>Latest Studies</h3>
+                        </a>
+                        <ol class="list-widget study-results">
+                            <li class="study template">
+                                <div class="widget-list-names">
+                                        <a href="https://www.metabolomicsworkbench.org/data/DRCCMetadata.php?Mode=Study" class="name link mwb widget-list-item"
+                                            target="_blank" rel="noopener noreferrer"></a>
+                                    </div>
+                                    <div class="widget-info">
+                                        <span class="submitted"></span>
+                                    </div>
+                                </li>
+                        </ol>
+                    </div>
                 </div>
-                <div class="graph">
-                    <a href="projects_by_year.png">
-                        <img src="projects_by_year.png" alt="Graph showing the number of projects by year" />
-                    </a>
-                </div>
-                <div class="about">
-                    <h3>About</h3>
-                    <p>
-                        The Metabolomics Info People Portal is a service of the
-                        <a href="https://metabolomics.info">Metabolomics Consortium Coordinating Center</a>.
-                    </p>
-                    <p>
-                        Grant <a href="https://projectreporter.nih.gov/project_info_description.cfm?aid=9589555"
-                            target="_blank" rel="noopener noreferrer">1U2CDK119889-01</a>
-                        of the <a href="https://commonfund.nih.gov/metabolomics" target="_blank"
-                            rel="noopener noreferrer">NIH
-                            Common Fund Metabolomics Program</a>.
-                    </p>
-                </div>
-            </div>
 
         </div> <!-- div.page -->
 
@@ -479,6 +504,7 @@
         <script src="tpf.js"></script>
         <script src="str.js"></script>
         <script src="m3c.js"></script>
+        <script src="ui.js"></script>
         <script src="entity.js"></script>
 
         <script>
@@ -516,6 +542,12 @@
             for (var i = 0; i < prevLinks.length; i++) {
                 addPrevLinkClickHandler(prevLinks[i])
             }
+
+            const widgetLinks = document.querySelector(".visuals")
+            const widgetPub = widgetLinks.querySelector("#pub-widget")
+            addWidgetLink(widgetPub)
+            const widgetStudy = widgetLinks.querySelector("#study-widget")
+            addWidgetLink(widgetStudy)
 
             function addLink(li) {
                 const concept = li.className
@@ -617,6 +649,156 @@
                     link.querySelector("img.photo").src =
                         m3c.PhotoURL(client.Endpoint, url)
                 })
+            }
+            function addWidgetLink(id) {
+                const concept = id.className
+                const lowered = concept.toLowerCase()
+
+                id.querySelector("a").href = m3c.ListingLink(lowered)
+            }
+
+            // script for the Publication and Studies list dashboard widgets
+
+            // Aliases for certain HTML elements
+            const pub_root = document.getElementById("pub-widget")
+            const study_root = document.getElementById("study-widget")
+            const pub_results = pub_root.querySelector(".pub-results")
+            const study_results = study_root.querySelector(".study-results")
+            const publicationTemplate = pub_root.querySelector("li.publication.template")
+            const studyTemplate = study_root.querySelector("li.study.template")
+
+
+            // Keep the Study results sorted.
+            const study_sorted = ui.SortedList(study_results, -1, sortStudyByYear)
+
+            // Query the TPF server for all studies and some related data.
+            const study_data = {
+                studies: [],
+                names: {},
+                submitted: {},
+            }
+
+            const promises = [
+                entity.Names(client),
+                entity.Studies(client),
+                entity.SubmissionDates(client),
+            ]
+
+            // Read the Publications from a local .json file
+            fetch("publicationlist.json")
+                .then(function (res) { return res.json() }).then(function (pubs) { 
+                    pubs.forEach(renderPublication)
+                })
+
+            Promise.all(promises)
+                .then(function setData(study_results) {
+                    study_data.names = study_results[0]
+                    study_data.studies = study_results[1]
+                    study_data.submitted = study_results[2]
+
+                    study_data.studies.forEach(renderStudy)
+                })
+
+
+            /**
+             * Extract the actual text from a VIVO string
+             * @param {string} [text]
+             */
+            function parseVIVOString(text) {
+                if (!text || text[0] != '"') {
+                    return text
+                }
+
+                text = text.slice(1, text.lastIndexOf('"'))
+                text = JSON.parse('"' + text + '"')
+                return text
+            }
+
+
+            /**
+             * Render a publication with the specified IRI.
+             * @param {string} publicationIRI
+             */
+            function renderPublication(publicationIRI) {
+                const authors = publicationIRI.authors
+
+                authors.sort(function (a, b) {
+                    const aname = sortLastFirst(a)
+                    const bname = sortLastFirst(b)
+                    if (aname < bname) {
+                        return -1
+                    }
+
+                    if (aname > bname) {
+                        return +1
+                    }
+
+                    return 0
+                })
+
+                var published = publicationIRI.published
+
+
+                const bindings = {
+                    link: {
+                        href: m3c.ProfileLink("publication",
+                        publicationIRI.iri.slice(1, -1)),
+                    },
+                    name: publicationIRI.title,
+                    year: published ? published : null,
+                    authors: authors ? authors.join(", ") : "",
+                }
+
+                const li = ui.Render(publicationTemplate, bindings)
+            }
+
+
+            /**
+             * Render a study with the specified IRI.
+             * @param {string} studyIRI
+             */
+             function renderStudy(studyIRI) {
+                const submitted = study_data.submitted[studyIRI]
+
+                const bindings = {
+                    link: {
+                        href: m3c.ProfileLink("study", studyIRI.slice(1, -1)),
+                    },
+                    name: parseVIVOString(study_data.names[studyIRI]),
+                    submitted: submitted ? submitted.getFullYear(): null,
+                }
+
+                const li = ui.Render(studyTemplate, bindings)
+            }
+
+            /**
+             * @param {string} name
+             */
+            function sortLastFirst(name) {
+                const firstLast = name.toUpperCase()
+                const lastFirst = firstLast.split(' ').reverse().join(' ')
+                return lastFirst
+            }
+
+
+            /**
+             * Extract the name of a list item; used for sorting.
+             * @param {HTMLLIElement} li
+             */
+            function sortByYear(li) {
+                const year = li.querySelector(".year")
+                if (!year || !year.innerText) {
+                    return "0"
+                }
+                return year.innerText
+            }
+
+            function sortStudyByYear(li) {
+                const submitted = li.querySelector(".submitted")
+                if (!submitted || !submitted.innerText) {
+                    return "0"
+                }
+                return submitted.innerText
             }
         </script>
 
