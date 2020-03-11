@@ -2,7 +2,8 @@
 const tpf = require("./tpf")
 const entity = require("./entity")
 async function main() {
-    const client = new tpf.Client("https://vivo.metabolomics.info/tpf/core")
+    const endpoint = process.env.TPF_ENDPOINT || "https://vivo.metabolomics.info/tpf/core"
+    const client = new tpf.Client(endpoint)
     const publicationIRIs = await entity.Publications(client)
     const names = await entity.Names(client)
     const authorships = await entity.Authorships(client)
