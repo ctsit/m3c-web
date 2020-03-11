@@ -39,6 +39,11 @@
             display: inline-block;
             padding-right: 0.5em;
         }
+
+        .authors a {
+            margin-left: 0.25em;
+            margin-right: 0.25em;
+        }
     </style>
 </head>
 
@@ -122,26 +127,8 @@
                     <div class="facet published">
                         <p>Year Published</p>
                         <div class="facet-controls">
-                            <a href="#" class="show">Show all</a>
-                            <a href="#" class="limit">Show fewer</a>
-                            <a href="#" class="reset">Uncheck all</a>
-                        </div>
-                        <ul>
-                            <li class="template">
-                                <label>
-                                    <input type="checkbox" class="box" />
-                                    <span class="name"></span>
-                                    <span class="count"></span>
-                                </label>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <div class="facet author">
-                        <p>Author</p>
-                        <div class="facet-controls">
-                            <a href="#" class="show">Show all</a>
-                            <a href="#" class="limit">Show fewer</a>
+                            <!-- <a href="#" class="show">Show all</a> -->
+                            <!-- <a href="#" class="limit">Show fewer</a> -->
                             <a href="#" class="reset">Uncheck all</a>
                         </div>
                         <ul>
@@ -205,52 +192,103 @@
         <script>
             const client = m3c.NewTPFClient()
 
-            // Aliases for certain HTML elements
-            const root = document.getElementById("listing")
-            const results = root.querySelector(".results")
-            const facets = root.querySelector(".facets")
-            const search = root.querySelector("#searchFilter")
-            const template = root.querySelector("li.publication.template")
+            const uiCount = document.querySelector(".controls .count")
+            const uiRoot = document.getElementById("listing")
+            const uiResults = uiRoot.querySelector(".results")
+            const uiFacets = uiRoot.querySelector(".facets")
+            const uiTemplate = uiRoot.querySelector("li.publication.template")
+            const uiSearch = uiRoot.querySelector("#searchFilter")
+            const uiUncheckAll = uiFacets.querySelector(".published .reset")
 
-            // Keep the results sorted.
-            const sorted = ui.SortedList(results, -1, sortByYear)
+            const state = {
+                limit: 100,
+                dirty: 0,
+                loading: false,
 
-            ui.SortedList(facets.querySelector(".published ul"), -1, sortByName)
-            ui.SortedList(facets.querySelector(".author ul"), -1, sortByCount)
-
-            // Query the TPF server for all publications and some related data.
-            const data = {
-                publications: [],
-                names: {},        // entity IRI => label string
-                authors: {},
                 years: {},
-                citations: {},
+                yearsSelected: [],
 
+                query: "",
+                filtered: [],
+
+                publications: [],
+                names: {},
+                published: {},
+                authors: {},
+                citations: {},
+                authorsNames: {},
             }
 
-            const promises = [
-                entity.Publications(client),
-                entity.Names(client),
-                entity.Authorships(client),
-                entity.PublicationYears(client),
-                entity.Citations(client),
-            ]
+            uiSearch.addEventListener("keyup", handleSearchChange)
+            uiUncheckAll.addEventListener("click", handleUncheckAll)
 
-            Promise.all(promises)
-                .then(function setData(results) {
-                    data.publications = results[0]
-                    data.names = results[1]
-                    const authorships = results[2]
-                    data.years = results[3]
-                    data.citations = results[4]
+            fetchData()
+            .then(render)
 
-                    // Build the authors mapping: author IRI => list of pubs.
-                    data.authors = {}
 
-                    // authorships: IRI => list of unordered, pair (pub, person)
-                    const authorshipIRIs = Object.keys(authorships)
-                    for (var i = 0; i < authorshipIRIs.length; i++) {
-                        const authorshipIRI = authorshipIRIs[i]
+            function fetchData() {
+                update({ loading: true })
+
+                return Promise.all([
+                    entity.Publications(client),
+                    entity.Names(client),
+                    entity.PublicationDates(client),
+                ])
+                .then(function (data) {
+                    const pubs = data[0]
+                    const names = data[1]
+                    const dates = data[2]
+
+                    update({
+                        publications: pubs,
+                        published: dates,
+                    })
+
+                    pubs.sort(function (a, b) {
+                        return dates[b] > dates[a]
+                    })
+
+                    for (const uri in names) {
+                        names[uri] = entity.ParseVIVOString(names[uri])
+                    }
+
+                    update({
+                        names: names,
+                        publications: pubs,
+                        filtered: pubs,
+                    })
+
+                    /** @type {{[uri: string]: string[]}} */
+                    const years = {}
+                    const older = "1999 and earlier"
+                    for (const uri in dates) {
+                        var year = dates[uri].slice(0, "2012".length)
+                        if (year < "2000") {
+                            year = older
+                        }
+                        if (!years[year]) {
+                            years[year] = []
+                        }
+                        years[year].push(uri)
+                    }
+                    update({ years: years }, renderFacets)
+
+                }, console.error)
+                .then(function () {
+                    return entity.Citations(client)
+                })
+                .then(function (citations) {
+                    update({ citations: citations })
+                })
+                .then(function () {
+                    return entity.Authorships(client)
+                })
+                .then(function (authorships) {
+                    /** @type {{[uri: string]: string[]}} PMID => Author List */
+                    const authors = {}
+                    const authorsNames = {}
+
+                    for (const authorshipIRI in authorships) {
                         const relates = authorships[authorshipIRI]
 
                         // Unfortunately, the pub-person pair could be in either
@@ -262,100 +300,199 @@
                             pubIRI = relates[1]
                         }
 
-                        if (!data.authors[pubIRI]) {
-                            data.authors[pubIRI] = []
+                        if (!authors[pubIRI]) {
+                            authors[pubIRI] = []
+                            authorsNames[pubIRI] = []
                         }
 
-                        data.authors[pubIRI].push(personIRI)
+                        authors[pubIRI].push(personIRI)
+                        authorsNames[pubIRI].push(state.names[personIRI])
                     }
-                })
-                .then(function renderResultsItems() {
-                    const fragment = document.createDocumentFragment()
-                    const items = data.publications.map(renderPublication)
-                    items.forEach(function (li) { fragment.appendChild(li) })
-                    results.appendChild(fragment)
-                })
-                .then(automaticallyUpdateCount)
 
-            function automaticallyUpdateCount() {
-                if (data.publications.length > 5 + 1) {
-                    const facets = document.querySelectorAll(".facet")
-                    for (var i = 0; i < facets.length; i++) {
-                        var f = facets[i]
-                        f.className = (f.className + " limit").trim()
-                    }
-                }
-
-                const checkboxes = document.querySelectorAll(".facet input")
-                for (var i = 0; i < checkboxes.length; i++) {
-                    checkboxes[i].addEventListener("click", updateResultCount)
-                }
-
-                search.addEventListener("keyup", updateResultCount)
-
-                updateResultCount()
-            }
-
-            // Setup the filters used by each facets. Each item should be a
-            // function whose name matches the class name of the facet's HTML
-            // element.
-            const filters = {
-                published: function published(selected, li) {
-                    const year = li.querySelector(".year")
-                    return selected.indexOf(year.textContent) !== -1
-                },
-                author: function author(selected, li) {
-                    const authors = li.querySelector(".authors").textContent
-                    for (var i = 0; i < selected.length; i++) {
-                        if (authors.indexOf(selected[i]) !== -1) {
-                            return true
-                        }
-                    }
-                    return false
-                },
-            }
-
-            // Use facetsManager to dynamically increment the count of an option
-            const facetsManager = ui.Facets(facets, results, filters, search)
-
-            /**
-             * Render a publication with the specified IRI.
-             * @param {string} publicationIRI
-             */
-            function renderPublication(publicationIRI) {
-                const authors = data.authors[publicationIRI]
-                    .map(function (authorIRI) {
-                        return data.names[authorIRI]
+                    update({
+                        authors: authors,
+                        authorsNames: authorsNames,
                     })
-
-                authors.sort(function (a, b) {
-                    const aname = sortLastFirst(a)
-                    const bname = sortLastFirst(b)
-                    if (aname < bname) {
-                        return -1
-                    }
-
-                    if (aname > bname) {
-                        return +1
-                    }
-
-                    return 0
                 })
+                .catch(console.error)
+                .then(function () {
+                    update({ loading: false })
+                })
+            }
 
-                const published = data.years[publicationIRI]
-                const citation = data.citations[publicationIRI]
+            /** @param {MouseEvent} click */
+            function handleFacetClick(click) {
+                const year = click.target.value
+                const checked = click.target.checked
+                if (checked) {
+                    refilter(state.query, state.yearsSelected.concat([year]))
+                    return
+                }
+                const s = state.yearsSelected
+                const i = s.indexOf(year)
+                const selected = s.slice(0,i).concat(s.slice(i+1))
+                refilter(state.query, selected)
+            }
+
+            /** @param {KeyboardEvent} keyup */
+            function handleSearchChange(keyup) {
+                if (keyup.isComposing || keyup.keyCode === 229) {
+                    // Ignore IME composition
+                    // @see https://developer.mozilla.org/en-US/docs/Web/API/Document/keyup_event
+                    return
+                }
+                refilter(uiSearch.value, state.yearsSelected)
+            }
+
+            function handleUncheckAll() {
+                refilter(state.query, [], renderFacets)
+            }
+
+            function refilter(query, yearsSelected, callback) {
+                var pubs = state.publications
+                if (yearsSelected.length > 0) {
+                    pubs = []
+                    yearsSelected.sort().reverse()
+                    for (var i = 0; i < yearsSelected.length; i++) {
+                        const year = yearsSelected[i]
+                        pubs = pubs.concat(state.years[year])
+                    }
+                }
+
+                const q = query.toUpperCase()
+                var filtered = pubs
+                if (q) {
+                    filtered = []
+                    for (var i = 0; i < pubs.length; i++) {
+                        const uri = pubs[i]
+                        const title = state.names[uri].toUpperCase()
+                        if (title.indexOf(q) !== -1) {
+                            filtered.push(uri)
+                            continue
+                        }
+
+                        const authors = state
+                            .authorsNames[uri]
+                            .join(", ")
+                            .toUpperCase()
+
+                        if (authors.indexOf(q) !== -1) {
+                            filtered.push(uri)
+                            continue
+                        }
+                    }
+                }
+
+                update({
+                    query: query,
+                    yearsSelected: yearsSelected,
+                    filtered: filtered,
+                }, callback)
+            }
+
+            function render() {
+                // Clear previous rendering.
+                uiResults.innerHTML = ""
+                if (state.loading) {
+                    uiCount.innerHTML =
+                        '<i class="fas fa-spinner fa-spin"' +
+                        '   aria-hidden="true" title="Loading...">' +
+                        '</i>'
+                }
+
+                // Render Publications Listing.
+                const fragment = document.createDocumentFragment()
+
+                const pubs = state.filtered
+                var items = pubs
+                if (state.limit) {
+                   items = items.slice(0, state.limit)
+                }
+                items = items.map(renderPublication)
+                items.forEach(function (li) { fragment.appendChild(li) })
+                uiResults.appendChild(fragment)
+
+                if (!state.loading) {
+                    renderCount(uiCount, items.length, pubs.length)
+                }
+            }
+
+            function renderCount(uiCount, numItems, numPubs) {
+                if (numItems === numPubs) {
+                    uiCount.innerHTML = numPubs
+                    return
+                }
+
+                uiCount.innerHTML =
+                    str.Format("{} of {} shown ", numItems, numPubs)
+
+                const a = document.createElement("a")
+                a.href = "#"
+                a.innerText = "(Load all publications)"
+                a.addEventListener("click", handleLoadAllClick)
+                uiCount.appendChild(a)
+
+                function handleLoadAllClick(e) {
+                    uiCount.innerHTML =
+                        "<i>Loading all publications. This may take some time...</i>"
+                    update({ limit: null })
+                }
+            }
+
+            function renderFacets() {
+                const yearFacet = uiFacets.querySelector(".published")
+                const options = yearFacet.querySelector(".published ul")
+                const template = options.querySelector(".template")
+                options.innerHTML = ""
+
+                const fragment = document.createDocumentFragment()
+
+                var years = Object.keys(state.years).sort().reverse()
+                for (var i = 0; i < years.length; i++) {
+                    const year = years[i]
+                    const bindings = {
+                        box: {
+                            value: year,
+                            onclick: handleFacetClick,
+                        },
+                        name: year,
+                        count: state.years[year].length,
+                    }
+
+                    const item = ui.Build(template, bindings)
+
+                    fragment.appendChild(item)
+                }
+
+                options.appendChild(template)
+                options.appendChild(fragment)
+            }
+
+            function renderPublication(publicationIRI) {
+                const authorIRIs = state.authors[publicationIRI] || []
+                const published = state.published[publicationIRI]
+                const citation = state.citations[publicationIRI]
+
+                const authors = document.createElement("div")
+                for (var i = 0; i < authorIRIs.length; i++) {
+                    const authorIRI = authorIRIs[i]
+                    const a = document.createElement("a")
+                    a.href = m3c.ProfileLink("person", authorIRI)
+                    a.innerText = state.names[authorIRI]
+                    authors.appendChild(a)
+                }
 
                 const bindings = {
                     link: {
                         href: m3c.ProfileLink("publication", publicationIRI.slice(1, -1)),
                     },
-                    name: entity.ParseVIVOString(data.names[publicationIRI]),
+                    name: state.names[publicationIRI],
                     year: published ? published : null,
-                    authors: authors ? authors.join(", ") : "",
+                    authors: authors.innerHTML,
                     citation: citation ? entity.ParseVIVOString(citation) : ""
                 }
 
-                const li = ui.Build(template, bindings)
+                const li = ui.Build(uiTemplate, bindings)
 
                 const cite = li.querySelector(".cite")
                 if (!citation) {
@@ -369,59 +506,18 @@
                     })
                 }
 
-                for (var i = 0; i < authors.length; i++) {
-                    facetsManager.Increment('author', authors[i], authors[i])
-                }
-
-                if (published) {
-                    facetsManager.Increment('published', bindings.year, bindings.year)
-                }
-
                 return li
             }
 
-
-            /**
-             * @param {string} name
-             */
-            function sortLastFirst(name) {
-                const firstLast = name.toUpperCase()
-                const lastFirst = firstLast.split(' ').reverse().join(' ')
-                return lastFirst
-            }
-
-            /**
-             * Extract the name of a list item; used for sorting.
-             * @param {HTMLLIElement} li
-             */
-            function sortByName(li) {
-                const name = li.querySelector(".name").innerText.toUpperCase()
-                return name
-            }
-
-            /**
-             * Extract the name of a list item; used for sorting.
-             * @param {HTMLLIElement} li
-             */
-            function sortByYear(li) {
-                const year = li.querySelector(".year")
-                if (!year || !year.innerText) {
-                    return "0"
+            function update(values, callback) {
+                clearTimeout(state.dirty)
+                for (const prop in values) {
+                    state[prop] = values[prop]
                 }
-                return year.innerText
-            }
-
-            /**
-             * Extract the count of a facet option; used for sorting.
-             * @param {HTMLLIElement} li
-             */
-            function sortByCount(li) {
-                return parseInt(li.querySelector(".count").innerText)
-            }
-
-            function updateResultCount() {
-                const visible = document.querySelectorAll(".results li:not(.hidden):not(.template)")
-                document.querySelector(".controls .count").innerText = visible.length
+                state.dirty = setTimeout(render, 100)
+                if (callback) {
+                    callback()
+                }
             }
         </script>
     </div>
