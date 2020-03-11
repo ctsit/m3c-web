@@ -39,6 +39,11 @@
             display: inline-block;
             padding-right: 0.5em;
         }
+
+        .authors a {
+            margin-left: 0.25em;
+            margin-right: 0.25em;
+        }
     </style>
 </head>
 
@@ -211,6 +216,7 @@
                 published: {},
                 authors: {},
                 citations: {},
+                authorsNames: {},
             }
 
             uiSearch.addEventListener("keyup", handleSearchChange)
@@ -280,6 +286,7 @@
                 .then(function (authorships) {
                     /** @type {{[uri: string]: string[]}} PMID => Author List */
                     const authors = {}
+                    const authorsNames = {}
 
                     for (const authorshipIRI in authorships) {
                         const relates = authorships[authorshipIRI]
@@ -295,12 +302,17 @@
 
                         if (!authors[pubIRI]) {
                             authors[pubIRI] = []
+                            authorsNames[pubIRI] = []
                         }
 
-                        authors[pubIRI].push(state.names[personIRI])
+                        authors[pubIRI].push(personIRI)
+                        authorsNames[pubIRI].push(state.names[personIRI])
                     }
 
-                    update({ authors: authors })
+                    update({
+                        authors: authors,
+                        authorsNames: authorsNames,
+                    })
                 })
                 .catch(console.error)
                 .then(function () {
@@ -359,7 +371,11 @@
                             continue
                         }
 
-                        const authors = state.authors[uri].join(", ").toUpperCase()
+                        const authors = state
+                            .authorsNames[uri]
+                            .join(", ")
+                            .toUpperCase()
+
                         if (authors.indexOf(q) !== -1) {
                             filtered.push(uri)
                             continue
@@ -453,9 +469,18 @@
             }
 
             function renderPublication(publicationIRI) {
-                const authors = state.authors[publicationIRI]
+                const authorIRIs = state.authors[publicationIRI] || []
                 const published = state.published[publicationIRI]
                 const citation = state.citations[publicationIRI]
+
+                const authors = document.createElement("div")
+                for (var i = 0; i < authorIRIs.length; i++) {
+                    const authorIRI = authorIRIs[i]
+                    const a = document.createElement("a")
+                    a.href = m3c.ProfileLink("person", authorIRI)
+                    a.innerText = state.names[authorIRI]
+                    authors.appendChild(a)
+                }
 
                 const bindings = {
                     link: {
@@ -463,7 +488,7 @@
                     },
                     name: state.names[publicationIRI],
                     year: published ? published : null,
-                    authors: authors ? authors.join(", ") : "",
+                    authors: authors.innerHTML,
                     citation: citation ? entity.ParseVIVOString(citation) : ""
                 }
 
