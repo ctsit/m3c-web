@@ -186,7 +186,11 @@
                 person: [],
                 associatedWith: {},  // person IRI => org IRI
                 names: {},           // entity IRI => label string
-                institutes: []       // list of institute IRIs
+                institutes: [],       // list of institute IRIs
+                mainImages: {},
+                downloadLocations: {},
+                directDownloadUrls: {},
+                personToURL: {}
             }
 
             const promises = [
@@ -194,6 +198,9 @@
                 entity.AssociatedWiths(client),
                 entity.Names(client),
                 entity.Institutes(client),
+                entity.MainImages(client),
+                entity.DownloadLocations(client),
+                entity.DirectDownloadUrls(client)
             ]
 
             Promise.all(promises)
@@ -202,6 +209,20 @@
                     data.associatedWith = results[1]
                     data.names = results[2]
                     data.institutes = results[3]
+                    data.mainImages = results[4]
+                    data.downloadLocations = results[5]
+                    data.directDownloadUrls = results[6]
+
+                    data.person.forEach(function(uri) {
+                        const mainImage = data.mainImages[uri]
+                        if (!mainImage) {
+                            return
+                        }
+
+                        const downloadLocation = data.downloadLocations[mainImage]
+                        const directURL = data.directDownloadUrls[downloadLocation]
+                        data.personToURL[uri] = directURL[0].slice(1, -1)
+                    })
 
                     data.person.forEach(renderPerson)
                 })
@@ -235,20 +256,6 @@
             const facetsManager = ui.Facets(facets, results, filters, search)
 
             /**
-             * Extract the actual text from a VIVO string
-             * @param {string} [text]
-             */
-            function parseVIVOString(text) {
-                if (!text || text[0] != '"') {
-                    return text
-                }
-
-                text = text.slice(1, text.lastIndexOf('"'))
-                text = JSON.parse('"' + text + '"')
-                return text
-            }
-
-            /**
              * Render a person with the specified IRI.
              * @param {string} personIRI
              */
@@ -267,7 +274,7 @@
                     link: {
                         href: m3c.ProfileLink("person", personIRI),
                     },
-                    name: parseVIVOString(data.names[personIRI]),
+                    name: entity.ParseVIVOString(data.names[personIRI]),
                     photo: {
                         alt: data.names[personIRI],
                         src: getPhoto,
@@ -282,15 +289,11 @@
                 }
 
                 function getPhoto(callback) {
-                    person.PhotoThumbnail(renderPhoto)
-
-                    function renderPhoto(url) {
-                        if (!url) {
-                            return
-                        }
-                        url = m3c.PhotoURL(client.Endpoint, url)
-                        callback(url)
+                    const url = data.personToURL[personIRI]
+                    if (!url) {
+                        return
                     }
+                    callback(m3c.PhotoURL(client.Endpoint, url))
                 }
             }
 

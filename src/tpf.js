@@ -1,7 +1,9 @@
 "use strict"
 
 if (typeof require !== "undefined") {
-    // No imports.
+    // node-fetch implements the Fetch API of modern browsers.
+    // This is only needed when running from Node.
+    var fetch = require("node-fetch")
 }
 
 /**

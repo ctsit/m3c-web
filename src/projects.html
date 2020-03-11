@@ -216,20 +216,6 @@
             const facetsManager = ui.Facets(facets, results, filters, search)
 
             /**
-             * Extract the actual text from a VIVO string
-             * @param {string} [text]
-             */
-            function parseVIVOString(text) {
-                if (!text || text[0] != '"') {
-                    return text
-                }
-
-                text = text.slice(1, text.lastIndexOf('"'))
-                text = JSON.parse('"' + text + '"')
-                return text
-            }
-
-            /**
              * Render a project with the specified IRI.
              * @param {string} projectIRI
              */
@@ -240,7 +226,7 @@
                     link: {
                         href: m3c.ProfileLink("project", projectIRI),
                     },
-                    name: parseVIVOString(data.names[projectIRI]),
+                    name: entity.ParseVIVOString(data.names[projectIRI]),
                     organization: orgIRI ? data.names[orgIRI] : null,
                 }
 

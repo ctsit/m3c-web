@@ -1,9 +1,13 @@
 {
     "private": true,
+    "version": "0.5.0",
     "scripts": {
         "test": "npx mocha --recursive ./tests/*_test.js"
     },
     "devDependencies": {
         "mocha": "^6.2.2"
+    },
+    "dependencies": {
+        "node-fetch": "^2.6.0"
     }
 }

@@ -84,6 +84,18 @@ var entity = (function module() {
         })
     }
 
+    function MainImages(client) {
+        return client.MapAll(vitro + "mainImage")
+    }
+
+    function DownloadLocations(client) {
+        return client.MapAll(vitro + "downloadLocation")
+    }
+
+    function DirectDownloadUrls(client) {
+        return client.MapAll(vitro + "directDownloadUrl")
+    }
+
     /**
      * Fetches the name (label) of an Entity.
      *
@@ -109,7 +121,7 @@ var entity = (function module() {
         return client.Query(null, rdfs + "label", null).then(function(triples) {
             const names = {}
             triples.forEach(function(triple) {
-                names[triple.Subject] = parseVIVOString(triple.Object)
+                names[triple.Subject] = ParseVIVOString(triple.Object)
             })
             return names
         })
@@ -130,6 +142,21 @@ var entity = (function module() {
      */
     function Parents(client) {
         return client.Map(base + "hasParent")
+    }
+
+    /**
+     * Extract the actual text from a VIVO string
+     * @param {string} [text]
+     * @returns string
+     */
+    function ParseVIVOString(text) {
+        if (!text || text[0] != '"') {
+            return text
+        }
+
+        text = text.slice(1, text.lastIndexOf('"'))
+        text = JSON.parse('"' + text + '"')
+        return text
     }
 
     /**
@@ -165,7 +192,7 @@ var entity = (function module() {
         return new publication(client, iri)
     }
 
-    function PublicationYears(client) {
+    function PublicationDates(client) {
         const dateTimeValues = client.Query(null, vivo + "dateTimeValue", null)
         const dateTimes = client.Query(null, vivo + "dateTime", null)
 
@@ -174,7 +201,7 @@ var entity = (function module() {
                 const dateTimesToPubs = mapTriples(results[0], true)
                 const dateTimesToValues = mapTriples(results[1])
 
-                const years = {}
+                const dates = {}
                 Object.keys(dateTimesToValues).forEach(function (dateTimeIRI) {
                     const publicationIRI = dateTimesToPubs[dateTimeIRI]
                     if (!publicationIRI) {
@@ -185,14 +212,26 @@ var entity = (function module() {
                         return
                     }
 
-                    // Using January 2 works around issues with timezones.
-                    const date = parseDate(value.replace("-01-01", "-01-02"))
-                    const year = date.getFullYear()
-                    if (year && !isNaN(year)) {
-                        years[publicationIRI] = year.toString()
+                    const date = value.slice(1, value.indexOf('T'))
+                    if (date && date.length === "2012-06-23".length) {
+                        dates[publicationIRI] = date
                     }
                 })
 
+                return dates
+            })
+    }
+
+    function PublicationYears(client) {
+        return PublicationDates(client)
+            .then(function (dates) {
+                const years = {}
+                for (const publicationIRI in dates) {
+                    const year = date.slice(0, "2012".length)
+                    if (year && year.length === 4) {
+                        years[publicationIRI] = year
+                    }
+                }
                 return years
             })
     }
@@ -418,7 +457,6 @@ var entity = (function module() {
                 client
                     .Entity(iri)
                     .Link(vitro, "mainImage")
-                    .Link(vitro, "thumbnailImage")
                     .Link(vitro, "downloadLocation")
                     .Link(vitro, "directDownloadUrl")
                     .Single(decodeString(returnPhoto))
@@ -976,22 +1014,27 @@ var entity = (function module() {
 
     // Module Exports
     return {
-        Authorships: Authorships,
         AssociatedWiths: AssociatedWiths,
+        Authorships: Authorships,
         Citations: Citations,
         Departments: Departments,
+        DirectDownloadUrls: DirectDownloadUrls,
+        DownloadLocations: DownloadLocations,
         FundingOrganizations: FundingOrganizations,
         Institutes: Institutes,
         Laboratories: Laboratories,
+        MainImages: MainImages,
         Name: Name,
         Names: Names,
+        Organization: Organization,
         Parents: Parents,
+        ParseVIVOString: ParseVIVOString,
         Person: Person,
         Persons: Persons,
-        Organization: Organization,
         Project: Project,
         Projects: Projects,
         Publication: Publication,
+        PublicationDates: PublicationDates,
         PublicationYears: PublicationYears,
         Publications: Publications,
         Studies: Studies,
