@@ -16,10 +16,7 @@ First, generate the `recentpubs.json` file.
 Next, run a local HTTP server. Then, open a browser with the `endpoint`
 parameter set to your TPF endpoint.
 
-For example, on macOS, you could run the following Terminal commands:
-
-    $ cd src/
-    $ python3 -m http.server 8080
+    $ npm start
     $ open 'http://localhost:8080/?endpoint=http://stage.vivo.metabolomics.info/tpf/core'
 
 

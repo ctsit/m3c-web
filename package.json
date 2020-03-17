@@ -2,9 +2,11 @@
     "private": true,
     "version": "0.5.0",
     "scripts": {
+        "start": "npx http-server ./src/",
         "test": "npx mocha --recursive ./tests/*_test.js"
     },
     "devDependencies": {
+        "http-server": "^0.12.1",
         "mocha": "^6.2.2"
     },
     "dependencies": {
