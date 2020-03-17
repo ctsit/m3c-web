@@ -227,6 +227,7 @@ var entity = (function module() {
             .then(function (dates) {
                 const years = {}
                 for (const publicationIRI in dates) {
+                    const date = dates[publicationIRI]
                     const year = date.slice(0, "2012".length)
                     if (year && year.length === 4) {
                         years[publicationIRI] = year
