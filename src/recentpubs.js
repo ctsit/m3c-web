@@ -1,23 +1,22 @@
 // Most Recent Publications
 const tpf = require("./tpf")
 const entity = require("./entity")
+
 async function main() {
-    const endpoint = process.env.TPF_ENDPOINT || "https://vivo.metabolomics.info/tpf/core"
+    const endpoint = process.env.TPF_ENDPOINT || "https://people.metabolomics.info/tpf/core"
     const client = new tpf.Client(endpoint)
+
     const publicationIRIs = await entity.Publications(client)
     const names = await entity.Names(client)
     const authorships = await entity.Authorships(client)
-    const years = await entity.PublicationYears(client)
-
-    // const names = await entity.Authorships(client)
+    const published = await entity.PublicationDates(client)
+    const citations = await entity.Citations(client)
 
     // Build the authors mapping: author IRI => list of pubs.
     const authors = {}
 
     // authorships: IRI => list of unordered, pair (pub, person)
-    const authorshipIRIs = Object.keys(authorships)
-    for (var i = 0; i < authorshipIRIs.length; i++) {
-        const authorshipIRI = authorshipIRIs[i]
+    for (const authorshipIRI in authorships) {
         const relates = authorships[authorshipIRI]
 
         // Unfortunately, the pub-person pair could be in either
@@ -34,17 +33,13 @@ async function main() {
         }
 
         authors[publicationIRI].push(personIRI)
-
     }
 
-    
-
-    // TODO: get publication dates and sort by them
     const publications = []
     // arrays have a sort method (publicationIRIs.sort() and then pass a comparison function (use mozilla))
     publicationIRIs.sort(function (a, b) {
-        const adate = years[a]
-        const bdate = years[b]
+        const adate = published[a]
+        const bdate = published[b]
         if (adate < bdate) {
             return -1
         }
@@ -53,8 +48,9 @@ async function main() {
         }
         return 0
     }).reverse()
+
     for (const pubIRI of publicationIRIs.slice(0, 10)) {
-        var authornames = authors[pubIRI]
+        const authornames = authors[pubIRI]
             .map(function (authorIRI) {
                 return names[authorIRI]
             })
@@ -63,7 +59,8 @@ async function main() {
             "pmid": pubIRI.slice(47,-1),
             "title": names[pubIRI],
             "authors": authornames,
-            "published": years[pubIRI]
+            "published": published[pubIRI],
+            "citation": entity.ParseVIVOString(citations[pubIRI]),
         }
         publications.push(publication)
     }

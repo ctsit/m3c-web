@@ -660,19 +660,18 @@
             // script for the Publication and Studies list dashboard widgets
 
             // Aliases for certain HTML elements
-            const pub_root = document.getElementById("pub-widget")
-            const study_root = document.getElementById("study-widget")
-            const pub_results = pub_root.querySelector(".pub-results")
-            const study_results = study_root.querySelector(".study-results")
-            const publicationTemplate = pub_root.querySelector("li.publication.template")
-            const studyTemplate = study_root.querySelector("li.study.template")
+            const pubRoot = document.getElementById("pub-widget")
+            const studyRoot = document.getElementById("study-widget")
+            const studyResults = studyRoot.querySelector(".study-results")
+            const publicationTemplate = pubRoot.querySelector("li.publication.template")
+            const studyTemplate = studyRoot.querySelector("li.study.template")
 
 
             // Keep the Study results sorted.
-            const study_sorted = ui.SortedList(study_results, -1, sortStudyByYear)
+            const studySorted = ui.SortedList(studyResults, -1, sortStudyByYear)
 
             // Query the TPF server for all studies and some related data.
-            const study_data = {
+            const studyData = {
                 studies: [],
                 names: {},
                 submitted: {},
@@ -686,41 +685,35 @@
 
             // Read the Publications from a local .json file
             fetch("publicationlist.json")
-                .then(function (res) { return res.json() }).then(function (pubs) { 
+                .then(function (res) {
+                    return res.json()
+                })
+                .then(function (pubs) {
                     pubs.forEach(renderPublication)
                 })
 
             Promise.all(promises)
-                .then(function setData(study_results) {
-                    study_data.names = study_results[0]
-                    study_data.studies = study_results[1]
-                    study_data.submitted = study_results[2]
+                .then(function setData(studyResults) {
+                    studyData.names = studyResults[0]
+                    studyData.studies = studyResults[1]
+                    studyData.submitted = studyResults[2]
 
-                    study_data.studies.forEach(renderStudy)
+                    studyData.studies.forEach(renderStudy)
                 })
 
-
             /**
-             * Extract the actual text from a VIVO string
-             * @param {string} [text]
+             * Render a publication.
+             *
+             * @param {{
+             *   iri: string,
+             *   pmid: string,
+             *   title: string,
+             *   authors: string[],
+             *   published: string,
+             * }} publication
              */
-            function parseVIVOString(text) {
-                if (!text || text[0] != '"') {
-                    return text
-                }
-
-                text = text.slice(1, text.lastIndexOf('"'))
-                text = JSON.parse('"' + text + '"')
-                return text
-            }
-
-
-            /**
-             * Render a publication with the specified IRI.
-             * @param {string} publicationIRI
-             */
-            function renderPublication(publicationIRI) {
-                const authors = publicationIRI.authors
+            function renderPublication(publication) {
+                const authors = publication.authors
 
                 authors.sort(function (a, b) {
                     const aname = sortLastFirst(a)
@@ -736,35 +729,32 @@
                     return 0
                 })
 
-                var published = publicationIRI.published
-
+                const uri = publication.iri.slice(1, -1)
 
                 const bindings = {
                     link: {
-                        href: m3c.ProfileLink("publication",
-                        publicationIRI.iri.slice(1, -1)),
+                        href: m3c.ProfileLink("publication", uri),
                     },
-                    name: publicationIRI.title,
-                    year: published ? published : null,
+                    name: publication.title,
+                    year: publication.published ? publication.published : "",
                     authors: authors ? authors.join(", ") : "",
                 }
 
                 const li = ui.Render(publicationTemplate, bindings)
             }
 
-
             /**
              * Render a study with the specified IRI.
              * @param {string} studyIRI
              */
              function renderStudy(studyIRI) {
-                const submitted = study_data.submitted[studyIRI]
+                const submitted = studyData.submitted[studyIRI]
 
                 const bindings = {
                     link: {
                         href: m3c.ProfileLink("study", studyIRI.slice(1, -1)),
                     },
-                    name: parseVIVOString(study_data.names[studyIRI]),
+                    name: entity.ParseVIVOString(studyData.names[studyIRI]),
                     submitted: submitted ? submitted.getFullYear(): null,
                 }
 
@@ -778,19 +768,6 @@
                 const firstLast = name.toUpperCase()
                 const lastFirst = firstLast.split(' ').reverse().join(' ')
                 return lastFirst
-            }
-
-
-            /**
-             * Extract the name of a list item; used for sorting.
-             * @param {HTMLLIElement} li
-             */
-            function sortByYear(li) {
-                const year = li.querySelector(".year")
-                if (!year || !year.innerText) {
-                    return "0"
-                }
-                return year.innerText
             }
 
             function sortStudyByYear(li) {
