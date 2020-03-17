@@ -118,8 +118,8 @@
             display: -ms-grid;
             display: grid;
             -ms-grid-columns: 1fr 0.1fr 1fr;
-            grid-template-columns: repeat(auto-fit, 320px);
-            /* grid-template-columns: 1fr 1fr 1fr; */
+            /* grid-template-columns: repeat(auto-fit, 320px); */
+            grid-template-columns: 1fr 1fr;
             grid-gap: 1em;
             width: 95%;
             justify-content: center;
@@ -128,41 +128,17 @@
         }
 
         .visuals div {
-            text-align: center;
             background: white;
-            min-height: 200px;
             padding: 1em;
+            text-align: center;
+        }
+
+        .visuals a {
+            display: block;
         }
 
         .visuals #pub-widget  { -ms-grid-column: 1 }
         .visuals #study-widget { -ms-grid-column: 3 }
-
-        .list-widget {
-            font-size: 0.9rem;
-        }
-
-        .pub-results li:nth-child(n+11) {
-            display: none !important;
-        }
-
-        .study-results li:nth-child(n+12) {
-            display: none !important;
-        }   /* n+11 only shows 9 results */
-
-        .widget-list-names {
-            min-height:35px !important;
-            padding-bottom:2px !important;
-        }
-
-        .widget-list-item {
-            padding:0px 20px !important;
-        }
-
-        .widget-info {
-            min-height:10px !important;
-            margin-bottom:10px !important;
-            padding:0.5em !important;
-        }
 
         h3 {
             text-shadow: 1px 1px 3px gray;
@@ -257,12 +233,18 @@
                 margin-top: 0;
             }
 
-        }
+            .visuals {
+                margin: auto;
+                margin-top: 1em;
+                display: block;
+                width: 100%;
+                padding-bottom: 1em;
+            }
 
-        @media only screen and (max-width: 690px) {
-           .wordcloud img {
-               padding-top: 0.5em;
-           }
+            .visuals div {
+                text-align: left;
+            }
+
         }
     </style>
 
@@ -459,11 +441,9 @@
                         </a>
                         <ol class="list-widget pub-results">
                                 <li class="publication template">
-                                    <div class="widget-list-names">
-                                        <a href="#" class="name link widget-list-item"
+                                    <div>
+                                        <a href="#" class="name link"
                                             target="_blank" rel="noopener noreferrer"></a>
-                                    </div>
-                                    <div class="widget-info">
                                         <span class="year"></span>
                                         <span class="authors"></span>
                                     </div>
@@ -476,12 +456,11 @@
                         </a>
                         <ol class="list-widget study-results">
                             <li class="study template">
-                                <div class="widget-list-names">
-                                        <a href="https://www.metabolomicsworkbench.org/data/DRCCMetadata.php?Mode=Study" class="name link mwb widget-list-item"
+                                <div>
+                                        <a href="https://www.metabolomicsworkbench.org/data/DRCCMetadata.php?Mode=Study" class="name link"
                                             target="_blank" rel="noopener noreferrer"></a>
-                                    </div>
-                                    <div class="widget-info">
                                         <span class="submitted"></span>
+                                        <span class="institute"></span>
                                     </div>
                                 </li>
                         </ol>
@@ -666,10 +645,6 @@
             const publicationTemplate = pubRoot.querySelector("li.publication.template")
             const studyTemplate = studyRoot.querySelector("li.study.template")
 
-
-            // Keep the Study results sorted.
-            const studySorted = ui.SortedList(studyResults, -1, sortStudyByYear)
-
             // Query the TPF server for all studies and some related data.
             const studyData = {
                 studies: [],
@@ -698,7 +673,14 @@
                     studyData.studies = studyResults[1]
                     studyData.submitted = studyResults[2]
 
-                    studyData.studies.forEach(renderStudy)
+                    studyData.studies.sort(function (a, b) {
+                        const aSubmitted = studyData.submitted[a]
+                        const bSubmitted = studyData.submitted[b]
+                        return bSubmitted - aSubmitted
+                    })
+
+                    // Show only the most recent 10 studies.
+                    studyData.studies.slice(0,10).forEach(renderStudy)
                 })
 
             /**
@@ -747,18 +729,31 @@
              * Render a study with the specified IRI.
              * @param {string} studyIRI
              */
-             function renderStudy(studyIRI) {
+            function renderStudy(studyIRI) {
+                const uri = studyIRI.slice(1, -1)
+                /** @type {Date} */
                 const submitted = studyData.submitted[studyIRI]
+                const study = entity.Study(client, uri)
 
                 const bindings = {
                     link: {
-                        href: m3c.ProfileLink("study", studyIRI.slice(1, -1)),
+                        href: m3c.ProfileLink("study", uri),
                     },
                     name: entity.ParseVIVOString(studyData.names[studyIRI]),
-                    submitted: submitted ? submitted.getFullYear(): null,
+                    submitted: submitted ? submitted.toLocaleDateString() : null,
+                    institute: getInstitute,
                 }
 
                 const li = ui.Render(studyTemplate, bindings)
+
+                function getInstitute(callback) {
+                    return new Promise(function (resolve) {
+                        return study.Institute(resolve)
+                    }).then(function (instituteIRI) {
+                        const institute = studyData.names[instituteIRI]
+                        callback(institute)
+                    })
+                }
             }
 
             /**
@@ -768,14 +763,6 @@
                 const firstLast = name.toUpperCase()
                 const lastFirst = firstLast.split(' ').reverse().join(' ')
                 return lastFirst
-            }
-
-            function sortStudyByYear(li) {
-                const submitted = li.querySelector(".submitted")
-                if (!submitted || !submitted.innerText) {
-                    return "0"
-                }
-                return submitted.innerText
             }
         </script>
 
