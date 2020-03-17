@@ -118,8 +118,8 @@
             display: -ms-grid;
             display: grid;
             -ms-grid-columns: 1fr 0.1fr 1fr;
-            grid-template-columns: repeat(auto-fit, 320px);
-            /* grid-template-columns: 1fr 1fr 1fr; */
+            /* grid-template-columns: repeat(auto-fit, 320px); */
+            grid-template-columns: 1fr 1fr;
             grid-gap: 1em;
             width: 95%;
             justify-content: center;
@@ -128,41 +128,17 @@
         }
 
         .visuals div {
-            text-align: center;
             background: white;
-            min-height: 200px;
             padding: 1em;
+            text-align: center;
+        }
+
+        .visuals a {
+            display: block;
         }
 
         .visuals #pub-widget  { -ms-grid-column: 1 }
         .visuals #study-widget { -ms-grid-column: 3 }
-
-        .list-widget {
-            font-size: 0.9rem;
-        }
-
-        .pub-results li:nth-child(n+11) {
-            display: none !important;
-        }
-
-        .study-results li:nth-child(n+12) {
-            display: none !important;
-        }   /* n+11 only shows 9 results */
-
-        .widget-list-names {
-            min-height:35px !important;
-            padding-bottom:2px !important;
-        }
-
-        .widget-list-item {
-            padding:0px 20px !important;
-        }
-
-        .widget-info {
-            min-height:10px !important;
-            margin-bottom:10px !important;
-            padding:0.5em !important;
-        }
 
         h3 {
             text-shadow: 1px 1px 3px gray;
@@ -257,12 +233,18 @@
                 margin-top: 0;
             }
 
-        }
+            .visuals {
+                margin: auto;
+                margin-top: 1em;
+                display: block;
+                width: 100%;
+                padding-bottom: 1em;
+            }
 
-        @media only screen and (max-width: 690px) {
-           .wordcloud img {
-               padding-top: 0.5em;
-           }
+            .visuals div {
+                text-align: left;
+            }
+
         }
     </style>
 
@@ -352,7 +334,7 @@
 
             <div id="content" class="hero">
                 <div class="hero-item person">
-                    <a class="prev-link">
+                    <a class="prev-link" tabindex="0">
                         <div class="prev">
                             <i class="fas fa-arrow-left"></i>
                         </div>
@@ -380,7 +362,7 @@
                         </p>
                     </div>
 
-                    <a class="next-link">
+                    <a class="next-link" tabindex="0">
                         <div class="next">
                             <i class="fas fa-arrow-right"></i>
                         </div>
@@ -388,7 +370,7 @@
                 </div>
 
                 <div class="hero-item study">
-                    <a class="prev-link">
+                    <a class="prev-link" tabindex="0">
                         <div class="prev">
                             <i class="fas fa-arrow-left"></i>
                         </div>
@@ -412,7 +394,7 @@
                         </p>
                     </div>
 
-                    <a class="next-link">
+                    <a class="next-link" tabindex="0">
                         <div class="next">
                             <i class="fas fa-arrow-right"></i>
                         </div>
@@ -420,7 +402,7 @@
                 </div>
 
                 <div class="hero-item project">
-                    <a class="prev-link">
+                    <a class="prev-link" tabindex="0">
                         <div class="prev">
                             <i class="fas fa-arrow-left"></i>
                         </div>
@@ -442,7 +424,7 @@
                         </p>
                     </div>
 
-                    <a class="next-link">
+                    <a class="next-link" tabindex="0">
                         <div class="next">
                             <i class="fas fa-arrow-right"></i>
                         </div>
@@ -459,11 +441,9 @@
                         </a>
                         <ol class="list-widget pub-results">
                                 <li class="publication template">
-                                    <div class="widget-list-names">
-                                        <a href="#" class="name link widget-list-item"
+                                    <div>
+                                        <a href="#" class="name link"
                                             target="_blank" rel="noopener noreferrer"></a>
-                                    </div>
-                                    <div class="widget-info">
                                         <span class="year"></span>
                                         <span class="authors"></span>
                                     </div>
@@ -476,12 +456,11 @@
                         </a>
                         <ol class="list-widget study-results">
                             <li class="study template">
-                                <div class="widget-list-names">
-                                        <a href="https://www.metabolomicsworkbench.org/data/DRCCMetadata.php?Mode=Study" class="name link mwb widget-list-item"
+                                <div>
+                                        <a href="https://www.metabolomicsworkbench.org/data/DRCCMetadata.php?Mode=Study" class="name link"
                                             target="_blank" rel="noopener noreferrer"></a>
-                                    </div>
-                                    <div class="widget-info">
                                         <span class="submitted"></span>
+                                        <span class="institute"></span>
                                     </div>
                                 </li>
                         </ol>
@@ -660,19 +639,14 @@
             // script for the Publication and Studies list dashboard widgets
 
             // Aliases for certain HTML elements
-            const pub_root = document.getElementById("pub-widget")
-            const study_root = document.getElementById("study-widget")
-            const pub_results = pub_root.querySelector(".pub-results")
-            const study_results = study_root.querySelector(".study-results")
-            const publicationTemplate = pub_root.querySelector("li.publication.template")
-            const studyTemplate = study_root.querySelector("li.study.template")
-
-
-            // Keep the Study results sorted.
-            const study_sorted = ui.SortedList(study_results, -1, sortStudyByYear)
+            const pubRoot = document.getElementById("pub-widget")
+            const studyRoot = document.getElementById("study-widget")
+            const studyResults = studyRoot.querySelector(".study-results")
+            const publicationTemplate = pubRoot.querySelector("li.publication.template")
+            const studyTemplate = studyRoot.querySelector("li.study.template")
 
             // Query the TPF server for all studies and some related data.
-            const study_data = {
+            const studyData = {
                 studies: [],
                 names: {},
                 submitted: {},
@@ -686,41 +660,42 @@
 
             // Read the Publications from a local .json file
             fetch("publicationlist.json")
-                .then(function (res) { return res.json() }).then(function (pubs) { 
+                .then(function (res) {
+                    return res.json()
+                })
+                .then(function (pubs) {
                     pubs.forEach(renderPublication)
                 })
 
             Promise.all(promises)
-                .then(function setData(study_results) {
-                    study_data.names = study_results[0]
-                    study_data.studies = study_results[1]
-                    study_data.submitted = study_results[2]
+                .then(function setData(studyResults) {
+                    studyData.names = studyResults[0]
+                    studyData.studies = studyResults[1]
+                    studyData.submitted = studyResults[2]
 
-                    study_data.studies.forEach(renderStudy)
+                    studyData.studies.sort(function (a, b) {
+                        const aSubmitted = studyData.submitted[a]
+                        const bSubmitted = studyData.submitted[b]
+                        return bSubmitted - aSubmitted
+                    })
+
+                    // Show only the most recent 10 studies.
+                    studyData.studies.slice(0,10).forEach(renderStudy)
                 })
 
-
             /**
-             * Extract the actual text from a VIVO string
-             * @param {string} [text]
+             * Render a publication.
+             *
+             * @param {{
+             *   iri: string,
+             *   pmid: string,
+             *   title: string,
+             *   authors: string[],
+             *   published: string,
+             * }} publication
              */
-            function parseVIVOString(text) {
-                if (!text || text[0] != '"') {
-                    return text
-                }
-
-                text = text.slice(1, text.lastIndexOf('"'))
-                text = JSON.parse('"' + text + '"')
-                return text
-            }
-
-
-            /**
-             * Render a publication with the specified IRI.
-             * @param {string} publicationIRI
-             */
-            function renderPublication(publicationIRI) {
-                const authors = publicationIRI.authors
+            function renderPublication(publication) {
+                const authors = publication.authors
 
                 authors.sort(function (a, b) {
                     const aname = sortLastFirst(a)
@@ -736,39 +711,49 @@
                     return 0
                 })
 
-                var published = publicationIRI.published
-
+                const uri = publication.iri.slice(1, -1)
 
                 const bindings = {
                     link: {
-                        href: m3c.ProfileLink("publication",
-                        publicationIRI.iri.slice(1, -1)),
+                        href: m3c.ProfileLink("publication", uri),
                     },
-                    name: publicationIRI.title,
-                    year: published ? published : null,
+                    name: publication.title,
+                    year: publication.published ? publication.published : "",
                     authors: authors ? authors.join(", ") : "",
                 }
 
                 const li = ui.Render(publicationTemplate, bindings)
             }
 
-
             /**
              * Render a study with the specified IRI.
              * @param {string} studyIRI
              */
-             function renderStudy(studyIRI) {
-                const submitted = study_data.submitted[studyIRI]
+            function renderStudy(studyIRI) {
+                const uri = studyIRI.slice(1, -1)
+                /** @type {Date} */
+                const submitted = studyData.submitted[studyIRI]
+                const study = entity.Study(client, uri)
 
                 const bindings = {
                     link: {
-                        href: m3c.ProfileLink("study", studyIRI.slice(1, -1)),
+                        href: m3c.ProfileLink("study", uri),
                     },
-                    name: parseVIVOString(study_data.names[studyIRI]),
-                    submitted: submitted ? submitted.getFullYear(): null,
+                    name: entity.ParseVIVOString(studyData.names[studyIRI]),
+                    submitted: submitted ? submitted.toLocaleDateString() : null,
+                    institute: getInstitute,
                 }
 
                 const li = ui.Render(studyTemplate, bindings)
+
+                function getInstitute(callback) {
+                    return new Promise(function (resolve) {
+                        return study.Institute(resolve)
+                    }).then(function (instituteIRI) {
+                        const institute = studyData.names[instituteIRI]
+                        callback(institute)
+                    })
+                }
             }
 
             /**
@@ -778,27 +763,6 @@
                 const firstLast = name.toUpperCase()
                 const lastFirst = firstLast.split(' ').reverse().join(' ')
                 return lastFirst
-            }
-
-
-            /**
-             * Extract the name of a list item; used for sorting.
-             * @param {HTMLLIElement} li
-             */
-            function sortByYear(li) {
-                const year = li.querySelector(".year")
-                if (!year || !year.innerText) {
-                    return "0"
-                }
-                return year.innerText
-            }
-
-            function sortStudyByYear(li) {
-                const submitted = li.querySelector(".submitted")
-                if (!submitted || !submitted.innerText) {
-                    return "0"
-                }
-                return submitted.innerText
             }
         </script>
 

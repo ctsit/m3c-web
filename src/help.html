@@ -25,16 +25,11 @@
     <script crossorigin src="https://unpkg.com/@ungap/url-search-params@0.1.2/min.js"></script>
 
     <style>
-        .tags div {
-            display: inline;
-            padding-left: 0.25em;
-            padding-right: 0.25em;
-            color: gray;
-        }
-        .tags div.template {
-            display: none;
+        #profile {
+            text-align: justify;
         }
     </style>
+
 </head>
 
 <body class="profile">
@@ -42,7 +37,6 @@
     <div class="container">
 
         <header>
-
             <a href="https://metabolomics.info/">
                 <img alt="Metabolomics Info logo"
                     src="https://i2.wp.com/metabolomics.info/wp-content/uploads/2018/10/sepcc-logo-75.png?fit=60%2C60&ssl=1"
@@ -101,80 +95,89 @@
                 </nav>
             </div>
         </header>
-            <div id="profile" class="page">
-                  <div class="info-frame">
-                        <h2>People Portal Help</h2>
-                          <p>The Metabolomics Community People Portal is an information resource
-                            for research and scholarship.  The People Portal organizes information
-                            about metabolomics researchers and their work -- their activities,
-                            interests, and accomplishments.  Information is assembled regarding people,
-                            collaborators, projects, studies, publications, tools, datasets, and more.
-                            The People Portal can be used to find potential collaborators and mentors,
-                            to study aspects of inquiry, and to help understand the processes of
-                            creating, transmitting and preserving knowledge.
-                          </p>
-                          <h3>New to the People Portal?</h3>
-                          <p>Those new to the People Portal may wish to review the &quot;About People Portal&quot;
-                            link below, which describes the VIVO technology that is used to support the semantic web
-                            technology that underpins the People Portal, as well as background information provided
-                            in &quot;Where does the People Portal get its data?,&quot; which describes methods used
-                            by the Metabolomics Consortium Coordinating center to assemble and represent the research
-                            activity of the Metabolomics Community.</p>
 
-                          <p>&quot;Finding information in the People Portal&quot; provides additional material on
-                            searching and exploring the Metabolomics community.  &quot;How to edit information&quot; addresses
-                            adding and improving the information in the People Portal.</p>
+        <div id="content" class="page">
+            <div id="profile">
+                <h2>People Portal Help</h2>
+                <p>The Metabolomics Community People Portal is an information resource
+                    for research and scholarship.  The People Portal organizes information
+                    about metabolomics researchers and their work &mdash; their activities,
+                    interests, and accomplishments.  Information is assembled regarding people,
+                    collaborators, projects, studies, publications, tools, datasets, and more.
+                    The People Portal can be used to find potential collaborators and mentors,
+                    to study aspects of inquiry, and to help understand the processes of
+                    creating, transmitting and preserving knowledge.
+                    </p>
 
-                            <h3>Where does the People Portal get its data?</h3>
-                            <p>The Metabolomics Consortium Coordinating Center's People Portal is sourced from two publicly
-                            accessible datasets. The first data source is the
-                            <a href="https://www.metabolomicsworkbench.org">Metabolomics Workbench</a> and the second source
-                            is <a href="http://pubmed.gov">PubMed</a>.
-                            </p>
-                            <p>The metadata found in the <a href="https://www.metabolomicsworkbench.org">Metabolomics Workbench</a>
-                            is shared with the Metabolomics Consortium Coordinating Center as a monthly dataset that is ingested
-                            through a series of scripts and transformations. These data are then loaded into an instance of
-                            <a href="https://duraspace.org/vivo">VIVO</a> to create profiles that highlight research, publications,
-                            data, and collaborations in the metabolomics community using triple pattern fragment (TPF) technology.
-                            </p>
-                            <p>The PubMed publication information is sourced from the  <a href="https://www.ncbi.nlm.nih.gov/home/develop/api/">PubMed API</a>
-                            and scripted to extract and load publication information for the relevant researchers' profile and
-                            stored in <a href="https://duraspace.org/vivo">VIVO</a>.
-                            </p>
+                <h3>New to the People Portal?</h3>
+                <p>Those new to the People Portal may wish to review the &quot;About People Portal&quot;
+                link below, which describes the VIVO technology that is used to support the semantic web
+                technology that underpins the People Portal, as well as background information provided
+                in &quot;Where does the People Portal get its data?,&quot; which describes methods used
+                by the Metabolomics Consortium Coordinating center to assemble and represent the research
+                activity of the Metabolomics Community.</p>
 
-                            <h3>How do I search?</h3>
-                            <p>From the People Portal sub-menu, select the information sections for
-                            <a href="https://people.metabolomics.info/people.html">people</a>,
-                            <a href="https://people.metabolomics.info/people.html">publications</a>,
-                            <a href="https://people.metabolomics.info/projects.html">projects</a>,
-                            <a href="https://people.metabolomics.info/studies.html">studies</a>,
-                            <a href="https://people.metabolomics.info/organizations.html">organizations</a>, or
-                            <a href="https://people.metabolomics.info/tools.html">tools</a>.
-                              From these pages, type any phrase in the search box and the information will
-                              automatically condense to display the relevant information for the
-                              word entered. On the people page type in the word "Sara" for the page to only show people with the
-                              name Sara among the researchers in the database or from the projects page type in the word
-                              "kidney" to condense the information to projects related to kidney research.
+                <p>&quot;Finding information in the People Portal&quot; provides additional material on
+                searching and exploring the Metabolomics community.  &quot;How to edit information&quot; addresses
+                adding and improving the information in the People Portal.</p>
 
-                              Additionally, the box to the left of the information displayed on each page represents
-                              </p>
-                              <p>The metadata found in the <a href="https://www.metabolomicsworkbench.org">Metabolomics Workbench</a>
-                              is shared with the Metabolomics Consortium Coordinating Center as a monthly dataset that is ingested
-                              through a series of scripts and transformations. These data are then loaded into an instance of
-                              <a href="https://duraspace.org/vivo">VIVO</a> to create profiles that highlight research, publications,
-                              data, and collaborations in the metabolomics community using triple pattern fragment (TPF) technology.
-                              </p>
-                              <p>The PubMed publication information is sourced from the  <a href="https://www.ncbi.nlm.nih.gov/home/develop/api/">PubMed API</a>
-                              and scripted to extract and load publication information for the relevant researchers profile and
-                              stored in <a href="https://duraspace.org/vivo">VIVO</a>.
-                              </p>
+                <h3>Where does the People Portal get its data?</h3>
+                <p>The Metabolomics Consortium Coordinating Center's People Portal is sourced from two publicly
+                accessible datasets. The first data source is the
+                <a href="https://www.metabolomicsworkbench.org">Metabolomics Workbench</a><i class="fas fa-external-link-alt"></i>
+                and the second source
+                is <a href="https://pubmed.gov">PubMed</a><i class="fas fa-external-link-alt"></i>.
+                </p>
+                <p>The metadata found in the <a href="https://www.metabolomicsworkbench.org">Metabolomics Workbench</a><i class="fas fa-external-link-alt"></i>
+                is shared with the Metabolomics Consortium Coordinating Center as a monthly dataset that is ingested
+                through a series of scripts and transformations. These data are then loaded into an instance of
+                <a href="https://duraspace.org/vivo">VIVO</a><i class="fas fa-external-link-alt"></i> to create profiles that highlight research, publications,
+                data, and collaborations in the metabolomics community using triple pattern fragment (TPF) technology.
+                </p>
+                <p>The PubMed publication information is sourced from the  <a href="https://www.ncbi.nlm.nih.gov/home/develop/api/">PubMed API</a>
+                and scripted to extract and load publication information for the relevant researchers' profile and
+                stored in <a href="https://duraspace.org/vivo">VIVO</a><i class="fas fa-external-link-alt"></i>.
 
-                              <h3>How do I edit information?</h3>
-                              <p>All researchers that submit information to the <a href="https://www.metabolomicsworkbench.org">Metabolomics Workbench</a>
-                              or develop tools for the community have their information included in the People Portal. To edit the information on the People portal,
-                              please <a href="https://github.com/ctsit/m3c-web/issues">report an issue on GitHub</a> and include the page that needs to be edited.
-                              </p>
-               </div>
+                </p>
+
+                <h3>How do I search?</h3>
+                <p>From the People Portal sub-menu, select the information sections for
+                <a href="https://people.metabolomics.info/people.html">people</a>,
+                <a href="https://people.metabolomics.info/people.html">publications</a>,
+                <a href="https://people.metabolomics.info/projects.html">projects</a>,
+                <a href="https://people.metabolomics.info/studies.html">studies</a>,
+                <a href="https://people.metabolomics.info/organizations.html">organizations</a>, or
+                <a href="https://people.metabolomics.info/tools.html">tools</a>.
+                From these pages, type any phrase in the search box and the information will
+                automatically condense to display the relevant information for the
+                word entered. On the people page type in the word "Sara" for the page to only show people with the
+                name Sara among the researchers in the database or from the projects page type in the word
+                "kidney" to condense the information to projects related to kidney research.
+
+                Additionally, the box to the left of the information displayed on each page represents
+                </p>
+                <p>The metadata found in the <a href="https://www.metabolomicsworkbench.org">Metabolomics Workbench</a><i class="fas fa-external-link-alt"></i>
+                is shared with the Metabolomics Consortium Coordinating Center as a monthly dataset that is ingested
+                through a series of scripts and transformations. These data are then loaded into an instance of
+                <a href="https://duraspace.org/vivo">VIVO</a><i class="fas fa-external-link-alt"></i> to create profiles that highlight research, publications,
+                data, and collaborations in the metabolomics community using triple pattern fragment (TPF) technology.
+                </p>
+                <p>The PubMed publication information is sourced from the  <a href="https://www.ncbi.nlm.nih.gov/home/develop/api/">PubMed API</a>
+                and scripted to extract and load publication information for the relevant researchers profile and
+                stored in <a href="https://duraspace.org/vivo">VIVO</a><i class="fas fa-external-link-alt"></i>.
+                </p>
+                <p>The majority of the tools information is sourced from the
+                    <a href="https://raspicer.github.io/MetabolomicsTools/">Metabolomics Tools Wiki</a><i class="fas fa-external-link-alt"></i>.
+                </p>
+
+                <h3>How do I edit information?</h3>
+                <p>All researchers that submit information to the
+                    <a href="https://www.metabolomicsworkbench.org">Metabolomics Workbench</a><i class="fas fa-external-link-alt"></i>
+                or develop tools for the community have their information included in the People Portal. To edit the information on the People portal,
+                please <a href="https://github.com/ctsit/m3c-web/issues">report an issue on GitHub</a><i class="fas fa-external-link-alt"></i>
+                and include the page that needs to be edited.
+                </p>
+            </div>
         </div>
 
         <footer>
@@ -187,16 +190,19 @@
             </p>
         </footer>
 
-        <!-- The order is important. -->
-        <script src="tpf.js"></script>
-        <script src="str.js"></script>
-        <script src="m3c.js"></script>
-
-        <script>
-            m3c.NewTPFClient()
-        </script>
-
     </div>
+
+    <script src="tpf.js"></script>
+    <script src="str.js"></script>
+    <script src="m3c.js"></script>
+    <script src="ui.js"></script>
+    <script src="entity.js"></script>
+
+    <script>
+        const client = m3c.NewTPFClient()
+        // The client automatically adjusts the links if an endpoint is used.
+    </script>
+
 </body>
 
 </html>
