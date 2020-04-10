@@ -475,13 +475,13 @@
 
                 const authors = document.createElement("div")
                 for (var i = 0; i < authorIRIs.length; i++) {
+                    const authorIRI = authorIRIs[i]
                     const name = state.names[authorIRI]
                     if (!name) {
                         // Filter out nameless authors. This can happen with
                         // withheld records.
                         continue
                     }
-                    const authorIRI = authorIRIs[i]
                     const a = document.createElement("a")
                     a.href = m3c.ProfileLink("person", authorIRI)
                     a.innerText = state.names[authorIRI]
