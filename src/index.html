@@ -695,7 +695,12 @@
              * }} publication
              */
             function renderPublication(publication) {
-                const authors = publication.authors
+                var authors = publication.authors
+                authors.filter(function (name) {
+                    // Filter out nameless authors. This can happen with
+                    // withheld records.
+                    return !!name
+                })
 
                 authors.sort(function (a, b) {
                     const aname = sortLastFirst(a)
