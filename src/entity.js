@@ -288,6 +288,26 @@ var entity = (function module() {
         return new tool(client, iri)
     }
 
+    function ToolApproaches(client){
+        return client.MapAll(base + "approach")
+    }
+
+    function ToolFunctionalities(client){
+        return client.MapAll(base + "functionality")
+    }
+
+    function ToolInstrumentalDataTypes(client){
+        return client.MapAll(base + "instrumentalDataType")
+    }
+
+    function ToolLanguages(client){
+        return client.MapAll(base + "programmingLanguage")
+    }
+
+    function ToolTypes(client){
+        return client.MapAll(base + "softwareType")
+    }
+
     function Tools(client) {
         return new Promise(function(resolve) {
             client.List(base + "Tool").Results(resolve)
@@ -1043,6 +1063,11 @@ var entity = (function module() {
         SubmissionDates: SubmissionDates,
         Tags: Tags,
         Tool: Tool,
+        ToolApproaches: ToolApproaches,
+        ToolFunctionalities: ToolFunctionalities,
+        ToolInstrumentalDataTypes: ToolInstrumentalDataTypes,
+        ToolLanguages: ToolLanguages,
+        ToolTypes: ToolTypes,
         Tools: Tools,
     }
 })()

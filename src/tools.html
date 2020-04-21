@@ -25,14 +25,14 @@
     <script crossorigin src="https://unpkg.com/@ungap/url-search-params@0.1.2/min.js"></script>
 
     <style>
-        .tags div {
-            display: inline;
+        .results .tags {
             padding-left: 0.25em;
-            padding-right: 0.25em;
-            color: gray;
         }
-        .tags div.template {
-            display: none;
+        .results .tags span {
+            font-size: smaller;
+            display: inline;
+            padding-right: 0.75em;
+            color: gray;
         }
     </style>
 </head>
@@ -114,6 +114,91 @@
                 </div>
 
                 <div class="facets">
+                    <div class="facet functionality">
+                        <p>Functionality</p>
+                        <div class="facet-controls">
+                            <a href="#" class="show">Show all</a>
+                            <a href="#" class="limit">Show fewer</a>
+                            <a href="#" class="reset">Uncheck all</a>
+                        </div>
+                        <ul>
+                            <li class="template">
+                                <label>
+                                    <input type="checkbox" class="box" />
+                                    <span class="name"></span>
+                                    <span class="count"></span>
+                                </label>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="facet instrumental">
+                        <p>Instrumental Data Type</p>
+                        <div class="facet-controls">
+                            <a href="#" class="show">Show all</a>
+                            <a href="#" class="limit">Show fewer</a>
+                            <a href="#" class="reset">Uncheck all</a>
+                        </div>
+                        <ul>
+                            <li class="template">
+                                <label>
+                                    <input type="checkbox" class="box" />
+                                    <span class="name"></span>
+                                    <span class="count"></span>
+                                </label>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="facet approach">
+                        <p>Approach</p>
+                        <div class="facet-controls">
+                            <a href="#" class="show">Show all</a>
+                            <a href="#" class="limit">Show fewer</a>
+                            <a href="#" class="reset">Uncheck all</a>
+                        </div>
+                        <ul>
+                            <li class="template">
+                                <label>
+                                    <input type="checkbox" class="box" />
+                                    <span class="name"></span>
+                                    <span class="count"></span>
+                                </label>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="facet language">
+                        <p>Programming Language</p>
+                        <div class="facet-controls">
+                            <a href="#" class="show">Show all</a>
+                            <a href="#" class="limit">Show fewer</a>
+                            <a href="#" class="reset">Uncheck all</a>
+                        </div>
+                        <ul>
+                            <li class="template">
+                                <label>
+                                    <input type="checkbox" class="box" />
+                                    <span class="name"></span>
+                                    <span class="count"></span>
+                                </label>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="facet type">
+                        <p>Software Type</p>
+                        <div class="facet-controls">
+                            <a href="#" class="show">Show all</a>
+                            <a href="#" class="limit">Show fewer</a>
+                            <a href="#" class="reset">Uncheck all</a>
+                        </div>
+                        <ul>
+                            <li class="template">
+                                <label>
+                                    <input type="checkbox" class="box" />
+                                    <span class="name"></span>
+                                    <span class="count"></span>
+                                </label>
+                            </li>
+                        </ul>
+                    </div>
                     <div class="facet tag">
                         <p>Tag</p>
                         <div class="facet-controls">
@@ -140,13 +225,18 @@
                             <div class="name"></div>
                         </a>
                         <div class="tags">
-                            <div class="template"><span class="tag" /></div>
+                            <span class="tag"></span>
+                            <span class="functionality"></span>
+                            <span class="instrumental"></span>
+                            <span class="approach"></span>
+                            <span class="language"></span>
+                            <span class="type"></span>
                         </div>
                     </li>
                 </ol>
             </div>
             <p class="disclaimer">
-                Data from the
+                Most of the data is from the
                 <a href="https://raspicer.github.io/MetabolomicsTools/">Metabolomics Tools Wiki</a>
                 <i class="fas fa-external-link-alt"></i>.
             </p>
@@ -182,19 +272,35 @@
             // Keep the results sorted.
             const sorted = ui.SortedList(results, 1, sortByName)
 
+
             ui.SortedList(facets.querySelector(".tag ul"), -1, sortByCount)
+            ui.SortedList(facets.querySelector(".functionality ul"), -1, sortByCount)
+            ui.SortedList(facets.querySelector(".instrumental ul"), -1, sortByCount)
+            ui.SortedList(facets.querySelector(".approach ul"), -1, sortByCount)
+            ui.SortedList(facets.querySelector(".language ul"), -1, sortByCount)
+            ui.SortedList(facets.querySelector(".type ul"), -1, sortByCount)
 
             // Query the TPF server for all tools and some related data.
             const data = {
                 tools: [],
                 names: {}, // entity IRI => label string
                 tags: {},  // tool IRI => list of tags
+                functionalities: {},
+                instrumentalDataTypes: {},
+                approaches: {},
+                languages: {},
+                types: {},
             }
 
             const promises = [
                 entity.Tools(client),
                 entity.Names(client),
                 entity.Tags(client),
+                entity.ToolFunctionalities(client),
+                entity.ToolInstrumentalDataTypes(client),
+                entity.ToolApproaches(client),
+                entity.ToolLanguages(client),
+                entity.ToolTypes(client),
             ]
 
             Promise.all(promises)
@@ -202,13 +308,21 @@
                     data.tools = results[0]
                     data.names = results[1]
                     data.tags = results[2]
+                    data.functionalities = results[3]
+                    data.instrumentalDataTypes = results[4]
+                    data.approaches = results[5]
+                    data.languages = results[6]
+                    data.types = results[7]
 
                     data.tools.forEach(renderTool)
                 })
                 .then(function automaticallyUpdateCount() {
                     if (data.tools.length > 5 + 1) {
-                        const orgfacet = root.querySelector(".facet.tag")
-                        orgfacet.className = (orgfacet.className + " limit").trim()
+                        const facetNodes = facets.querySelectorAll(".facet")
+                        for (var i = 0; i < facetNodes.length; i++) {
+                            const facet = facetNodes[i]
+                            facet.className = (facet.className + " limit").trim()
+                        }
                     }
 
                     const checkboxes = document.querySelectorAll(".facet input")
@@ -237,6 +351,26 @@
                     }
                     return false
                 },
+                functionality: function functionality(selected, li) {
+                    const functionalities = li.querySelector(".functionality")
+                    return str.Contains(functionalities.innerText, selected)
+                },
+                instrumental: function instrumental(selected, li) {
+                    const instrumentals = li.querySelector(".instrumental")
+                    return str.Contains(instrumentals.innerText, selected)
+                },
+                approach: function approach(selected, li) {
+                    const approaches = li.querySelector(".approach")
+                    return str.Contains(approaches.innerText, selected)
+                },
+                language: function language(selected, li) {
+                    const languages = li.querySelector(".language")
+                    return str.Contains(languages.innerText, selected)
+                },
+                type: function type(selected, li) {
+                    const types = li.querySelector(".type")
+                    return str.Contains(types.innerText, selected)
+                },
             }
 
             // Use facetsManager to dynamically increment the count of an option
@@ -248,21 +382,59 @@
              */
             function renderTool(toolIRI) {
                 const tags = data.tags[toolIRI] || []
+                const functionalities = getProperty("functionalities")
+                const instrumentals = getProperty("instrumentalDataTypes")
+                const approaches = getProperty("approaches")
+                const languages= getProperty("languages")
+                const types = getProperty("types")
 
                 const bindings = {
                     link: {
                         href: m3c.ProfileLink("tool", toolIRI.slice(1, -1)),
                     },
                     name: entity.ParseVIVOString(data.names[toolIRI]),
+                    tag: tags,
+                    functionality: functionalities,
+                    instrumental: instrumentals,
+                    approach: approaches,
+                    language: languages,
+                    type: types,
                 }
 
                 const li = ui.Render(template, bindings)
 
-                const tagTemplate = li.querySelector(".tags .template")
-                for (var i = 0; i < tags.length; i++) {
-                    const tag = tags[i]
-                    ui.Render(tagTemplate, { "tag": tag })
-                    facetsManager.Increment('tag', tag, tag)
+                const props = [
+                    "tag", "functionality", "instrumental", "approach",
+                    "language", "type"
+                ]
+                for (var i = 0; i < props.length; i++) {
+                    const prop = props[i]
+                    for (var j = 0; j < bindings[prop].length; j++) {
+                        const tag = bindings[prop][j]
+                        facetsManager.Increment(prop, tag, tag)
+                    }
+                }
+
+                function getProperty(prop) {
+                    if (!data[prop] || !data[prop][toolIRI]) {
+                        return []
+                    }
+
+                    const values = []
+                    var strings = data[prop][toolIRI].map(entity.ParseVIVOString)
+                    for (var i = 0; i < strings.length; i++) {
+                        const s = strings[i]
+                        const split = s.replace(/[,/]/g, "\n").split("\n")
+                        for (var i = 0; i < split.length; i++) {
+                            const value = split[i].trim()
+                            if (!value || value === "-" || value === "?") {
+                                continue
+                            }
+                            values.push(value)
+                        }
+                    }
+
+                    return values
                 }
             }
 

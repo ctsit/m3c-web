@@ -216,45 +216,7 @@ var ui = (function module() {
                 continue
             }
 
-            switch (typeof data[key]) {
-                case "function":
-                    data[key](setText(placeholder))
-                    break
-
-                case "object":
-                    for (var name in data[key]) {
-                        const isEventListener = name.slice(0, 2) === "on"
-                        if (isEventListener) {
-                            const event = name.slice(2)
-                            placeholder.addEventListener(event, data[key][name])
-                            continue
-                        }
-
-                        const isFunction = data[key][name] instanceof Function
-                        if (isFunction) {
-                            const attrib = name
-                            data[key][attrib](done)
-                            function done(val) {
-                                placeholder[attrib] = val
-                            }
-                            continue
-                        }
-
-                        placeholder[name] = data[key][name]
-                    }
-                    break
-
-                case "string":
-                default:
-                    placeholder.innerHTML = data[key]
-                    break
-            }
-
-            function setText(element) {
-                return function callback(text) {
-                    element.innerHTML = text
-                }
-            }
+            processBinding(placeholder, data[key])
         }
 
         return clone
@@ -400,6 +362,68 @@ var ui = (function module() {
                 if (checkboxes[j].checked) {
                     checkboxes[j].click()
                 }
+            }
+        }
+    }
+
+    /**
+     * Processes a binding for `Build`.
+     * @param {Node} placeholder
+     * @param {any} binding
+     * @param {bool} allowArray Whether or not to allow binding to be an array
+     */
+    function processBinding(placeholder, binding, allowArray = true) {
+        switch (typeof binding) {
+            case "function":
+                binding(setText(placeholder))
+                break
+
+            case "object":
+                if (allowArray && Array.isArray(binding)) {
+                    if (binding.length === 0) {
+                        placeholder.parentNode.removeChild(placeholder)
+                        break
+                    }
+                    for (var i = binding.length-1; i > 0; i--) {
+                        const clone = placeholder.cloneNode(true)
+                        processBinding(clone, binding[i], !allowArray)
+                        placeholder.parentNode.insertBefore(clone, placeholder)
+                    }
+                    processBinding(placeholder, binding[0], !allowArray)
+                    break
+                }
+
+                for (var name in binding) {
+                    const isEventListener = name.slice(0, 2) === "on"
+                    if (isEventListener) {
+                        const event = name.slice(2)
+                        placeholder.addEventListener(event, binding[name])
+                        continue
+                    }
+
+                    const isFunction = binding[name] instanceof Function
+                    if (isFunction) {
+                        const attrib = name
+                        binding[attrib](done)
+                        function done(val) {
+                            placeholder[attrib] = val
+                        }
+                        continue
+                    }
+
+                    placeholder[name] = binding[name]
+                }
+                break
+
+            case "string":
+            default:
+                placeholder.innerHTML = binding
+                break
+        }
+
+        function setText(element) {
+            return function callback(text) {
+                element.innerHTML = text
             }
         }
     }
