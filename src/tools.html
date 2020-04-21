@@ -419,22 +419,7 @@
                     if (!data[prop] || !data[prop][toolIRI]) {
                         return []
                     }
-
-                    const values = []
-                    var strings = data[prop][toolIRI].map(entity.ParseVIVOString)
-                    for (var i = 0; i < strings.length; i++) {
-                        const s = strings[i]
-                        const split = s.replace(/[,/]/g, "\n").split("\n")
-                        for (var i = 0; i < split.length; i++) {
-                            const value = split[i].trim()
-                            if (!value || value === "-" || value === "?") {
-                                continue
-                            }
-                            values.push(value)
-                        }
-                    }
-
-                    return values
+                    return data[prop][toolIRI].map(entity.ParseVIVOString)
                 }
             }
 
