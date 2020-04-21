@@ -1010,6 +1010,51 @@ var entity = (function module() {
             })
         }
 
+        this.Functionalities = function Functionalities(returnFunctionalities) {
+            return new Promise(function () {
+                client
+                    .Entity(iri)
+                    .Link(base, "functionality")
+                    .Results(decodeStrings(returnFunctionalities))
+            })
+        }
+
+        this.InstrumentalDataTypes = function InstrumentalDataTypes(returnInstrumentals) {
+            return new Promise(function () {
+                client
+                    .Entity(iri)
+                    .Link(base, "instrumentalDataType")
+                    .Results(decodeStrings(returnInstrumentals))
+            })
+        }
+
+        this.Approaches = function Approaches(returnApproaches) {
+            return new Promise(function () {
+                client
+                    .Entity(iri)
+                    .Link(base, "approach")
+                    .Results(decodeStrings(returnApproaches))
+            })
+        }
+
+        this.ProgrammingLanguages = function ProgrammingLanguages(returnLanguages) {
+            return new Promise(function () {
+                client
+                    .Entity(iri)
+                    .Link(base, "programmingLanguage")
+                    .Results(decodeStrings(returnLanguages))
+            })
+        }
+
+        this.SoftwareTypes = function SoftwareTypes(returnTypes) {
+            return new Promise(function () {
+                client
+                    .Entity(iri)
+                    .Link(base, "softwareType")
+                    .Results(decodeStrings(returnTypes))
+            })
+        }
+
         this.Website = function Website(returnWebsite) {
             return new Promise(function () {
                 client
