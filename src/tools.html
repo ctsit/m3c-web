@@ -335,41 +335,49 @@
                     updateResultCount()
                 })
 
+            /**
+             * @param {Array<str>} selected
+             * @param {NodeList}   tags
+             */
+            function anyTagsMatch(selected, tags) {
+                for (var j = 0; j < tags.length; j++) {
+                    const tag = tags[j].innerText
+                    for (var i = 0; i < selected.length; i++) {
+                        if (tag === selected[i]) {
+                            return true
+                        }
+                    }
+                }
+                return false;
+            }
+
             // Setup the filters used by each facets. Each item should be a
             // function whose name matches the class name of the facet's HTML
             // element.
             const filters = {
                 tag: function tag(selected, li) {
                     const tags = li.querySelectorAll(".tags .tag")
-                    for (var j = 0; j < tags.length; j++) {
-                        const tag = tags[j].innerText
-                        for (var i = 0; i < selected.length; i++) {
-                            if (tag === selected[i]) {
-                                return true
-                            }
-                        }
-                    }
-                    return false
+                    return anyTagsMatch(selected, tags)
                 },
                 functionality: function functionality(selected, li) {
-                    const functionalities = li.querySelector(".functionality")
-                    return str.Contains(functionalities.innerText, selected)
+                    const tags = li.querySelectorAll(".tags .functionality")
+                    return anyTagsMatch(selected, tags)
                 },
                 instrumental: function instrumental(selected, li) {
-                    const instrumentals = li.querySelector(".instrumental")
-                    return str.Contains(instrumentals.innerText, selected)
+                    const tags = li.querySelectorAll(".tags .instrumental")
+                    return anyTagsMatch(selected, tags)
                 },
                 approach: function approach(selected, li) {
-                    const approaches = li.querySelector(".approach")
-                    return str.Contains(approaches.innerText, selected)
+                    const tags = li.querySelectorAll(".tags .approach")
+                    return anyTagsMatch(selected, tags)
                 },
                 language: function language(selected, li) {
-                    const languages = li.querySelector(".language")
-                    return str.Contains(languages.innerText, selected)
+                    const tags = li.querySelectorAll(".tags .language")
+                    return anyTagsMatch(selected, tags)
                 },
                 type: function type(selected, li) {
-                    const types = li.querySelector(".type")
-                    return str.Contains(types.innerText, selected)
+                    const tags = li.querySelectorAll(".tags .type")
+                    return anyTagsMatch(selected, tags)
                 },
             }
 
