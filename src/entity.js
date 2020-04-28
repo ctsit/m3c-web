@@ -1001,6 +1001,15 @@ var entity = (function module() {
             })
         }
 
+        this.Summary = function Summary(returnSummary) {
+            return new Promise(function() {
+                client
+                    .Entity(iri)
+                    .Link(base, "summary")
+                    .Single(decodeString(returnSummary))
+            })
+        }
+
         this.Tags = function Tags(returnTags) {
             return new Promise(function () {
                 client

@@ -181,6 +181,11 @@
                     <div class="fas fa-spinner fa-spin hidden"></div>
                 </div>
 
+                <section class="overview">
+                    <h2>Summary</h2>
+                    <p class="summary"></p>
+                </section>
+
                 <section class="people">
                     <h2 class="people">
                         <a href="people.html">Contributors</a>
@@ -220,6 +225,7 @@
 
             const tool = entity.Tool(client, uri)
             tool.Name(renderName)
+            tool.Summary(renderSummary)
             tool.Website(renderWebsite)
             tool.Tags(renderTags.bind(null, "tags"))
             tool.Functionalities(renderTags.bind(null, "functionality"))
@@ -330,6 +336,22 @@
 
                 name = name.trim()
                 root.querySelector(".name").innerHTML = name
+            }
+
+            function renderSummary(summary) {
+                const p = root.querySelector("p.summary")
+
+                if (!summary) {
+                    p.parentNode.removeChild(p)
+                    return
+                }
+
+                // Remove escaped string, if it exists.
+                if (summary.slice(0,2) === '\\"' && summary.slice(-2) == '\\"') {
+                    summary = summary.slice(2, -2)
+                }
+
+                p.innerText = summary
             }
 
             /**
