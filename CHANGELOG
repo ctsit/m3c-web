@@ -1,6 +1,15 @@
 Changelog
 =========
 
+## 1.2.0 - 2020-05-06
+
+ * List coauthors as collaborators (Taeber Rapczak)
+ * Add overview to Person Profile (Taeber Rapczak)
+ * Render summary on Tool Profile (Taeber Rapczak)
+ * Update Tool Profile page with new properties (Taeber Rapczak)
+ * Finish adding new facets to Tools Listing (Taeber Rapczak)
+
+
 ## 1.1.1 - 2020-04-10
 
 Hot fix
