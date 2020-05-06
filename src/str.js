@@ -11,6 +11,17 @@ if (typeof require !== "undefined") {
 var str = (function module() {
 
     /**
+     * Reports whether `substr` is within `text`.
+     *
+     * @param {string} text   text to search
+     * @param {string} substr string to search for within text
+     * @returns {boolean}
+     */
+    function Contains(text, substr) {
+        return text.indexOf(substr) !== -1
+    }
+
+    /**
      * Replaces instances of `{}` in text with the remaining arguments.
      *
      * Example
@@ -31,7 +42,8 @@ var str = (function module() {
 
     // Module exports
     return {
-        Format: Format
+        Contains: Contains,
+        Format: Format,
     }
 
 })()

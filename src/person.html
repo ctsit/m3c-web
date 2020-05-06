@@ -60,9 +60,9 @@
             margin-left: -1.5em;
         }
 
-        section.people {
-            padding-top: 2em;
-            border-top: 1px solid gray;
+        div.loading {
+            padding-bottom: 2em;
+            border-bottom: 1px solid gray;
         }
 
         .year {
@@ -230,6 +230,11 @@
                     <div class="fas fa-spinner fa-spin hidden"></div>
                 </div>
 
+                <section class="overview">
+                    <h2>Overview</h2>
+                    <p class="overview"></p>
+                </section>
+
                 <section class="people">
                     <h2 class="people">
                         <a href="people.html">Collaborators</a>
@@ -341,6 +346,7 @@
 
             const person = entity.Person(client, uri)
             person.Name(renderName)
+            person.Overview(renderOverview)
             person.Photo(renderPhoto)
             person.Organizations(renderOrganizations)
             person.Phones(renderPhones)
@@ -588,6 +594,18 @@
                             }
                         }
                     })
+            }
+
+            function renderOverview(overview) {
+                if (!overview) {
+                    root.querySelector("section.overview")
+                        .classList
+                        .add("hide-children")
+                    return
+                }
+
+                const p = root.querySelector("p.overview")
+                p.innerHTML = overview.replace(/\\n/g, "\n")
             }
 
             function renderPhones(phones) {

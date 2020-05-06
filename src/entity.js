@@ -288,6 +288,26 @@ var entity = (function module() {
         return new tool(client, iri)
     }
 
+    function ToolApproaches(client){
+        return client.MapAll(base + "approach")
+    }
+
+    function ToolFunctionalities(client){
+        return client.MapAll(base + "functionality")
+    }
+
+    function ToolInstrumentalDataTypes(client){
+        return client.MapAll(base + "instrumentalDataType")
+    }
+
+    function ToolLanguages(client){
+        return client.MapAll(base + "programmingLanguage")
+    }
+
+    function ToolTypes(client){
+        return client.MapAll(base + "softwareType")
+    }
+
     function Tools(client) {
         return new Promise(function(resolve) {
             client.List(base + "Tool").Results(resolve)
@@ -383,7 +403,21 @@ var entity = (function module() {
                     .Results(decodeStrings(resolve))
             })
 
-            return Promise.all([runners, investigators, developers])
+            const coauthors = new Promise(function(resolve) {
+                client
+                    .Entity(iri)
+                    .Link(vivo, "relatedBy")
+                    .Type(vivo, "Authorship")
+                    .Link(vivo, "relates")
+                    .Type(bibo, "Document")
+                    .Link(vivo, "relatedBy")
+                    .Type(vivo, "Authorship")
+                    .Link(vivo, "relates")
+                    .Type(foaf, "Person")
+                    .Results(decodeStrings(resolve))
+            })
+
+            return Promise.all([runners, investigators, developers, coauthors])
                 .then(flatten)
                 .then(unique)
                 .then(excludeSelf)
@@ -429,6 +463,16 @@ var entity = (function module() {
                     .Link(base, "associatedWith")
                     .Results(decodeString(returnOrganizations))
             })
+        }
+
+        this.Overview = function Overview(returnOverview) {
+            return new Promise(function() {
+                client
+                    .Entity(iri)
+                    .Link(vivo, "overview")
+                    .Single(decodeString(returnOverview))
+            })
+
         }
 
         this.Phones = function Phones(returnPhones) {
@@ -981,12 +1025,66 @@ var entity = (function module() {
             })
         }
 
+        this.Summary = function Summary(returnSummary) {
+            return new Promise(function() {
+                client
+                    .Entity(iri)
+                    .Link(base, "summary")
+                    .Single(decodeString(returnSummary))
+            })
+        }
+
         this.Tags = function Tags(returnTags) {
             return new Promise(function () {
                 client
                     .Entity(iri)
                     .Link(base, "tag")
                     .Results(decodeStrings(returnTags))
+            })
+        }
+
+        this.Functionalities = function Functionalities(returnFunctionalities) {
+            return new Promise(function () {
+                client
+                    .Entity(iri)
+                    .Link(base, "functionality")
+                    .Results(decodeStrings(returnFunctionalities))
+            })
+        }
+
+        this.InstrumentalDataTypes = function InstrumentalDataTypes(returnInstrumentals) {
+            return new Promise(function () {
+                client
+                    .Entity(iri)
+                    .Link(base, "instrumentalDataType")
+                    .Results(decodeStrings(returnInstrumentals))
+            })
+        }
+
+        this.Approaches = function Approaches(returnApproaches) {
+            return new Promise(function () {
+                client
+                    .Entity(iri)
+                    .Link(base, "approach")
+                    .Results(decodeStrings(returnApproaches))
+            })
+        }
+
+        this.ProgrammingLanguages = function ProgrammingLanguages(returnLanguages) {
+            return new Promise(function () {
+                client
+                    .Entity(iri)
+                    .Link(base, "programmingLanguage")
+                    .Results(decodeStrings(returnLanguages))
+            })
+        }
+
+        this.SoftwareTypes = function SoftwareTypes(returnTypes) {
+            return new Promise(function () {
+                client
+                    .Entity(iri)
+                    .Link(base, "softwareType")
+                    .Results(decodeStrings(returnTypes))
             })
         }
 
@@ -1043,6 +1141,11 @@ var entity = (function module() {
         SubmissionDates: SubmissionDates,
         Tags: Tags,
         Tool: Tool,
+        ToolApproaches: ToolApproaches,
+        ToolFunctionalities: ToolFunctionalities,
+        ToolInstrumentalDataTypes: ToolInstrumentalDataTypes,
+        ToolLanguages: ToolLanguages,
+        ToolTypes: ToolTypes,
         Tools: Tools,
     }
 })()

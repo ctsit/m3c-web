@@ -25,10 +25,15 @@
     <script crossorigin src="https://unpkg.com/@ungap/url-search-params@0.1.2/min.js"></script>
 
     <style>
-        .info-frame > * {
+        .info-frame div {
+            padding-top: 0.5em;
+            padding-left: 1em;
+        }
+
+        .info-frame div .term {
             display: block;
-            padding-top: 0.25em;
-            padding-bottom: 0.25em;
+            font-weight: bolder;
+            margin-left: -1em;
         }
 
         .listing-link {
@@ -37,8 +42,8 @@
             padding-bottom: 1em;
         }
 
-        ul.tags { display: inline; }
-        ul.tags li {
+        .info-frame ul { display: inline; }
+        .info-fame ul li {
             display: inline;
             padding-left: 0.25em;
         }
@@ -126,7 +131,7 @@
 
                 <div class="info-frame">
                     <div class="website">
-                        Website:
+                        <span class="term">Website</span>
                         <a href="#" class="link" target="_blank">
                             <span class="text"></span>
                         </a>
@@ -134,7 +139,7 @@
                     </div>
 
                     <div class="license">
-                        License:
+                        <span class="term">License</span>
                         <a href="#" class="license-url" target="_blank">
                             <span class="license-name"></span>
                             <i class="fas fa-external-link-alt"></i>
@@ -142,14 +147,44 @@
                     </div>
 
                     <div class="tags">
-                        Tags:
+                        <span class="term">Tags</span>
                         <ul class="tags"></ul>
+                    </div>
+
+                    <div class="functionality">
+                        <span class="term">Functionality</span>
+                        <ul class="functionality"></ul>
+                    </div>
+
+                    <div class="instrumental">
+                        <span class="term">Instrumental Data Type</span>
+                        <ul class="instrumental"></ul>
+                    </div>
+
+                    <div class="approach">
+                        <span class="term">Approach</span>
+                        <ul class="approach"></ul>
+                    </div>
+
+                    <div class="language">
+                        <span class="term">Programming Language</span>
+                        <ul class="language"></ul>
+                    </div>
+
+                    <div class="type">
+                        <span class="term">Software Type</span>
+                        <ul class="type"></ul>
                     </div>
                 </div>
 
                 <div class="loading">
                     <div class="fas fa-spinner fa-spin hidden"></div>
                 </div>
+
+                <section class="overview">
+                    <h2>Summary</h2>
+                    <p class="summary"></p>
+                </section>
 
                 <section class="people">
                     <h2 class="people">
@@ -160,7 +195,7 @@
 
             </div>
             <p class="disclaimer">
-                Data from the
+                Most of the tools data is from the
                 <a href="https://raspicer.github.io/MetabolomicsTools/">Metabolomics Tools Wiki</a>
                 <i class="fas fa-external-link-alt"></i>.
             </p>
@@ -190,8 +225,14 @@
 
             const tool = entity.Tool(client, uri)
             tool.Name(renderName)
+            tool.Summary(renderSummary)
             tool.Website(renderWebsite)
-            tool.Tags(renderTags)
+            tool.Tags(renderTags.bind(null, "tags"))
+            tool.Functionalities(renderTags.bind(null, "functionality"))
+            tool.InstrumentalDataTypes(renderTags.bind(null, "instrumental"))
+            tool.Approaches(renderTags.bind(null, "approach"))
+            tool.ProgrammingLanguages(renderTags.bind(null, "language"))
+            tool.SoftwareTypes(renderTags.bind(null, "type"))
             tool.License(renderLicense)
             tool.People(listRenderer("ul.people", "person"))
 
@@ -297,17 +338,39 @@
                 root.querySelector(".name").innerHTML = name
             }
 
-            function renderTags(tags) {
-                const list = root.querySelector("ul.tags")
+            function renderSummary(summary) {
+                const p = root.querySelector("p.summary")
 
-                tags.forEach(renderTag)
+                if (!summary) {
+                    p.parentNode.removeChild(p)
+                    return
+                }
 
-                function renderTag(tag) {
+                // Remove escaped string, if it exists.
+                if (summary.slice(0,2) === '\\"' && summary.slice(-2) == '\\"') {
+                    summary = summary.slice(2, -2)
+                }
+
+                p.innerText = summary
+            }
+
+            /**
+             * @param {string} className
+             * @param {Array<string>} tags
+             */
+            function renderTags(className, tags) {
+                const div = root.querySelector("div." + className)
+                if (tags.length === 0) {
+                    div.parentNode.removeChild(div)
+                    return
+                }
+                const list = div.querySelector("ul." + className)
+                for (var i = 0; i < tags.length; i++) {
                     const item = document.createElement("li")
-                    item.innerText = tag
+                    item.innerText = tags[i]
                     list.appendChild(item)
                 }
-            }
+           }
 
             function renderWebsite(url) {
                 const link = root.querySelector(".website .link")
