@@ -403,7 +403,21 @@ var entity = (function module() {
                     .Results(decodeStrings(resolve))
             })
 
-            return Promise.all([runners, investigators, developers])
+            const coauthors = new Promise(function(resolve) {
+                client
+                    .Entity(iri)
+                    .Link(vivo, "relatedBy")
+                    .Type(vivo, "Authorship")
+                    .Link(vivo, "relates")
+                    .Type(bibo, "Document")
+                    .Link(vivo, "relatedBy")
+                    .Type(vivo, "Authorship")
+                    .Link(vivo, "relates")
+                    .Type(foaf, "Person")
+                    .Results(decodeStrings(resolve))
+            })
+
+            return Promise.all([runners, investigators, developers, coauthors])
                 .then(flatten)
                 .then(unique)
                 .then(excludeSelf)
