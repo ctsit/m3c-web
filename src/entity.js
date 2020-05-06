@@ -451,6 +451,16 @@ var entity = (function module() {
             })
         }
 
+        this.Overview = function Overview(returnOverview) {
+            return new Promise(function() {
+                client
+                    .Entity(iri)
+                    .Link(vivo, "overview")
+                    .Single(decodeString(returnOverview))
+            })
+
+        }
+
         this.Phones = function Phones(returnPhones) {
             return new Promise(function() {
                 client
