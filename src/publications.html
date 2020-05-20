@@ -245,7 +245,7 @@
                     })
 
                     pubs.sort(function (a, b) {
-                        return dates[b] > dates[a]
+                        return dates[b].localeCompare(dates[a])
                     })
 
                     for (const uri in names) {
@@ -382,6 +382,10 @@
                         }
                     }
                 }
+
+                filtered.sort(function (a, b) {
+                    return state.published[b].localeCompare(state.published[a])
+                })
 
                 update({
                     query: query,
