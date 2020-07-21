@@ -19,8 +19,9 @@ var ui = (function module() {
      *        Filter functions that are called whenever there is a change to the
      *        selected facets. There should be one per facet.
      * @param {HTMLInputElement} [search] Search/Filter bar
+     * @param {Function} [onUpdate] Callback for when there has been an update.
      */
-    function Facets(facets, results, filters, search) {
+    function Facets(facets, results, filters, search, onUpdate) {
         const facetElements = facets.querySelectorAll(".facet")
         for (var i = 0; i < facetElements.length; i++) {
             addFacetEventListeners(facetElements[i])
@@ -44,12 +45,8 @@ var ui = (function module() {
                 return
             }
 
-            // Delay results udpate by a half-second until user is done typing.
             clearTimeout(dirtyTimeoutID)
-            dirtyTimeoutID = setTimeout(onFacetClick, 500)
-            search.removeEventListener("keyup", handleSearchKeyup)
-            search.dispatchEvent(new KeyboardEvent("keyup"))
-            search.addEventListener("keyup", handleSearchKeyup)
+            dirtyTimeoutID = setTimeout(refilter, 500)
         }
 
         /**
@@ -79,7 +76,7 @@ var ui = (function module() {
                 const data = {
                     box: {
                         value: optionID,
-                        onclick: onFacetClick,
+                        onclick: refilter,
                     },
                     name: optionName,
                     count: 0,
@@ -92,7 +89,7 @@ var ui = (function module() {
             count.innerText = parseInt(count.innerText) + 1
         }
 
-        function onFacetClick() {
+        function refilter() {
             const lis = results.querySelectorAll("li")
             const items = []
             for (var i = 0; i < lis.length; i++) {
@@ -157,6 +154,10 @@ var ui = (function module() {
                 function isItemInSubset(subset) {
                     return subset.indexOf(item) !== -1
                 }
+            }
+
+            if (onUpdate) {
+                onUpdate()
             }
         }
 

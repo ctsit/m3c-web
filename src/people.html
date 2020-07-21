@@ -226,21 +226,13 @@
 
                     data.person.forEach(renderPerson)
                 })
-                .then(function automaticallyUpdateCount() {
+                .then(function limitFacetItems() {
                     if (data.person.length > 5 + 1) {
                         const orgfacet = root.querySelector(".facet.organization")
                         orgfacet.className = (orgfacet.className + " limit").trim()
                     }
-
-                    const checkboxes = document.querySelectorAll(".facet input")
-                    for (var i = 0; i < checkboxes.length; i++) {
-                        checkboxes[i].addEventListener("click", updateResultCount)
-                    }
-
-                    search.addEventListener("keyup", updateResultCount)
-
-                   updateResultCount()
                 })
+                .then(updateResultCount)
 
             // Setup the filters used by each facets. Each item should be a
             // function whose name matches the class name of the facet's HTML
@@ -253,7 +245,9 @@
             }
 
             // Use facetsManager to dynamically increment the count of an option
-            const facetsManager = ui.Facets(facets, results, filters, search)
+            const facetsManager = ui.Facets(
+                facets, results, filters, search, updateResultCount
+            )
 
             /**
              * Render a person with the specified IRI.
