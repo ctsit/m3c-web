@@ -316,7 +316,7 @@
 
                     data.tools.forEach(renderTool)
                 })
-                .then(function automaticallyUpdateCount() {
+                .then(function limitFacetItems() {
                     if (data.tools.length > 5 + 1) {
                         const facetNodes = facets.querySelectorAll(".facet")
                         for (var i = 0; i < facetNodes.length; i++) {
@@ -324,16 +324,8 @@
                             facet.className = (facet.className + " limit").trim()
                         }
                     }
-
-                    const checkboxes = document.querySelectorAll(".facet input")
-                    for (var i = 0; i < checkboxes.length; i++) {
-                        checkboxes[i].addEventListener("click", updateResultCount)
-                    }
-
-                    search.addEventListener("keyup", updateResultCount)
-
-                    updateResultCount()
                 })
+                .then(updateResultCount)
 
             /**
              * @param {Array<str>} selected
@@ -382,7 +374,9 @@
             }
 
             // Use facetsManager to dynamically increment the count of an option
-            const facetsManager = ui.Facets(facets, results, filters, search)
+            const facetsManager = ui.Facets(
+                facets, results, filters, search, updateResultCount
+            )
 
             /**
              * Render a tool with the specified IRI.

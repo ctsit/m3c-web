@@ -231,17 +231,14 @@
                     items.forEach(function (li) { fragment.appendChild(li) })
                     results.appendChild(fragment)
                 })
-                .then(automaticallyUpdateCount)
+                .then(limitFacetItems)
+                .then(updateResultCount)
 
-            function automaticallyUpdateCount() {
+            function limitFacetItems() {
                 const checkboxes = document.querySelectorAll(".facet input")
                 for (var i = 0; i < checkboxes.length; i++) {
                     checkboxes[i].addEventListener("click", updateResultCount)
                 }
-
-                search.addEventListener("keyup", updateResultCount)
-
-                updateResultCount()
             }
 
             // Setup the filters used by each facets. Each item should be a
@@ -255,7 +252,9 @@
             }
 
             // Use facetsManager to dynamically increment the count of an option
-            const facetsManager = ui.Facets(facets, results, filters, search)
+            const facetsManager = ui.Facets(
+                facets, results, filters, search, updateResultCount
+            )
 
             /**
              * Render an organization of type with the specified IRI.
