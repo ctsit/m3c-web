@@ -1,6 +1,14 @@
 Changelog
 =========
 
+## 1.5.0 - 2020-08-03
+
+ * Update Publication List for Aug 2020 (Taeber Rapczak)
+ * Fix wrong result count bug (Taeber Rapczak)
+ * Bump lodash from 4.17.15 to 4.17.19 (dependabot[bot])
+ * Update publication list for July (Taeber Rapczak)
+
+
 ## 1.4.0 - 2020-07-08
 
  * Highlight Oliver, Jeremy and Catia for person, study and project (Kevin Hanson)
