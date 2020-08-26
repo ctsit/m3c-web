@@ -51,8 +51,20 @@
         #links li,
         #pub-widget,
         #study-widget,
-        #htmlwidget_container {
+        #institute-map-widget {
             box-shadow: 3px 4px 5px gray;
+        }
+
+        #institute-map-widget iframe {
+            border: 1px solid rgba(0, 169, 224, 0.4);
+            background-color: rgba(0, 169, 224, 0.4);
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        #institute-map-widget a {
+            font-size: smaller;
+            text-align: center;
         }
 
         .count {
@@ -140,7 +152,7 @@
 
         .visuals #pub-widget  { -ms-grid-column: 1 }
         .visuals #study-widget { -ms-grid-column: 3 }
-        .visuals #htmlwidget_container { grid-column: 1 / 3 }
+        .visuals #institute-map-widget { grid-column: 1 / 3 }
 
         h3 {
             text-shadow: 1px 1px 3px gray;
@@ -246,11 +258,6 @@
             .visuals div {
                 text-align: left;
             }
-
-            #htmlwidget_container {
-                width: 100%;
-            }
-
         }
     </style>
 
@@ -468,8 +475,11 @@
                                 </li>
                         </ol>
                     </div>
-                <!-- Widget for Institution Map -->
-                    <iframe id="htmlwidget_container" src="vivo_map.html" height="375"></iframe>
+                <div id="institute-map-widget">
+                    <!-- Widget for Institution Map -->
+                    <iframe src="vivo_map.html" height="375"></iframe>
+                    <a href="vivo_map.html">View Map Fullscreen</a>
+                </div>
             </div>
 
         </div> <!-- div.page -->
