@@ -49,7 +49,7 @@ async function main() {
         return 0
     }).reverse()
 
-    for (const pubIRI of publicationIRIs.slice(0, 10)) {
+    for (const pubIRI of publicationIRIs.slice(0, 5)) {
         const authornames = authors[pubIRI]
             .map(function (authorIRI) {
                 return names[authorIRI]

@@ -1,6 +1,17 @@
 Changelog
 =========
 
+## 1.7.0 - 2021-02-15
+
+* Update Publication List for Jan 2021 (Samantha Emerson)
+* Add Site Map and associated utility script (Taeber Rapczak)
+
+
+## 1.6.0 - 2020-08-26
+
+ * Add "Institute Map" (Melissa Moreno, Samantha Emerson)
+
+
 ## 1.5.0 - 2020-08-03
 
  * Update Publication List for Aug 2020 (Taeber Rapczak)
@@ -116,4 +127,3 @@ Implemented requested style changes and bug fixes.
 ## 0.1.0 - 2019-11-04
 
 Initial release.
-
