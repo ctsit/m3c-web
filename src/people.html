@@ -185,76 +185,75 @@
             // Query the TPF server for all people and some related data.
             const state = {
                 persons: [],
-                associatedWith: {},  // person IRI => org IRI
-                names: {},           // entity IRI => label string
-                institutes: [],       // list of institute IRIs
+                associatedWith: {}, // person IRI => org IRI
+                names: {}, //          entity IRI => label string
+                institutes: [], //     list of institute IRIs
                 mainImages: {},
                 downloadLocations: {},
                 directDownloadUrls: {},
                 personToURL: {}
             }
             fetchData()
-            .then(render)
+                .then(render)
 
-            function fetchData(){
-                update({ loading:true })
+            function fetchData() {
+                update({loading: true})
 
                 return Promise.all([
-                entity.Persons(client),
-                entity.AssociatedWiths(client),
-                entity.Names(client),
-                entity.Institutes(client),
-                entity.MainImages(client),
-                entity.DownloadLocations(client),
-                entity.DirectDownloadUrls(client)
+                    entity.Persons(client),
+                    entity.AssociatedWiths(client),
+                    entity.Names(client),
+                    entity.Institutes(client),
+                    entity.MainImages(client),
+                    entity.DownloadLocations(client),
+                    entity.DirectDownloadUrls(client)
                 ])
-                .then(function setData(data) {
-                    const person = data[0]
-                    const associatedWith = data[1]
-                    const names = data[2]
-                    const institutes = data[3]
-                    const mainImages = data[4]
-                    const downloadLocations = data[5]
-                    const directDownloadUrls = data[6]
+                    .then(function setData(data) {
+                        const person = data[0]
+                        const associatedWith = data[1]
+                        const names = data[2]
+                        const institutes = data[3]
+                        const mainImages = data[4]
+                        const downloadLocations = data[5]
+                        const directDownloadUrls = data[6]
 
-                    update({
-                        persons: person,
-                        associatedWith: associatedWith,
-                        institutes: institutes,
-                        mainImages: mainImages,
-                        downloadLocations: downloadLocations,
-                        directDownloadUrls: directDownloadUrls
-                    })
+                        update({
+                            persons: person,
+                            associatedWith: associatedWith,
+                            institutes: institutes,
+                            mainImages: mainImages,
+                            downloadLocations: downloadLocations,
+                            directDownloadUrls: directDownloadUrls
+                        })
 
-                    for (const uri in names) {
-                        names[uri] = entity.ParseVIVOString(names[uri])
-                    }
-                    update({names: names})
-                    //refactor line here
-
-                    state.persons.forEach(function(uri) {
-                        const mainImage = state.mainImages[uri]
-                        if (!mainImage) {
-                            return
+                        for (const uri in names) {
+                            names[uri] = entity.ParseVIVOString(names[uri])
                         }
+                        update({names: names})
 
-                        const downloadLocation = state.downloadLocations[mainImage]
-                        const directURL = state.directDownloadUrls[downloadLocation]
-                        state.personToURL[uri] = directURL[0].slice(1, -1)
+                        state.persons.forEach(function(uri) {
+                            const mainImage = state.mainImages[uri]
+                            if (!mainImage) {
+                                return
+                            }
+
+                            const downloadLocation = state.downloadLocations[mainImage]
+                            const directURL = state.directDownloadUrls[downloadLocation]
+                            state.personToURL[uri] = directURL[0].slice(1, -1)
+                        })
+
+                        state.persons.forEach(renderPerson)
                     })
-
-                    state.persons.forEach(renderPerson)
-                })
-                .then(function limitFacetItems() {
-                    if (state.persons.length > 5 + 1) {
-                        const orgfacet = uiRoot.querySelector(".facet.organization")
-                        orgfacet.className = (orgfacet.className + " limit").trim()
-                    }
-                })
-                .then(function () {
-                    updateResultCount
-                    update({loading: false})
-                })
+                    .then(function limitFacetItems() {
+                        if (state.persons.length > 5 + 1) {
+                            const orgfacet = uiRoot.querySelector(".facet.organization")
+                            orgfacet.className = (orgfacet.className + " limit").trim()
+                        }
+                    })
+                    .then(function() {
+                        updateResultCount
+                        update({loading: false})
+                    })
             }
 
             // Setup the filters used by each facets. Each item should be a
@@ -275,20 +274,24 @@
             function render() {
                 // Clear previous rendering.
                 uiResults.innerHTML = ""
+                /* eslint-disable quotes */
                 if (state.loading) {
                     uiCount.innerHTML =
                         '<i class="fas fa-spinner fa-spin"' +
                         '   aria-hidden="true" title="Loading...">' +
                         '</i>'
                 }
-
+                /* eslint-enable quotes */
                 // Render Person Listing.
                 const fragment = document.createDocumentFragment()
 
                 const persons = state.persons
-                var items = persons
+                let items = persons
                 items = items.map(renderPerson)
-                items.forEach(function (li) { fragment.appendChild(li) })
+                items.forEach(function(li) {
+                    fragment.appendChild(li)
+                })
+
                 uiResults.appendChild(fragment)
 
                 if (!state.loading) {
@@ -300,11 +303,12 @@
             /**
              * Render a person with the specified IRI.
              * @param {string} personIRI
+             * @return {li} list of rendered Persons
              */
             function renderPerson(personIRI) {
                 const person = entity.Person(client, personIRI.slice(1, -1))
                 const associations = state.associatedWith[personIRI] || []
-                var orgIRI = null
+                let orgIRI = null
                 for (var i = 0; i < associations.length; i++) {
                     if (state.institutes.indexOf(associations[i]) !== -1 ) {
                         orgIRI = associations[i]
@@ -322,12 +326,12 @@
                         src: getPhoto,
                     },
                     organization: orgIRI ? state.names[orgIRI] : null,
-                }                
+                }
 
                 const li = ui.Build(uiPersonTemplate, bindings)
-                
+            
                 if (orgIRI) {
-                    facetsManager.Increment('organization', bindings.organization, bindings.organization)
+                    facetsManager.Increment("organization", bindings.organization, bindings.organization)
                 }
 
                 function getPhoto(callback) {
@@ -335,7 +339,6 @@
                     if (!url) {
                         return
                     }
-                    console.log("Found image")
                     callback(m3c.PhotoURL(client.Endpoint, url))
                 }
                 return li
@@ -344,16 +347,18 @@
             /**
              * Extract the name of a list item; used for sorting.
              * @param {HTMLLIElement} li
+             * @return {lastFirst} list ordered by lastname first
              */
             function sortLastFirst(li) {
                 const firstLast = li.querySelector(".name").innerText.toUpperCase()
-                const lastFirst = firstLast.split(' ').reverse().join(' ')
+                const lastFirst = firstLast.split(" ").reverse().join(" ")
                 return lastFirst
             }
 
             /**
              * Extract the count of a facet option; used for sorting.
              * @param {HTMLLIElement} li
+             * @return {int}
              */
             function sortByCount(li) {
                 return parseInt(li.querySelector(".count").innerText)
