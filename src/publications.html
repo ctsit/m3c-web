@@ -223,101 +223,100 @@
             uiUncheckAll.addEventListener("click", handleUncheckAll)
 
             fetchData()
-            .then(render)
+                .then(render)
 
 
             function fetchData() {
-                update({ loading: true })
+                update({loading: true})
 
                 return Promise.all([
                     entity.Publications(client),
                     entity.Names(client),
                     entity.PublicationDates(client),
                 ])
-                .then(function (data) {
-                    const pubs = data[0]
-                    const names = data[1]
-                    const dates = data[2]
+                    .then(function(data) {
+                        const pubs = data[0]
+                        const names = data[1]
+                        const dates = data[2]
 
-                    update({
-                        publications: pubs,
-                        published: dates,
-                    })
+                        update({
+                            publications: pubs,
+                            published: dates,
+                        })
 
-                    pubs.sort(function (a, b) {
-                        return dates[b].localeCompare(dates[a])
-                    })
+                        pubs.sort(function(a, b) {
+                            return dates[b].localeCompare(dates[a])
+                        })
 
-                    for (const uri in names) {
-                        names[uri] = entity.ParseVIVOString(names[uri])
-                    }
-
-                    update({
-                        names: names,
-                        publications: pubs,
-                        filtered: pubs,
-                    })
-
-                    /** @type {{[uri: string]: string[]}} */
-                    const years = {}
-                    const older = "1999 and earlier"
-                    for (const uri in dates) {
-                        var year = dates[uri].slice(0, "2012".length)
-                        if (year < "2000") {
-                            year = older
+                        for (const uri in names) {
+                            names[uri] = entity.ParseVIVOString(names[uri])
                         }
-                        if (!years[year]) {
-                            years[year] = []
-                        }
-                        years[year].push(uri)
-                    }
-                    update({ years: years }, renderFacets)
 
-                }, console.error)
-                .then(function () {
-                    return entity.Citations(client)
-                })
-                .then(function (citations) {
-                    update({ citations: citations })
-                })
-                .then(function () {
-                    return entity.Authorships(client)
-                })
-                .then(function (authorships) {
+                        update({
+                            names: names,
+                            publications: pubs,
+                            filtered: pubs,
+                        })
+
+                        /** @type {{[uri: string]: string[]}} */
+                        const years = {}
+                        const older = "1999 and earlier"
+                        for (const uri in dates) {
+                            let year = dates[uri].slice(0, "2012".length)
+                            if (year < "2000") {
+                                year = older
+                            }
+                            if (!years[year]) {
+                                years[year] = []
+                            }
+                            years[year].push(uri)
+                        }
+                        update({years: years}, renderFacets)
+                    }, console.error)
+                    .then(function() {
+                        return entity.Citations(client)
+                    })
+                    .then(function(citations) {
+                        update({citations: citations})
+                    })
+                    .then(function() {
+                        return entity.Authorships(client)
+                    })
+                    .then(function(authorships) {
                     /** @type {{[uri: string]: string[]}} PMID => Author List */
-                    const authors = {}
-                    const authorsNames = {}
+                        const authors = {}
+                        const authorsNames = {}
 
-                    for (const authorshipIRI in authorships) {
-                        const relates = authorships[authorshipIRI]
+                        for (const authorshipIRI in authorships) {
+                            const relates = authorships[authorshipIRI]
 
-                        // Unfortunately, the pub-person pair could be in either
-                        // order. If the IRI contains "pmid", it's for the Pub.
-                        var pubIRI = relates[0]
-                        var personIRI = relates[1]
-                        if (relates[0].indexOf("pmid") === -1) {
-                            personIRI = relates[0]
-                            pubIRI = relates[1]
+                            // Unfortunately, the pub-person pair could be in either
+                            // order. If the IRI contains "pmid", it's for the Pub.
+                            let pubIRI = relates[0]
+                            let personIRI = relates[1]
+                            if (relates[0].indexOf("pmid") === -1) {
+                                personIRI = relates[0]
+                                pubIRI = relates[1]
+                            }
+
+                            if (!authors[pubIRI]) {
+                                authors[pubIRI] = []
+                                authorsNames[pubIRI] = []
+                            }
+
+                            authors[pubIRI].push(personIRI)
+                            authorsNames[pubIRI].push(state.names[personIRI])
                         }
 
-                        if (!authors[pubIRI]) {
-                            authors[pubIRI] = []
-                            authorsNames[pubIRI] = []
-                        }
-
-                        authors[pubIRI].push(personIRI)
-                        authorsNames[pubIRI].push(state.names[personIRI])
-                    }
-
-                    update({
-                        authors: authors,
-                        authorsNames: authorsNames,
+                        update({
+                            authors: authors,
+                            authorsNames: authorsNames,
+                        })
                     })
-                })
-                .catch(console.error)
-                .then(function () {
-                    update({ loading: false })
-                })
+                    .catch(console.error)
+                    .then(function() {
+                        update({loading: false})
+                    })
             }
 
             /** @param {MouseEvent} click */
@@ -330,7 +329,7 @@
                 }
                 const s = state.yearsSelected
                 const i = s.indexOf(year)
-                const selected = s.slice(0,i).concat(s.slice(i+1))
+                const selected = s.slice(0, i).concat(s.slice(i+1))
                 refilter(state.query, selected)
             }
 
@@ -349,21 +348,21 @@
             }
 
             function refilter(query, yearsSelected, callback) {
-                var pubs = state.publications
+                let pubs = state.publications
                 if (yearsSelected.length > 0) {
                     pubs = []
                     yearsSelected.sort().reverse()
-                    for (var i = 0; i < yearsSelected.length; i++) {
+                    for (let i = 0; i < yearsSelected.length; i++) {
                         const year = yearsSelected[i]
                         pubs = pubs.concat(state.years[year])
                     }
                 }
 
                 const q = query.toUpperCase()
-                var filtered = pubs
+                let filtered = pubs
                 if (q) {
                     filtered = []
-                    for (var i = 0; i < pubs.length; i++) {
+                    for (let i = 0; i < pubs.length; i++) {
                         const uri = pubs[i]
                         const title = state.names[uri].toUpperCase()
                         if (title.indexOf(q) !== -1) {
@@ -383,7 +382,7 @@
                     }
                 }
 
-                filtered.sort(function (a, b) {
+                filtered.sort(function(a, b) {
                     return state.published[b].localeCompare(state.published[a])
                 })
 
@@ -398,22 +397,25 @@
                 // Clear previous rendering.
                 uiResults.innerHTML = ""
                 if (state.loading) {
+                    /* eslint-disable quotes */
                     uiCount.innerHTML =
                         '<i class="fas fa-spinner fa-spin"' +
                         '   aria-hidden="true" title="Loading...">' +
                         '</i>'
                 }
-
+                /* eslint-enable quotes */
                 // Render Publications Listing.
                 const fragment = document.createDocumentFragment()
 
                 const pubs = state.filtered
-                var items = pubs
+                let items = pubs
                 if (state.limit) {
-                   items = items.slice(0, state.limit)
+                    items = items.slice(0, state.limit)
                 }
                 items = items.map(renderPublication)
-                items.forEach(function (li) { fragment.appendChild(li) })
+                items.forEach(function(li) {
+                    fragment.appendChild(li)
+                })
                 uiResults.appendChild(fragment)
 
                 if (!state.loading) {
@@ -439,7 +441,7 @@
                 function handleLoadAllClick(e) {
                     uiCount.innerHTML =
                         "<i>Loading all publications. This may take some time...</i>"
-                    update({ limit: null })
+                    update({limit: null})
                 }
             }
 
@@ -451,8 +453,8 @@
 
                 const fragment = document.createDocumentFragment()
 
-                var years = Object.keys(state.years).sort().reverse()
-                for (var i = 0; i < years.length; i++) {
+                const years = Object.keys(state.years).sort().reverse()
+                for (let i = 0; i < years.length; i++) {
                     const year = years[i]
                     const bindings = {
                         box: {
@@ -478,7 +480,7 @@
                 const citation = state.citations[publicationIRI]
 
                 const authors = document.createElement("div")
-                for (var i = 0; i < authorIRIs.length; i++) {
+                for (let i = 0; i < authorIRIs.length; i++) {
                     const authorIRI = authorIRIs[i]
                     const name = state.names[authorIRI]
                     if (!name) {
@@ -508,7 +510,7 @@
                 if (!citation) {
                     cite.className += " hidden"
                 } else {
-                    cite.addEventListener("click", function (click) {
+                    cite.addEventListener("click", function(click) {
                         click.preventDefault()
                         cite.className += " hidden"
                         const c = li.querySelector(".citation")
