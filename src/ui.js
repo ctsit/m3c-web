@@ -8,26 +8,26 @@ if (typeof require !== "undefined") {
  * User Interface components
  * @module ui
  */
-var ui = (function module() {
+const ui = (function module() {
     /**
      * Manage a facets and their interaction with a listing of items.
      *
      * @param {HTMLElement} facets HTML Element containing the facets.
      * @param {HTMLElement} results HTML Element containing the listed items.
-     * @param {{[name: string]: (selected: string[], item: Node) => boolean}}
-     *        filters
+     * @param {Function} filters
      *        Filter functions that are called whenever there is a change to the
      *        selected facets. There should be one per facet.
      * @param {HTMLInputElement} [search] Search/Filter bar
      * @param {Function} [onUpdate] Callback for when there has been an update.
+     * @return {HTMLElement}
      */
     function Facets(facets, results, filters, search, onUpdate) {
         const facetElements = facets.querySelectorAll(".facet")
-        for (var i = 0; i < facetElements.length; i++) {
+        for (let i = 0; i < facetElements.length; i++) {
             addFacetEventListeners(facetElements[i])
         }
 
-        var dirtyTimeoutID = 0
+        let dirtyTimeoutID = 0
 
         if (search) {
             search.addEventListener("keyup", handleSearchKeyup)
@@ -64,7 +64,7 @@ var ui = (function module() {
                 return
             }
 
-            var option
+            let option
 
             const input = facet.querySelector('input[value="' + optionID + '"]')
             if (input) {
@@ -92,7 +92,7 @@ var ui = (function module() {
         function refilter() {
             const lis = results.querySelectorAll("li")
             const items = []
-            for (var i = 0; i < lis.length; i++) {
+            for (let i = 0; i < lis.length; i++) {
                 items.push(lis[i])
             }
 
@@ -102,7 +102,7 @@ var ui = (function module() {
                 )
 
                 const selected = []
-                for (var i = 0; i < checked.length; i++) {
+                for (let i = 0; i < checked.length; i++) {
                     const input = checked[i]
                     const option = input.parentElement
                     const name = option.querySelector(".name")
@@ -120,11 +120,11 @@ var ui = (function module() {
                 return remaining
             })
 
-            for (var i = 0; i < items.length; i++) {
+            for (let i = 0; i < items.length; i++) {
                 const item = items[i]
 
                 if (remainingSets.every(isItemInSubset)) {
-                    var filteredBySearch = false
+                    let filteredBySearch = false
 
                     // Ensure that the search text is somewhere in the item.
                     if (search && search.value && search.value.trim()) {
@@ -183,9 +183,10 @@ var ui = (function module() {
      *
      * @param {Node} template
      * @param {Object.<string, any>} data
+     * @return {HTMLElement}
      */
     function Render(template, data) {
-        const elem = Build(template, data)
+        let elem = Build(template, data)
         template.parentElement.appendChild(elem)
         return elem
     }
@@ -204,12 +205,13 @@ var ui = (function module() {
      *
      * @param {Node} template
      * @param {Object.<string, any>} data
+     * @return {Clone}
      */
     function Build(template, data) {
         const clone = template.cloneNode(true)
         clone.className = clone.className.replace("template", "")
 
-        for (var key in data) {
+        for (const key in data) {
             /** @type {Node} */
             const placeholder = clone.querySelector("." + key)
             if (!placeholder) {
@@ -228,9 +230,10 @@ var ui = (function module() {
      *
      * @param {HTMLElement} ol Ordered list element.
      * @param {number} direction Initial order: 1 for normal, -1 for reverse.
-     * @param {(li: HTMLLIElement) => string} [listItemKey]
+     * @param {Function} [listItemKey]
      *        Callback function to get the sorting key for a list item.
      *        Defaults to a alphabetical ordering of the list item's innerText.
+     * @return {list}
      */
     function SortedList(ol, direction, listItemKey) {
         if (!direction) {
@@ -255,13 +258,13 @@ var ui = (function module() {
         }
 
         function observe() {
-            observer.observe(ol, { childList: true })
+            observer.observe(ol, {childList: true})
         }
 
         function onMutate(/** @type {Array} */mutations) {
-            var mutation = null
+            let mutation = null
 
-            for (var i = 0; i <= mutations.length; i++) {
+            for (let i = 0; i <= mutations.length; i++) {
                 if (mutations[i].type === "childList") {
                     mutation = mutations[i]
                     break
@@ -284,11 +287,11 @@ var ui = (function module() {
         function sort() {
             // Get immediate <li> children.
             const lis = []
-            for (var i = 0; i < ol.children.length; i++) {
+            for (let i = 0; i < ol.children.length; i++) {
                 lis.push(ol.children[i])
             }
 
-            lis.sort(function (a, b) {
+            lis.sort(function(a, b) {
                 const name1 = listItemKey(a)
                 const name2 = listItemKey(b)
 
@@ -303,12 +306,12 @@ var ui = (function module() {
                 ol.removeChild(ol.firstChild)
             }
 
-            lis.forEach(function (li) {
+            lis.forEach(function(li) {
                 ol.appendChild(li)
             })
         }
 
-        var dirty = 0
+        let dirty = 0
 
         function update() {
             // Limit resorting to once in 100ms.
@@ -316,7 +319,7 @@ var ui = (function module() {
                 return
             }
 
-            dirty = setTimeout(function () {
+            dirty = setTimeout(function() {
                 // Stop observing changes until after sorting is complete,
                 // otherwise each change during sorting will trigger onMutate
                 // causing a never-ending cycle.
@@ -359,7 +362,7 @@ var ui = (function module() {
         function resetFacet(clickEvent) {
             clickEvent.preventDefault()
             const checkboxes = facet.querySelectorAll("input")
-            for (var j = 0; j < checkboxes.length; j++) {
+            for (let j = 0; j < checkboxes.length; j++) {
                 if (checkboxes[j].checked) {
                     checkboxes[j].click()
                 }
@@ -375,51 +378,51 @@ var ui = (function module() {
      */
     function processBinding(placeholder, binding, allowArray = true) {
         switch (typeof binding) {
-            case "function":
-                binding(setText(placeholder))
-                break
+        case "function":
+            binding(setText(placeholder))
+            break
 
-            case "object":
-                if (allowArray && Array.isArray(binding)) {
-                    if (binding.length === 0) {
-                        placeholder.parentNode.removeChild(placeholder)
-                        break
-                    }
-                    for (var i = binding.length-1; i > 0; i--) {
-                        const clone = placeholder.cloneNode(true)
-                        processBinding(clone, binding[i], !allowArray)
-                        placeholder.parentNode.insertBefore(clone, placeholder)
-                    }
-                    processBinding(placeholder, binding[0], !allowArray)
+        case "object":
+            if (allowArray && Array.isArray(binding)) {
+                if (binding.length === 0) {
+                    placeholder.parentNode.removeChild(placeholder)
                     break
                 }
-
-                for (var name in binding) {
-                    const isEventListener = name.slice(0, 2) === "on"
-                    if (isEventListener) {
-                        const event = name.slice(2)
-                        placeholder.addEventListener(event, binding[name])
-                        continue
-                    }
-
-                    const isFunction = binding[name] instanceof Function
-                    if (isFunction) {
-                        const attrib = name
-                        binding[attrib](done)
-                        function done(val) {
-                            placeholder[attrib] = val
-                        }
-                        continue
-                    }
-
-                    placeholder[name] = binding[name]
+                for (let i = binding.length-1; i > 0; i--) {
+                    const clone = placeholder.cloneNode(true)
+                    processBinding(clone, binding[i], !allowArray)
+                    placeholder.parentNode.insertBefore(clone, placeholder)
                 }
+                processBinding(placeholder, binding[0], !allowArray)
                 break
+            }
 
-            case "string":
-            default:
-                placeholder.innerHTML = binding
-                break
+            for (const name in binding) {
+                const isEventListener = name.slice(0, 2) === "on"
+                if (isEventListener) {
+                    const event = name.slice(2)
+                    placeholder.addEventListener(event, binding[name])
+                    continue
+                }
+
+                const isFunction = binding[name] instanceof Function
+                if (isFunction) {
+                    const attrib = name
+                    binding[attrib](done)
+                    function done(val) {
+                        placeholder[attrib] = val
+                    }
+                    continue
+                }
+
+                placeholder[name] = binding[name]
+            }
+            break
+
+        case "string":
+        default:
+            placeholder.innerHTML = binding
+            break
         }
 
         function setText(element) {
