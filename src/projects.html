@@ -154,45 +154,63 @@
             const client = m3c.NewTPFClient()
 
             // Aliases for certain HTML elements
-            const root = document.getElementById("listing")
-            const results = root.querySelector(".results")
-            const facets = root.querySelector(".facets")
-            const search = root.querySelector("#searchFilter")
-            const projectTemplate = root.querySelector("li.project.template")
+            const uiCount = document.querySelector(".controls .count")
+            const uiRoot = document.getElementById("listing")
+            const uiResults = uiRoot.querySelector(".results")
+            const uiFacets = uiRoot.querySelector(".facets")
+            const search = uiRoot.querySelector("#searchFilter")
+            const uiProjectTemplate = uiRoot.querySelector("li.project.template")
 
             // Keep the results sorted.
-            const sorted = ui.SortedList(results, 1, sortByName)
+            const sorted = ui.SortedList(uiResults, 1, sortByName)
 
-            ui.SortedList(facets.querySelector(".organization ul"), -1, sortByCount)
+            ui.SortedList(uiFacets.querySelector(".organization ul"), -1, sortByCount)
 
             // Query the TPF server for all projects and some related data.
-            const data = {
+            const state = {
                 projects: [],
-                names: {},    // entity IRI => label string
-                funding: {},  // project IRI => list of org IRIs
+                names: {}, //   entity IRI => label string
+                funding: {}, // project IRI => list of org IRIs
             }
 
-            const promises = [
-                entity.Projects(client),
-                entity.Names(client),
-                entity.FundingOrganizations(client),
-            ]
+            fetchData()
+                .then(render)
+            
+            function fetchData() {
+                update({loading: true})
 
-            Promise.all(promises)
-                .then(function setData(results) {
-                    data.projects = results[0]
-                    data.names = results[1]
-                    data.funding = results[2]
+                return Promise.all([
+                    entity.Projects(client),
+                    entity.Names(client),
+                    entity.FundingOrganizations(client),
+                ])
+                    .then(function setData(data) {
+                        const projectData = data[0]
+                        const namesData = data[1]
+                        const fundingOrgsData = data[2]
 
-                    data.projects.forEach(renderProject)
-                })
-                .then(function limitFacetItems() {
-                    if (data.projects.length > 5 + 1) {
-                        const orgfacet = root.querySelector(".facet.organization")
-                        orgfacet.className = (orgfacet.className + " limit").trim()
-                    }
-                })
-                .then(updateResultCount)
+                        update({
+                            projects: projectData,
+                            funding: fundingOrgsData
+                        })
+
+                        for (const uri in namesData) {
+                            namesData[uri] = entity.ParseVIVOString(namesData[uri])
+                        }
+                        update({names: namesData})
+                        state.projects.forEach(renderProject)
+                    })
+                    .then(function limitFacetItems() {
+                        if (state.projects.length > 5 + 1) {
+                            const orgfacet = uiRoot.querySelector(".facet.organization")
+                            orgfacet.className = (orgfacet.className + " limit").trim()
+                        }
+                    })
+                    .then(function() {
+                        updateResultCount
+                        update({loading: false})
+                    })
+            }
 
             // Setup the filters used by each facets. Each item should be a
             // function whose name matches the class name of the facet's HTML
@@ -206,34 +224,65 @@
 
             // Use facetsManager to dynamically increment the count of an option
             const facetsManager = ui.Facets(
-                facets, results, filters, search, updateResultCount
+                uiFacets, uiResults, filters, search, updateResultCount
             )
+
+            function render() {
+                // Clear previous rendering.
+                uiResults.innerHTML = ""
+                /* eslint-disable quotes */
+                if (state.loading) {
+                    uiCount.innerHTML =
+                        '<i class="fas fa-spinner fa-spin"' +
+                        '   aria-hidden="true" title="Loading...">' +
+                        '</i>'
+                }
+                /* eslint-enable quotes */
+                const fragment = document.createDocumentFragment()
+
+                const project = state.projects
+                let items = project
+                items = items.map(renderProject)
+                items.forEach(function(li) {
+                    fragment.appendChild(li)
+                })
+
+                uiResults.appendChild(fragment)
+
+                if (!state.loading) {
+                    updateResultCount()
+                }
+            }
 
             /**
              * Render a project with the specified IRI.
              * @param {string} projectIRI
+             * @return {HTMLLIElement} li
              */
             function renderProject(projectIRI) {
                 // const project = entity.Project(client, projectIRI.slice(1, -1))
-                const orgIRI = data.funding[projectIRI]
+                const orgIRI = state.funding[projectIRI]
                 const bindings = {
                     link: {
                         href: m3c.ProfileLink("project", projectIRI),
                     },
-                    name: entity.ParseVIVOString(data.names[projectIRI]),
-                    organization: orgIRI ? data.names[orgIRI] : null,
+                    name: entity.ParseVIVOString(state.names[projectIRI]),
+                    organization: orgIRI ? state.names[orgIRI] : null,
                 }
 
-                const li = ui.Render(projectTemplate, bindings)
+                const li = ui.Build(uiProjectTemplate, bindings)
 
                 if (orgIRI) {
-                    facetsManager.Increment('organization', bindings.organization, bindings.organization)
+                    facetsManager.Increment("organization", bindings.organization, bindings.organization)
                 }
+
+                return li
             }
 
             /**
              * Extract the name of a list item; used for sorting.
              * @param {HTMLLIElement} li
+             * @return {name}
              */
             function sortByName(li) {
                 const name = li.querySelector(".name").innerText.toUpperCase()
@@ -243,6 +292,7 @@
             /**
              * Extract the count of a facet option; used for sorting.
              * @param {HTMLLIElement} li
+             * @return {int}
              */
             function sortByCount(li) {
                 return parseInt(li.querySelector(".count").innerText)
@@ -251,6 +301,17 @@
             function updateResultCount() {
                 const visible = document.querySelectorAll(".results li:not(.hidden):not(.template)")
                 document.querySelector(".controls .count").innerText = visible.length
+            }
+
+            function update(values, callback) {
+                clearTimeout(state.dirty)
+                for (const prop in values) {
+                    state[prop] = values[prop]
+                }
+                state.dirty = setTimeout(render, 100)
+                if (callback) {
+                    callback()
+                }
             }
         </script>
     </div>
